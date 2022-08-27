@@ -4,6 +4,7 @@ typedef struct	{
 
 	char * major;
 	char * minor;
+	signed char sign;
 	
 } FP;
 
