@@ -3,4 +3,8 @@ aplib: aplib_.o
 	
 aplib_.o: aplib.c aplib.h
 	gcc -c -g -O0 -o aplib_.o aplib.c
+	
+clean:
+	rm -f aplib_.o
+	rm -f aplib.exe
 

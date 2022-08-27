@@ -1,41 +1,24 @@
+// APlib.c
+
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
-
 
 #include "APlib.h"
 
 FP a;
 FP b;
 
+
 void init()	{
 	
-	a.minor = (char *)malloc(10);
+	a = createFP(9, 9);
 	strcpy(a.minor, "123456789");
-	
-	b.minor = (char *)malloc(10);
-	strcpy(b.minor, "987654321");
-	
-	a.major = (char *)malloc(10);
 	strcpy(a.major, "240027689");
 	
-	b.major = (char *)malloc(10);
+	b = createFP(9, 9);
+	strcpy(b.minor, "987654321");
 	strcpy(b.major, "731051763");
-	
-	// A* 2 = 48
-}
-
-FP createFP()	{
-	
-	FP _;
-	_.minor = (char *)calloc(1, 10);
-	_.major = (char *)calloc(1, 10);
-	
-	_.sign = +1;
-	
-	return _;
-	
 }
 
 int main(int argc, char ** argv)	{
@@ -43,43 +26,37 @@ int main(int argc, char ** argv)	{
 		init();
 		
 		FP D, a2, b2;
-		D = createFP();
-		a2 = createFP();
-		b2 = createFP();
+		D = createFP(strlen(a.major), strlen(a.minor));
+		a2 = createFP(strlen(a.major), strlen(a.minor));
+		b2 = createFP(strlen(b.major), strlen(b.minor));
 
-		//memcpy(&a.minor, &a2.minor, sizeof (a.minor));
-		strcpy(a2.minor, a.minor);
-		strcpy(a2.major, a.major);
-		a2.sign = a.sign;
-		
-		strcpy(b2.minor, b.minor);
-		strcpy(b2.major, b.major);
-		b2.sign = b.sign;
-		
-		
-		printf("A = %s . %s\n", a.major, a.minor);
-		printf("B = %s . %s\n", b.major, b.minor);
+		// TEST 1: PLUS A, B
+		copy(&a2, &a);
+		copy(&b2, &b);
+		printf("A = %s.%s\n", a.major, a.minor);
+		printf("B = %s.%s\n", b.major, b.minor);
 		
 		D = PLUS(a, b);
-		printf("RESULT a + b: '%s.%s'\n", D.major, D.minor);
+		printf("RESULT a + b: %c'%s.%s'\n\n", D.sign, D.major, D.minor);
 		
+		// TEST 2: MINUS A, B , where A > B
+		copy(&a, &a2);
+		copy(&b, &b2);
+		printf("A = %s.%s\n", a.major, a.minor);
+		printf("B = %s.%s\n", b.major, b.minor);
 		
-		strcpy(a.minor, a2.minor);
-		strcpy(a.major, a2.major);
-		a.sign = a2.sign;
-		
-		strcpy(b.minor, b2.minor);
-		strcpy(b.major, b2.major);
-		b.sign = b2.sign;
+		D = MINUS(b, a);
+		printf("RESULT b - a: %c'%s.%s'\n\n", D.sign, D.major, D.minor);
 
-
-		printf("A = %s . %s\n", a.major, a.minor);
-		printf("B = %s . %s\n", b.major, b.minor);
+		// TEST 3: MINUS A, B , where A < B
+		copy(&a, &a2);
+		copy(&b, &b2);
+		printf("A = %s.%s\n", a.major, a.minor);
+		printf("B = %s.%s\n", b.major, b.minor);
 		
 		D = MINUS(a, b);
-		printf("RESULT a - b: %c'%s.%s'\n", ((D.sign == -1) ? '-' : '+'), D.major, D.minor);
+		printf("RESULT a - b: %c'%s.%s'\n", D.sign, D.major, D.minor);
 		
-
 		return 0;
 }
 
@@ -87,7 +64,7 @@ int main(int argc, char ** argv)	{
 FP MINUS(FP A, FP B)	{
 
 	FP C;
-	C = createFP();
+	C = createFP(strlen(A.major), strlen(A.minor));
 
 	signed char lt = 0;
 	
@@ -109,11 +86,11 @@ FP MINUS(FP A, FP B)	{
 		}
 	}
 	
-	if( lt==1  )	{
+	if(lt==1)	{
 
 		//printf("Hack invoking...\n");
 		C = MINUS(B, A);
-		C.sign *= -1;
+		sign(&C);
 		
 		return C;
 	}
@@ -137,17 +114,12 @@ FP MINUS(FP A, FP B)	{
 			A_P = A.minor;
 			B_P = B.minor;
 			C_P = C.minor;
-			
-			//printf("C.minor = '%s'\t", C.minor);
 		}
-		
 		else	{
 			
 			A_P = A.major;
 			B_P = B.major;
 			C_P = C.major;
-
-			//printf("A.major = '%s'\t", A.major);
 		}
 		
 	
@@ -212,7 +184,6 @@ FP MINUS(FP A, FP B)	{
 					goto loop1;
 				
 				}
-
 				else if (A_P[i] < '0')	{
 					
 					A_P[i] = ('0' + 10) - ('0' - A_P[i]);
@@ -231,10 +202,8 @@ FP MINUS(FP A, FP B)	{
 		
 		if(A_P[0] < B_P[0])	{
 			
-			if(flag==1)	{
-			
-			C.sign *= -1;
-			}
+			if(flag==1)
+				sign(&C);
 			else
 				A.major[strlen(A.major) - 1] -= 1;
 			
@@ -251,20 +220,9 @@ FP MINUS(FP A, FP B)	{
 	return C;
 }
 
-
-
 FP PLUS(FP A, FP B)	{
 
-	FP C;
-	C.minor = (char *)calloc( 1, strlen(A.minor)+1 );
-	C.major = (char *)calloc( 1, strlen(A.major)+1 );
-	
-	strcpy(C.minor, "000000000");
-	strcpy(C.major, "000000000");
-
-	//printf("A = '%s.%s'\n", A.major, A.minor);
-	//printf("B = '%s.%s'\n", B.major, B.minor);
-	//printf("C = '%s.%s'\n", C->major, C->minor);
+	FP C = createFP(strlen(A.major), strlen(A.minor));
 	
 	char k;
 	char j = 0;
@@ -285,17 +243,12 @@ FP PLUS(FP A, FP B)	{
 			A_P = A.minor;
 			B_P = B.minor;
 			C_P = C.minor;
-			
-			//printf("C.minor = '%s'\t", C.minor);
 		}
-		
 		else	{
 			
 			A_P = A.major;
 			B_P = B.major;
 			C_P = C.major;
-
-			//printf("A.major = '%s'\t", A.major);
 		}
 		
 		char _A, _B;
@@ -309,8 +262,6 @@ FP PLUS(FP A, FP B)	{
 			
 			j =  _A + _B;
 			
-			//printf("j = %d\n", j);
-			
 			if( j > 9 )	{
 				
 				k = j - 10;
@@ -320,12 +271,9 @@ FP PLUS(FP A, FP B)	{
 				k = j;
 			
 			C_P[i] = '0' + k;
-			
-			//printf("next = %d\n", (C.minor[i] - '0'));
 		}
 		
 		j = ( A_P[i] - '0' ) + ( B_P[i] - '0' );
-		//printf("j = %d\n", j);
 		
 		if(j>9)	{
 			
@@ -346,5 +294,25 @@ FP PLUS(FP A, FP B)	{
 	}
 	
 	return C;
+}
+
+
+FP createFP(int major, int minor)	{
+	
+	FP _;
+	_.major = (char *)calloc(1, major);
+	_.minor = (char *)calloc(1, minor);	
+	_.sign = '+';
+	
+	return _;
+}
+
+void copy(FP * out, FP * in)	{
+
+	strcpy(out->major, in->major);
+	strcpy(out->minor, in->minor);
+	out->sign = in->sign;
+
+	return;
 }
 
