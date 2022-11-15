@@ -1,0 +1,7 @@
+*.o
+load.bat
+*.exe
+libwregex.a
+*.html
+*.htm
+.vs/fsd/v16/.suo
