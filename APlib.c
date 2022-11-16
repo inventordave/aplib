@@ -3,22 +3,21 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-
 #include "APlib.h"
 
-FP a;
-FP b;
+FP ap_a;
+FP ap_b;
 
 
 void init()	{
 	
-	a = createFP(9, 9);
-	strcpy(a.minor, "123456789");
-	strcpy(a.major, "240027689");
+	ap_a = createFP(9, 9);
+	strcpy(ap_a.minor, "123456789");
+	strcpy(ap_a.major, "240027689");
 	
-	b = createFP(9, 9);
-	strcpy(b.minor, "987654321");
-	strcpy(b.major, "731051763");
+	ap_b = createFP(9, 9);
+	strcpy(ap_b.minor, "987654321");
+	strcpy(ap_b.major, "731051763");
 }
 
 int main(int argc, char ** argv)	{
@@ -26,35 +25,35 @@ int main(int argc, char ** argv)	{
 		init();
 		
 		FP D, a2, b2;
-		D = createFP(strlen(a.major), strlen(a.minor));
-		a2 = createFP(strlen(a.major), strlen(a.minor));
-		b2 = createFP(strlen(b.major), strlen(b.minor));
+		D = createFP(strlen(ap_a.major), strlen(ap_a.minor));
+		a2 = createFP(strlen(ap_a.major), strlen(ap_a.minor));
+		b2 = createFP(strlen(ap_b.major), strlen(ap_b.minor));
 
 		// TEST 1: PLUS A, B
-		copy(&a2, &a);
-		copy(&b2, &b);
-		printf("A = %s.%s\n", a.major, a.minor);
-		printf("B = %s.%s\n", b.major, b.minor);
+		copy(&a2, &ap_a);
+		copy(&b2, &ap_b);
+		printf("A = %s.%s\n", ap_a.major, ap_a.minor);
+		printf("B = %s.%s\n", ap_b.major, ap_b.minor);
 		
-		D = PLUS(a, b);
+		D = PLUS(ap_a, ap_b);
 		printf("RESULT a + b: %c'%s.%s'\n\n", D.sign, D.major, D.minor);
 		
 		// TEST 2: MINUS A, B , where A > B
-		copy(&a, &a2);
-		copy(&b, &b2);
-		printf("A = %s.%s\n", a.major, a.minor);
-		printf("B = %s.%s\n", b.major, b.minor);
+		copy(&ap_a, &a2);
+		copy(&ap_b, &b2);
+		printf("A = %s.%s\n", ap_a.major, ap_a.minor);
+		printf("B = %s.%s\n", ap_b.major, ap_b.minor);
 		
-		D = MINUS(b, a);
+		D = MINUS(ap_b, ap_a);
 		printf("RESULT b - a: %c'%s.%s'\n\n", D.sign, D.major, D.minor);
 
 		// TEST 3: MINUS A, B , where A < B
-		copy(&a, &a2);
-		copy(&b, &b2);
-		printf("A = %s.%s\n", a.major, a.minor);
-		printf("B = %s.%s\n", b.major, b.minor);
+		copy(&ap_a, &a2);
+		copy(&ap_b, &b2);
+		printf("A = %s.%s\n", ap_a.major, ap_a.minor);
+		printf("B = %s.%s\n", ap_b.major, ap_b.minor);
 		
-		D = MINUS(a, b);
+		D = MINUS(ap_a, ap_b);
 		printf("RESULT a - b: %c'%s.%s'\n", D.sign, D.major, D.minor);
 		
 		return 0;
@@ -66,12 +65,12 @@ FP MINUS(FP A, FP B)	{
 	FP C;
 	C = createFP(strlen(A.major), strlen(A.minor));
 
+	/**
+	This section is a total wedge to get A - B, when A < B
+	*/
 	signed char lt = 0;
 	
-	for(int q = 0; q < (strlen(A.major)); q++)	{
-		
-		if( A.major[q] == B.major[q] )
-			continue;
+	for(unsigned int q = 0; q < (strlen(A.major)); q++)	{
 		
 		if( A.major[q] < B.major[q] )	{
 			
@@ -86,7 +85,7 @@ FP MINUS(FP A, FP B)	{
 		}
 	}
 	
-	if(lt==1)	{
+	if(lt==+1)	{
 
 		//printf("Hack invoking...\n");
 		C = MINUS(B, A);
@@ -95,21 +94,25 @@ FP MINUS(FP A, FP B)	{
 		return C;
 	}
 	
+	/**
+	 End of section.
+	*/
+	
 	char k;
 	char j = 0;
 	
 	signed int i;
 	
-	unsigned char flag = 2;
+	PART = MINOR;
 	
-	while(flag > 0)	{
+	while(PART != COMPLETE)	{
 		
 		char * A_P;
 		char * B_P;
 		char * C_P;
 		
 		
-		if ( (flag % 2) == 0 )	{
+		if ( PART == MINOR )	{
 		
 			A_P = A.minor;
 			B_P = B.minor;
@@ -202,7 +205,7 @@ FP MINUS(FP A, FP B)	{
 		
 		if(A_P[0] < B_P[0])	{
 			
-			if(flag==1)
+			if(PART==MAJOR)
 				sign(&C);
 			else
 				A.major[strlen(A.major) - 1] -= 1;
@@ -214,7 +217,7 @@ FP MINUS(FP A, FP B)	{
 			C_P[0] = '0' + (A_P[0] - B_P[0]);
 		}
 		
-		--flag;
+		next(&PART);
 	}
 	
 	return C;
@@ -229,16 +232,16 @@ FP PLUS(FP A, FP B)	{
 	
 	signed int i;
 	
-	unsigned char flag = 2;
+	unsigned char PART = MINOR;
 	
-	while(flag > 0)	{
+	while(PART != COMPLETE)	{
 		
 		char * A_P;
 		char * B_P;
 		char * C_P;
 		
 		
-		if ( (flag % 2) == 0 )	{
+		if ( PART == MINOR )	{
 		
 			A_P = A.minor;
 			B_P = B.minor;
@@ -279,7 +282,7 @@ FP PLUS(FP A, FP B)	{
 			
 			k = j - 10;
 			
-			if(flag==2)	{
+			if(PART==MINOR)	{
 				
 				A.major[strlen(A.major) - 1] += 1;
 				// rolls-over overflow from minor to major component (rh-most digit of major)
@@ -290,7 +293,7 @@ FP PLUS(FP A, FP B)	{
 		else
 			C_P[i] = ('0' + j);
 		
-		--flag;
+		--PART;
 	}
 	
 	return C;
@@ -305,6 +308,7 @@ FP createFP(int major, int minor)	{
 	_.sign = '+';
 	
 	return _;
+	//use: sign(&_); to flip the sign to '-'
 }
 
 void copy(FP * out, FP * in)	{
