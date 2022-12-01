@@ -1,10 +1,14 @@
-aplib: aplib_.o
-	gcc -mconsole -g -O0 aplib_.o -lole32 -loleaut32  -o aplib.exe
+
+aplib: aplib.o cc.o
+	gcc -Wall -mconsole -g -Ofast aplib.o ../colorconsole/cc.o -o aplib.exe
 	
-aplib_.o: aplib.c aplib.h
-	gcc -c -g -O0 -o aplib_.o aplib.c
-	
+aplib.o: aplib.c aplib.h
+	gcc -Wall -c -g -Ofast aplib.c  -o aplib.o 
+		
+cc.o: 
+	make -C ../colorconsole/ colorconsole
+
 clean:
-	rm -f aplib_.o
+	rm -f aplib.o
 	rm -f aplib.exe
 
