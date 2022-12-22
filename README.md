@@ -1,5 +1,19 @@
 # APlib
 An arbitrary-precision library.
 
-Fleshing this lib out over time, it will be used further along as an ap-real driver for rtdt, the visualizer based on my vanilla js raytracer, RTDT. As it's an AP lib, it will require calculus methods, integration and differentiation, along with trig methods to model the physics of the ST-particles in an rtdt-volume.
+In development. Currently produces correct results for 2 signed integer inputs.
+
+Test:
+
+aplib %1 %2
+
+Where the operands are signed arbitrary-precision Integers.
+
+2 functions:
+
+ADD(a, b)
+SUB(a, b)
+
+As the lib is ultimately for ap real-valued numbers, the functions take as operands an object called AP, which has a .major and .minor component.
+Populate the .major component of 2 operands with an ascii-char based Integer string (e.g. a.major -> "1234")
 
