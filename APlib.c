@@ -63,7 +63,18 @@ int main(int argc, char **argv)	{
 	//print_ASCII(32, 126);
 	if( !strcmp(argv[1], "ascii") )	{
 	
-		print_ASCII( atoi(argv[2]),  atoi(argv[3]) );
+		char start, end;
+		if(argc>=3)
+			start = (char)atoi(argv[2]);
+		else
+			start = 32;
+		
+		if(argc>=4)
+			end = (char)atoi(argv[3]);
+		else
+			end = 127;
+		
+		print_ASCII( start, end );
 		exit(0);
 	}
 	
@@ -87,14 +98,21 @@ int main(int argc, char **argv)	{
 	fg[0] = '\0';
 	char * bg = (char *)malloc(16);
 	bg[0] = '\0';
+	char * _ = (char *)malloc(16);
+	_[0] = '\0';
 	
 	if( _fg )
 		strcpy( fg, argv[3] );
+	else
+		strcpy( fg, "white" );
+	
 	if( _bg )
 		strcpy( bg, argv[4] );
+	else
+		strcpy( bg, "bright_red" );
 	
-	if( _fg || _bg )
-		swap4color( fg,bg );
+	swap4color( fg,_ );
+	swap4color( bg,_ );
 	
 	BOOL color = 1;
 	
@@ -154,18 +172,21 @@ int main(int argc, char **argv)	{
 		strcpy(B.major, argv[2]);
 	}
 	
-	printf("%sValues Entered:%s\na = %c%s\nb = %c%s\n\n", "[1;31;47m", NORMAL, A.sign, A.major, B.sign, B.major);
+	printf("Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major);
+	
+	NL;
 	
 	// ADD
 	C = ADD(A, B);
-	printf("%c%s\nADD\n%c%s\n=\n%c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major); 
+	printf("%c%s %sADD%s %c%s = %s%c%s%s", A.sign, A.major, fg, NORMAL, B.sign, B.major, fg, C.sign, C.major, NORMAL); 
 	
 	NL;
 	
 	// SUB	
 	C = SUB(A, B);
-	printf("%c%s\nSUB\n%c%s\n=\n%c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major); 
+	printf("%c%s %sSUB%s %c%s = %s%c%s%s", A.sign, A.major, bg, NORMAL, B.sign, B.major, bg, C.sign, C.major, NORMAL); 
 	
+	NL;
 	exit(0);
 
 }
