@@ -194,20 +194,30 @@ signed short int cmp(AP a, AP b)	{
 }
 
 AP ADD(AP a, AP b)	{
-
-	if( cmp(a,b)==-1 )	{
 		
-		AP temp = b;
-		b = a;
-		a = temp;
-	}
-	
-	if( a.sign=='-' )
-		return SUB(a,b);
-
 	int size = ( strlen(b.major) > strlen(a.major) ? strlen(b.major) : strlen(a.major) );
 	AP c = new(size+1, 0);
 	clear(&c);
+
+	// temporary catch
+	// if abs(a)>=abs(b) && sign(a)=='-' then sub(a,b), set_sign(c, '-')
+	
+	if( ( abs(atoi(a.major))>abs(atoi(b.major)) ) && sign(&a)=='-' )	{
+		
+		set_sign(&a, '+');
+		
+		if( sign(&b)=='+' )
+			c = SUB(a,b);
+
+		else	{
+
+			set_sign(&b, '+');
+			c = ADD(a, b);
+		}
+		
+		set_sign(&c, '-');
+		return c;
+	}
 
 	signed short int value;
 	signed short int valA, valB, valC;
@@ -227,44 +237,39 @@ AP ADD(AP a, AP b)	{
 		
 		valC = (c.major[k] - '0');
 		
+		
 		if( sign(&a) == '-' )
-				valA = 0 - valA;
+			valA = 0 - valA;
 
 		if( sign(&b) == '-' )
 			valB = 0 - valB;
-
-		value = valA + valB + valC;
 		
-		//c.major[k] += '0' + (valA + valB);
+		
+		loop_:
+		
+		value = valA + valB + valC;
 		
 		if( value<0 )	{
 			
-			c.major[k] = '0' + (10 + value);
 			c.major[k-1] -= 1;
+			
+			valA += 10;
+			goto loop_;
+
 		}
-		
-		// ABOVE IF-BLOCK!!	
-		
-		else if( value>10 )	{
+
+		else if( value>=10 )	{
 			
 			c.major[k] = '0' + (value - 10);
 			c.major[k-1] += 1;
 		}
-		else if( value==10 )	{
-			
-			c.major[k] = '0';
-			c.major[k-1] += 1;
-		}
+
 		else
 			c.major[k] = '0' + value;
 	}
 	
-	if( c.major[0] < '0' )	{
-		
-		printf("OOPS!\n");
+	if( c.major[0] < '0' )
 		c.major[0] = '0' + ('0' - c.major[0]);
-	}
-	
 	
 	
 	if( tt(a,b)=='-' )
@@ -280,38 +285,43 @@ AP ADD(AP a, AP b)	{
 			break;
 	
 	free( _ );
-			
+	
+	if( *c.major == '\0' )
+		--c.major;
+	
 	return c;
 }
 
 AP SUB(AP a, AP b)	{
 	
 	AP c;
-	
-	// SUB(A,B): if ( abs(b) > abs(a)), flip_sign(sub(b,a))	
+
+	/**
+	Subtraction is anti-commutative, meaning that if one reverses the terms in a difference left-to-right, the result is the negative of the original result. Symbolically, if a and b are any two numbers, then
+
+	a − b = −(b − a)
+	*/
 	if( cmp(a,b)==-1 )	{
-		
-		printf("SUB, a < b, so flipped\n");
+
 		c = SUB(b,a);
 		flip_sign(&c);
 		
 		return c;
 	}
-
-	if( a.sign=='-' )
-		return ADD(a,b);
 	
+	// SUB algorithm:
+	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can then be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
 	flip_sign(&b);
 	c = ADD(a, b);
-	//flip_sign(&b);
 	
+
 	return c;
 }
 
 
 char tt(AP a, AP b)	{
 	
-	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2
+	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
 		return '+';
 	
 	if( ( cmp(a, b)==-1 ) && (a.sign=='-') && (b.sign=='+') )
@@ -331,8 +341,8 @@ AP new(ollie maj, ollie min)	{
 	
 	if( (result.major==NULL)||(result.minor==NULL) )	{
 		
-		printf("get_new_value_object failed 1 or 2 of 2 malloc() calls! Exiting...\n");
-		exit(0); // <---- peek via gdb step-trace
+		printf("AP new(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
+		exit(0);
 	}
 	
 	ollie i;
