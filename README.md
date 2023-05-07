@@ -3,6 +3,10 @@ An arbitrary-precision library.
 
 In development. Currently produces correct results for 2 signed integer inputs.
 
+Get my repo https://github.com/inventordave2/ColorConsole
+
+It is expected in order to compile APLib in it's current form.
+
 Test:
 
 aplib %1 %2
