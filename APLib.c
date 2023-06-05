@@ -300,7 +300,7 @@ AP MUL(AP a, AP b)  {
     /** FOR_EACH Digit in A, r-to-l */
     for(ollie j = strlen(A)-1; j >= 0; j--)  {
       
-      result = ('0'-A[j]) * ('0'-B[j]);  //  max = 81, min = 0
+      result = (A[j]-'0') * (B[i]-'0');  //  max = 81, min = 0
        
     
       if( result < 10 ) {
