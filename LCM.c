@@ -2,8 +2,11 @@
 #include <string.h>
 
 static signed int M1 = 0, M2 = 0;
-static int R1[1000] = {0}, R2[1000] = {0};
+#define MAX_ITER 4096
+static int R1[MAX_ITER] = {0}, R2[MAX_ITER] = {0};
 static int val = 1, inc = 0, match = 0;
+
+
 
 int str2int(char *);
 int test(int);
@@ -32,9 +35,9 @@ int calcLCM(int argc, char **argv)	{
 	
 	while (!match)	{
 		
-		if (inc > 999)	{
+		if (inc >= MAX_ITER)	{
 			
-			printf("Overflow error: More than %d iterations required.\n", inc-1);
+			printf("Overflow error: More than %d iterations required.\n", MAX_ITER);
 			return 1;
 		}
 		
@@ -47,6 +50,12 @@ int calcLCM(int argc, char **argv)	{
 	}
 	
 	printf("The LCM for %d and %d is %d.\n", M1, M2, R1[inc-1]);
+	// M1 * M2 := gcd(M1,M2) * lcm(M1,M2);
+	int sq = (M1 * M2);
+	int lcm = R1[inc-1];
+	
+	float gcd = ( (float)sq/(float)lcm );
+	printf("The GCD for %d and %d is %d (%d / %d).\n", M1, M2, (int)gcd, sq, lcm); 
 	
 	return 0;
 }
@@ -77,3 +86,4 @@ int str2int(char *input)	{
 	
 	return result;
 }
+
