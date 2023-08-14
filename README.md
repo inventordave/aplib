@@ -12,6 +12,7 @@ Test:
 aplib %1 %2
 
 Where the operands are signed arbitrary-precision Integers.
+A .bat file is available, just do 'a' instead of 'aplib' as the invocation.
 
 2 functions:
 

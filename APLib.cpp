@@ -1,60 +1,19 @@
-// APlib.c
+// APlib.cpp
 
-#include <stdlib.h>
 #include <stdio.h>
-#include <string.h>
+#include <cstring>
+#include <string>
 
 #include <windows.h>
-#include <signal.h>
-#include <assert.h>
 
-#include "APLib.h"
-#include "../colorconsole/ansivt2.h"
+using namespace std;
+
+#include "APLib.hpp"
 
 struct LL LinkedList;
 
-void trapHandler(int signo, siginfo_t *info, void *context)	{
-	
-	printf("Signal Caught.");
-}
 
 int main(int argc, char **argv)	{
-	
- struct sigaction trapSa;
-  
- // set up trap signal handler
-  trapSa.sa_flags = SA_SIGINFO;
-  trapSa.sa_sigaction = trapHandler;
-  int ret = sigaction(SIGTRAP, &trapSa, NULL);
-  assert(ret == 0);
-
-	BOOL color;
-	HANDLE StdHandle;
-	
-	StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
-	color = SetConsoleMode(
-		StdHandle,
-		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	);
-	
-	//print_ASCII(32, 126);
-	if( !strcmp(argv[1], "ascii") )	{
-	
-		char start, end;
-		if(argc>=3)
-			start = (char)atoi(argv[2]);
-		else
-			start = 32;
-		
-		if(argc>=4)
-			end = (char)atoi(argv[3]);
-		else
-			end = 127;
-		
-		print_ASCII( start, end );
-		exit(0);
-	}
 	
 	if( argc < 3 )	{
 		
@@ -67,8 +26,8 @@ int main(int argc, char **argv)	{
 	init_LL(&LinkedList);
 	
 	AP A, B, C;
-	A = new( 10, 0 );
-	B = new( 10, 0 );
+	A = new AP( 10, 0 );
+	B = new AP( 10, 0 );
 	
 	// Arg A
 	if( argv[1][0] == '-' )	{
@@ -247,18 +206,18 @@ AP SUB(AP a, AP b)	{
 
 	a − b = −(b − a)
 	*/
-	if( cmp(a,b)==-1 )	{
+	if( a<b )	{
 
-		c = SUB(b,a);
-		flip_sign(&c);
+		c = b - a;
+		c.flip_sign();
 		
 		return c;
 	}
 	
 	// SUB algorithm:
 	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
-	flip_sign(&b);
-	c = ADD(a, b);
+	b.flip_sign();
+	c = a + b;
 	
 
 	return c;
@@ -266,11 +225,11 @@ AP SUB(AP a, AP b)	{
 
 AP MUL(AP a, AP b)  {
   
-  AP c = new(10,0);
+  AP c = new AP(10,0);
   
-  AP d = new(10,0); // quickref
+  AP d = new AP(10,0); // quickref
   
-  if( cmp(a,b) == -1 )
+  if( a<b )
     d.major = b.major;
   else
     d.major = a.major;
@@ -278,32 +237,32 @@ AP MUL(AP a, AP b)  {
 
   //printf("Here... Line no: %d\n", __LINE__);
   ollie z;
-  for(z = 0; z < strlen(d.major); z++) {
+  for(z = 0; z < d.major.len(); z++) {
     
     c.major[z] = '0';
   }
   c.major[z] = '\0';
   
 
-  char * A = a.major;
-  char * B = b.major;
+  AP_Part A = a.major();
+  AP_Part B = b.major();
   
   
   
   int result;
-  signed int k = strlen(c.major) - 1;
+  signed int k = c.major.len() - 1;
   
   //printf("so far....line no:%d\n", __LINE__);
 
 	int l = 0;
   /** FOR_EACH Digit in B, r-to-l */
-  for(int i = strlen(b.major)-1; i >= 0; i--, l++)  {
+  for(int i = b.major.len()-1; i >= 0; i--, l++)  {
 	printf("l := %d\n", l);
     /** FOR_EACH Digit in A, r-to-l */
 
-    for(int j = strlen(a.major)-1; j >= 0; j--)  {
+    for(int j = a.major.len()-1; j >= 0; j--)  {
       
-      result = (A[j]-'0') * (B[i]-'0');  //  max = 81, min = 0
+      result = A[j] * B[i];  //  max = 81, min = 0
       //printf("RESULT:%d\n", result);
     
       if( result < 10 ) {
@@ -456,7 +415,7 @@ char tt(AP a, AP b)	{
 	return '-';
 }
 
-AP new(ollie maj, ollie min)	{
+AP new_ap(ollie maj, ollie min)	{
 
 	AP result;
 	result.major = (char *)malloc(maj+1);
@@ -491,7 +450,7 @@ AP new(ollie maj, ollie min)	{
 
 AP copy(AP * a)	{
 	
-	AP _ = new(strlen(a->major),strlen(a->minor));
+	AP _ = new_ap(strlen(a->major),strlen(a->minor));
 	
 	strcpy(_.major, a->major);
 	strcpy(_.minor, a->minor);

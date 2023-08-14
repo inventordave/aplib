@@ -1,12 +1,19 @@
 
-aplib: aplib.o cc.o
-	gcc -Wall -mconsole -g aplib.o ../colorconsole/cc.o -o aplib.exe
+aplibc: aplibc.o
+	gcc -Wall -mconsole -g aplibc.o ../colorconsole/cc.o -o aplibc.exe
 	
-aplib.o: aplib.c aplib.h
-	gcc -Wall -c -g aplib.c  -o aplib.o 
+aplibc.o: aplib.c aplib.h
+	gcc -Wall -c -g aplib.c -o aplibc.o 
 		
 cc.o: 
 	make -C ../colorconsole/ colorconsole
+
+aplibcpp: aplibcpp.o
+	g++ -Wall -mconsole -g aplibcpp.o -o aplibcpp.exe
+	
+aplibcpp.o: aplib.cpp aplib.hpp
+	g++ -Wall -c -g aplib.cpp -o aplibcpp.o
+	
 
 clean:
 	rm -f aplib.o

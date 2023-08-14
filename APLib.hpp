@@ -1,4 +1,4 @@
-// APlib.h
+// APlib.hpp
 
 // Make this any number of bytes you want. The new(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 #define MAX_LENGTH_AP_PART 1023
@@ -9,17 +9,77 @@
 #define NL NEW_LINE
 
 #define ollie unsigned long long int
-typedef struct	{
 
-	char * major;
-	char * minor;
+class AP_Part	{
+	
+	unsigned int len(void);
+	std::string value(void);
+	
+	std::string value;
+	
+};
+
+class AP(AP_Part major, AP_Part minor)	{
+
+	//operator=(this, AP b)	{};
+	
+	operator+(this, AP b)	{
+		
+		return ADD(this, b);
+	};
+	
+	operator>(this, AP b)	{
+		
+		if( cmp(this,b)==+1 )
+			return true;
+		
+		return false;
+	};
+	
+	operator<(this, AP b)	{
+		
+		if( cmp(this,b)==-1 )
+			return true;
+		
+		return false;
+	};
+
+	operator>=(this, AP b)	{
+		
+		short int result = cmp(this,b);
+		if( result>-1 )
+			return true;
+		
+		return false;
+	};
+	
+	operator<=(this, AP b)	{
+		
+		short int result = cmp(this,b);
+		if( result <= 0 )
+			return true;
+		
+		return false;
+	};
+	
+	operator==(this, AP b)	{
+		
+		if( cmp(this,b)==0 )
+			return true;
+		
+		return false;
+	};
+	
+	
+	AP_Part major;
+	AP_Part minor;
 	char sign;
 	
 	ollie length;
 	ollie major_length;
 	ollie minor_length;
 	
-} AP;
+};
 
 #define EXTEND_STRING 		\
 		char * temp = malloc( strlen(c.major) + 1 + l); \
@@ -34,7 +94,7 @@ typedef struct	{
 		c.major = temp;
 
 
-AP new(ollie maj, ollie min);
+AP new_ap(ollie maj, ollie min);
 void clear(AP * a);
 AP copy(AP * a);
 void flip_sign(AP * a);
