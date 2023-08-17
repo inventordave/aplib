@@ -65,6 +65,22 @@ typedef struct LL {
 } LL;
 
 
+void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes )	{
+	
+	curr_row[array_length] = 0;
+	
+	while( num_zeroes > 0 )	{
+		
+		--array_length;
+		
+		curr_row[array_length] = '0';
+		
+		--num_zeroes;
+	}
+}
+
+
+
 
 void init_LL(LL * linked_list)  {
   

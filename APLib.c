@@ -9,36 +9,15 @@
 #include <assert.h>
 
 #include "APLib.h"
-#include "../colorconsole/ansivt2.h"
 
-struct LL LinkedList;
-
-void trapHandler(int signo, siginfo_t *info, void *context)	{
-	
-	printf("Signal Caught.");
-}
 
 int main(int argc, char **argv)	{
 	
- struct sigaction trapSa;
-  
- // set up trap signal handler
-  trapSa.sa_flags = SA_SIGINFO;
-  trapSa.sa_sigaction = trapHandler;
-  int ret = sigaction(SIGTRAP, &trapSa, NULL);
-  assert(ret == 0);
 
-	BOOL color;
-	HANDLE StdHandle;
-	
-	StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
-	color = SetConsoleMode(
-		StdHandle,
-		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	);
-	
 	//print_ASCII(32, 126);
+	
+	if( argc>1 )
+		
 	if( !strcmp(argv[1], "ascii") )	{
 	
 		char start, end;
@@ -64,8 +43,6 @@ int main(int argc, char **argv)	{
 	
 	NL;
 	
-	init_LL(&LinkedList);
-	
 	AP A, B, C;
 	A = new( 10, 0 );
 	B = new( 10, 0 );
@@ -75,18 +52,18 @@ int main(int argc, char **argv)	{
 		
 		A.sign = '-';
 		++argv[1];
-		strcpy(A.major, argv[1]);
+		A.major = strdup(argv[1]);
 	}
 	else if( argv[1][0] == '+' )	{
 
 		A.sign = '+';
 		++argv[1];
-		strcpy(A.major, argv[1]);
+		A.major = strdup(argv[1]);
 		
 	}
 	else	{
 		
-		strcpy(A.major, argv[1]);
+		A.major = strdup(argv[1]);
 		A.sign = '+';
 	}
 	
@@ -95,19 +72,19 @@ int main(int argc, char **argv)	{
 		
 		B.sign = '-';
 		++argv[2];
-		strcpy(B.major, argv[2]);
+		B.major = strdup(argv[2]);
 	}
 	else if( argv[2][0] == '+' )	{
 
 		B.sign = '+';
 		++argv[2];
-		strcpy(B.major, argv[2]);
+		B.major = strdup(argv[2]);
 		
 	}
 	else	{
 			
 		B.sign = '+';
-		strcpy(B.major, argv[2]);
+		B.major = strdup(argv[2]);
 	}
 	
 	printf("Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major);
@@ -264,88 +241,91 @@ AP SUB(AP a, AP b)	{
 	return c;
 }
 
+
+int MSD(int num)	{
+	
+  short int rd = num % 10;
+  short int td = (num - rd);
+  int ld = 0;
+  
+  while(td>0) {
+  
+    ++ld;
+    td = td - 10;
+  }
+  
+  return ld;
+}
+
 AP MUL(AP a, AP b)  {
-  
-  AP c = new(10,0);
-  
-  AP d = new(10,0); // quickref
-  
-  if( cmp(a,b) == -1 )
-    d.major = b.major;
-  else
-    d.major = a.major;
-    
 
-  //printf("Here... Line no: %d\n", __LINE__);
-  ollie z;
-  for(z = 0; z < strlen(d.major); z++) {
-    
-    c.major[z] = '0';
-  }
-  c.major[z] = '\0';
-  
+	#define MAX_NUM_MUL_ROWS 100
+	
+	char ** ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
+	int q = 0;
 
-  char * A = a.major;
-  char * B = b.major;
-  
-  
-  
-  int result;
-  signed int k = strlen(c.major) - 1;
-  
-  //printf("so far....line no:%d\n", __LINE__);
-
-	int l = 0;
-  /** FOR_EACH Digit in B, r-to-l */
-  for(int i = strlen(b.major)-1; i >= 0; i--, l++)  {
-	printf("l := %d\n", l);
-    /** FOR_EACH Digit in A, r-to-l */
-
-    for(int j = strlen(a.major)-1; j >= 0; j--)  {
-      
-      result = (A[j]-'0') * (B[i]-'0');  //  max = 81, min = 0
-      //printf("RESULT:%d\n", result);
-    
-      if( result < 10 ) {
-        
-        // no overflow
-        c.major[k] = '0' + result;
-        k--;
-        
+	for( int k = strlen(b.major)-1; k>=0; k-- )	{
 		
-		EXTEND_STRING;
+		int rev_offset_B = strlen(b.major) - 1 - k;
 		
-        push(&LinkedList, c);
-        
-        continue;
-      }
-  
-      // overflow (result >= 10)
-      
-      // overflow goes to c[k-1]. if k-1 < 0, c needs to be stringlength-extended
-      k = overflow(&c, result, k);
-      
-	  EXTEND_STRING;
-	  
-      push(&LinkedList, c);
+		int curr_row_length = strlen(a.major) + 1 + rev_offset_B;
+		char * curr_row = (char *)malloc( curr_row_length + 1 );
+		curr_row[ curr_row_length ] = '\0';
+		pack_trailing_zeroes( curr_row, curr_row_length, rev_offset_B );
+		
+		int prev_overflow = 0;
+		
+		int p = curr_row_length - 1 - rev_offset_B;
+		
+		for( int i = strlen(a.major)-1; i>=0; i-- )	{
+			
+			int _a = a.major[i] - '0';
+			int _b = b.major[k] - '0';
+			
+			int result = _a * _b;
+			result += prev_overflow;
+			
+			if( result>9 )	{
+				
+				prev_overflow = MSD(result);
+				curr_row[p] = (result % 10) + '0';
+			}
+			else	{
+				
+				prev_overflow = 0;
+				curr_row[p] = result + '0';
+			}
+			
+			--p;
+		}
+	
+		if( prev_overflow>0 )	{
+		
+			curr_row[0] = prev_overflow + '0';
+		}
+		else
+			curr_row[0] = '0';
+		
+		ResultArray[q++] = curr_row;
+	}
 
-    }
-    
-	printf( "Row %d := %s\n", i, c.major );
-  }
-  
-  // now, add the rows in LinkedList together
-  AP acc;
-  acc = new( strlen(a.major)+1, 0 );
-  
-  while( LinkedList.top_entry != NULL)  {
-    
-    acc = ADD( pull(&LinkedList), acc );
-  }
-  
-  //printf("About to return '%s' from MUL(...)\n", acc.major);
-  return acc;
-  
+
+	AP c = new(10,0);
+	AP d = new(10,0);
+	
+	for( int t = 0; t < q; t++ )	{
+		
+		char * result_row = ResultArray[t];
+		
+		if(result_row==NULL)
+			continue;
+		
+		d.major = strdup(result_row);
+		
+		c = ADD(c, d);
+	}
+	
+	return c;
 }
 
 AP DIV(AP a, AP b)  {
