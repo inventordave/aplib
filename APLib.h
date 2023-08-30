@@ -136,7 +136,7 @@ void print_ASCII(char start, char end)	{
 			case 0:
 				printf("[%d]:=(%c)", j, j);
 			default:
-				new_ap_LINE;
+				NL;
 			break;
 		}
 		
