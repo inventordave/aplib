@@ -16,6 +16,6 @@ aplibcpp.o: aplib.cpp aplib.hpp
 	
 
 clean:
-	rm -f aplib.o
-	rm -f aplib.exe
+	rm -f *.o
+	rm -f *.exe
 

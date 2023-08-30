@@ -21,6 +21,15 @@ typedef struct	{
 	
 } AP;
 
+typedef struct	{
+	
+	AP n;
+	AP m;
+	
+	char sign;
+	
+} N_M;
+
 #define EXTEND_STRING 		\
 		char * temp = malloc( strlen(c.major) + 1 + l); \
 		strcpy( temp, c.major ); \
@@ -41,9 +50,10 @@ void flip_sign(AP * a);
 void set_sign(AP * a, char sym);
 char sign(AP * a);
 
-signed short int cmp(AP a, AP b);
+signed short int cmp(AP *, AP *);
 signed int overflow(AP * c, int result, signed int k);
 char tt(AP a, AP b);
+char tt_mul(AP * a, AP * b);
 
 AP ADD(AP a, AP b);
 AP SUB(AP a, AP b);
@@ -51,19 +61,21 @@ AP SUB(AP a, AP b);
 AP MUL(AP a, AP b);
 AP DIV(AP a, AP b);
 
-typedef struct LL_item {
+
+int MSD(int num)	{
+	
+  short int rd = num % 10;
+  short int td = (num - rd);
+  int ld = 0;
   
-  AP entry;
-  struct LL_item * next;
-  struct LL_item * prev;
+  while(td>0) {
   
-} LL_item;
-
-typedef struct LL {
-
-  struct LL_item * top_entry;
-} LL;
-
+    ++ld;
+    td = td - 10;
+  }
+  
+  return ld;
+}
 
 void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes )	{
 	
@@ -77,56 +89,6 @@ void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes )	{
 		
 		--num_zeroes;
 	}
-}
-
-
-
-
-void init_LL(LL * linked_list)  {
-  
-  AP temp = new(10,0);
-  LL_item * entry = (LL_item *)malloc( sizeof(LL_item) );
-  entry->prev = (LL_item *) NULL;
-  entry->next = (LL_item *) NULL;
-  entry->entry = temp;
-  linked_list->top_entry = entry;
-}
-
-AP pull(LL * linked_list);
-void push(LL * linked_list, AP item);
-
-AP pull(LL * linked_list) {
-  
-  
-  LL_item * result = linked_list->top_entry;
-  
-  LL_item * temp = result->prev;
-  
-  if( temp != NULL )
-	temp->next = (LL_item *) NULL;
-  linked_list->top_entry = temp;
-  
-  
-  return result->entry;
-}
-
-void push(LL * linked_list, AP item) {
-  
-  LL_item * swap_item = linked_list->top_entry;
-  
-  LL_item * new_top_entry = (LL_item *)malloc( sizeof(LL_item) );
-  
-  new_top_entry->entry = item;
-  new_top_entry->next = (LL_item *) NULL;
-  new_top_entry->prev = swap_item;
-  
-  if( swap_item )
-    swap_item->next = new_top_entry;
-  else
-    ;
-  
-  linked_list->top_entry = new_top_entry;
-  
 }
 
 

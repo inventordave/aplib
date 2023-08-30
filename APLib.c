@@ -13,28 +13,6 @@
 
 int main(int argc, char **argv)	{
 	
-
-	//print_ASCII(32, 126);
-	
-	if( argc>1 )
-		
-	if( !strcmp(argv[1], "ascii") )	{
-	
-		char start, end;
-		if(argc>=3)
-			start = (char)atoi(argv[2]);
-		else
-			start = 32;
-		
-		if(argc>=4)
-			end = (char)atoi(argv[3]);
-		else
-			end = 127;
-		
-		print_ASCII( start, end );
-		exit(0);
-	}
-	
 	if( argc < 3 )	{
 		
 		printf("Please pass 2 (possibly signed) integers on the cmd-line, and invoke the program again. Exiting...\n");
@@ -101,101 +79,103 @@ int main(int argc, char **argv)	{
 	C = SUB(A, B);
 	printf("%c%s SUB %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major);
 	
-	printf("\n");
+	NL;
 	
-	//printf("Hmmm....\n");
-	
-	//printf("A = %s, B = %s\n", A.major, B.major);
 	// MUL
 	C = MUL(A, B);
-  printf("%c%s MUL %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major);
+	printf( "%c%s MUL %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major );
 	
-	printf("\nCompleted.\n");
-	exit(0);
-
+	printf( "\nCompleted.\n" );
+	
+	return 0;
 }
 
 
+short int maximum(short int a, short int b)	{
+
+	if( b>a )
+		return b;
+	
+	return a;
+}
+
+short int minimum(short int a, short int b)	{
+	
+	if( b<a )
+		return b;
+	
+	return a;
+}
+
+	
 AP ADD(AP a, AP b)	{
-		
+	
+	int flag = 0;
+	
 	int size = ( strlen(b.major) > strlen(a.major) ? strlen(b.major) : strlen(a.major) );
 	AP c = new(size+1, 0);
-	//clear(&c);
 
-	// temporary catch
-	// if abs(a)>=abs(b) && sign(a)=='-' then sub(a,b), set_sign(c, '-')
-	
-	if( ( abs(atoi(a.major))>abs(atoi(b.major)) ) && sign(&a)=='-' )	{
-		
-		set_sign(&a, '+');
-		
-		if( sign(&b)=='+' )
-			c = SUB(a,b);
-
-		else	{
-
-			set_sign(&b, '+');
-			c = ADD(a, b);
-		}
-		
-		set_sign(&c, '-');
-		return c;
-	}
 
 	signed short int value;
 	signed short int valA, valB, valC;
-
-	signed int i, j, k;
-	for( i=strlen(a.major)-1, j=strlen(b.major)-1, k=strlen(c.major)-1; k>0; i--, j--, k--)	{
 	
-		if(i>=0)
-			valA = a.major[i] - '0';
-		else
-			valA = 0;
+	signed int i, j, k;
+	
+	if( sign(&a) == sign(&b) )	{
 		
-		if(j>=0)
-			valB = b.major[j] - '0';
-		else
-			valB = 0;
+		for( i=strlen(a.major)-1, j=strlen(b.major)-1, k=strlen(c.major)-1; k>0; i--, j--, k--)	{
 		
-		valC = (c.major[k] - '0');
-		
-		
-		if( sign(&a) == '-' )
-			valA = 0 - valA;
-
-		if( sign(&b) == '-' )
-			valB = 0 - valB;
-		
-		
-		loop_:
-		
-		value = valA + valB + valC;
-		
-		if( value<0 )	{
+			if(i>=0)
+				valA = a.major[i] - '0';
+			else
+				valA = 0;
 			
-			c.major[k-1] -= 1;
+			if(j>=0)
+				valB = b.major[j] - '0';
+			else
+				valB = 0;
 			
-			valA += 10;
-			goto loop_;
-
-		}
-
-		else if( value>=10 )	{
+			valC = (c.major[k] - '0');	
 			
-			c.major[k] = '0' + (value - 10);
-			c.major[k-1] += 1;
-		}
+			valA += valC;
 
-		else
+				
+			value = valA + valB;
+
+			if( value>=10 )	{
+				
+				value -= 10;
+				c.major[k-1] += 1;
+			}
+			
 			c.major[k] = '0' + value;
+		}
+	}
+	else	{
+		
+	//Subtract the smaller absolute value from the larger absolute value and give the answer the same sign as the number with the larger absolute value
+		char tsign;
+		if( cmp(&a,&b)==-1 )	{
+			
+			tsign = b.sign;
+			
+			AP temp;
+			temp = a;
+			a = b;
+			b = temp;
+		}
+		else
+			tsign = a.sign;
+		
+		a.sign = '+';
+		b.sign = '+';
+		c = SUB(a,b);
+		c.sign = tsign;
+		flag = 1;
 	}
 	
-	if( c.major[0] < '0' )
-		c.major[0] = '0' + ('0' - c.major[0]);
 	
-	
-	if( tt(a,b)=='-' )
+	if( (tt(a,b)=='-') && (flag==0) )
 		c.sign = '-';
 
 	
@@ -217,49 +197,51 @@ AP ADD(AP a, AP b)	{
 
 AP SUB(AP a, AP b)	{
 	
-	AP c;
+	if( (a.sign=='+') && (b.sign=='+') && (cmp(&a,&b)==+1) )	{
 
-	/**
-	Subtraction is anti-commutative, meaning that if one reverses the terms in a difference left-to-right, the result is the negative of the original result. Symbolically, if a and b are any two numbers, then
-
-	a − b = −(b − a)
-	*/
-	if( cmp(a,b)==-1 )	{
-
-		c = SUB(b,a);
-		flip_sign(&c);
+		int i, j, k, valA, valB, valC;
+		AP c = new(strlen(a.major)+1,0);
+		for( i=strlen(a.major)-1, j=strlen(b.major)-1, k=strlen(c.major)-1; k>0; i--, j--, k--)	{
 		
+			if(i>=0)
+				valA = a.major[i] - '0';
+			else
+				valA = 0;
+			
+			if(j>=0)
+				valB = b.major[j] - '0';
+			else
+				valB = 0;
+			
+			valC = (c.major[k] - '0');	
+			
+			valA += valC;
+
+			if( valA<valB )	{
+				
+				c.major[k-1] -= 1;
+				valA += 10;
+			}
+
+			int value = valA - valB;
+			c.major[k] = '0' + value;
+		}
+	
 		return c;
 	}
 	
-	// SUB algorithm:
+	// Alt. SUB algorithm:
 	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
 	flip_sign(&b);
-	c = ADD(a, b);
-	
+	AP res = ADD(a, b);
+	flip_sign(&b);
 
-	return c;
-}
-
-
-int MSD(int num)	{
-	
-  short int rd = num % 10;
-  short int td = (num - rd);
-  int ld = 0;
-  
-  while(td>0) {
-  
-    ++ld;
-    td = td - 10;
-  }
-  
-  return ld;
+	return res;
 }
 
 AP MUL(AP a, AP b)  {
 
-	#define MAX_NUM_MUL_ROWS 100
+	int MAX_NUM_MUL_ROWS = ( strlen(a.major)>strlen(b.major) ? strlen(a.major) : strlen(b.major) );
 	
 	char ** ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
 	int q = 0;
@@ -320,24 +302,29 @@ AP MUL(AP a, AP b)  {
 		if(result_row==NULL)
 			continue;
 		
+		free( d.major );
+		
 		d.major = strdup(result_row);
 		
 		c = ADD(c, d);
 	}
 	
+	c.sign = tt_mul(&a, &b);
 	return c;
 }
 
 AP DIV(AP a, AP b)  {
   
   return a;
+  
+  // return ( result = 1/(MUL(a,b) )
 }
 
 
-signed short int cmp(AP a, AP b)	{
+signed short int cmp(AP * a, AP * b)	{
 	
-	ollie len_a = strlen(a.major);
-	ollie len_b = strlen(b.major);
+	ollie len_a = strlen(a->major);
+	ollie len_b = strlen(b->major);
 	
 	if( len_a<len_b )
 		return -1;
@@ -347,10 +334,10 @@ signed short int cmp(AP a, AP b)	{
 	
 	for( ollie test=0; test<len_a; test++ )	{
 		
-		if( a.major[test]>b.major[test] )
+		if( a->major[test]>b->major[test] )
 			return +1;
 		
-		if( a.major[test]<b.major[test] )
+		if( a->major[test]<b->major[test] )
 			return -1;
 	}
 	
@@ -421,19 +408,34 @@ signed int overflow(AP * c, int result, signed int k) {
 }
 
 
-
 char tt(AP a, AP b)	{
+	
+	signed int ag = cmp(&a,&b);
 	
 	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
 		return '+';
 	
-	if( ( cmp(a, b)==-1 ) && (a.sign=='-') && (b.sign=='+') )
-		return '+';
-
-	if( ( cmp(a, b)==+1 ) && (a.sign=='+') && (b.sign=='-') )
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='+') )
 		return '+';
 	
-	return '-';
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+	
+	if( (ag==-1) && (a.sign=='+') && (b.sign=='-') )
+		return '-';
+	
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+
+	if( (ag==+1) && (a.sign=='+') && (b.sign=='-') )
+		return '+';
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='+') )
+		return '-';
+	
+	return '+';
+	
 }
 
 AP new(ollie maj, ollie min)	{
@@ -521,5 +523,14 @@ void flip_sign(AP * a)	{
 		a->sign = '+';
 	else
 		a->sign = '-';
+}
+
+
+char tt_mul(AP * a, AP * b)	{
+
+	if( sign(a)!=sign(b) )
+		return '-';
+	
+	return '+';
 }
 
