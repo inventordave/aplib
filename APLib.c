@@ -4,10 +4,6 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <windows.h>
-#include <signal.h>
-#include <assert.h>
-
 #include "APLib.h"
 
 
@@ -22,8 +18,8 @@ int main(int argc, char **argv)	{
 	NL;
 	
 	AP A, B, C;
-	A = new( 10, 0 );
-	B = new( 10, 0 );
+	A = new_ap( 10, 0 );
+	B = new_ap( 10, 0 );
 	
 	// Arg A
 	if( argv[1][0] == '-' )	{
@@ -113,7 +109,7 @@ AP ADD(AP a, AP b)	{
 	int flag = 0;
 	
 	int size = ( strlen(b.major) > strlen(a.major) ? strlen(b.major) : strlen(a.major) );
-	AP c = new(size+1, 0);
+	AP c = new_ap(size+1, 0);
 
 
 	signed short int value;
@@ -200,7 +196,7 @@ AP SUB(AP a, AP b)	{
 	if( (a.sign=='+') && (b.sign=='+') && (cmp(&a,&b)==+1) )	{
 
 		int i, j, k, valA, valB, valC;
-		AP c = new(strlen(a.major)+1,0);
+		AP c = new_ap(strlen(a.major)+1,0);
 		for( i=strlen(a.major)-1, j=strlen(b.major)-1, k=strlen(c.major)-1; k>0; i--, j--, k--)	{
 		
 			if(i>=0)
@@ -292,8 +288,8 @@ AP MUL(AP a, AP b)  {
 	}
 
 
-	AP c = new(10,0);
-	AP d = new(10,0);
+	AP c = new_ap(10,0);
+	AP d = new_ap(10,0);
 	
 	for( int t = 0; t < q; t++ )	{
 		
@@ -438,7 +434,7 @@ char tt(AP a, AP b)	{
 	
 }
 
-AP new(ollie maj, ollie min)	{
+AP new_ap(ollie maj, ollie min)	{
 
 	AP result;
 	result.major = (char *)malloc(maj+1);
@@ -446,7 +442,7 @@ AP new(ollie maj, ollie min)	{
 	
 	if( (result.major==NULL)||(result.minor==NULL) )	{
 		
-		printf("AP new(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
+		printf("AP new_ap(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
 		exit(0);
 	}
 	
@@ -473,7 +469,7 @@ AP new(ollie maj, ollie min)	{
 
 AP copy(AP * a)	{
 	
-	AP _ = new(strlen(a->major),strlen(a->minor));
+	AP _ = new_ap(strlen(a->major),strlen(a->minor));
 	
 	strcpy(_.major, a->major);
 	strcpy(_.minor, a->minor);
