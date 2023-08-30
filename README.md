@@ -8,7 +8,7 @@ Test:
 aplibc %1 %2
 
 Where the operands are signed arbitrary-precision Integers.
-A .bat file is available, just do 'a' instead of 'aplib' as the invocation.
+A .bat file is available, just do 'a' instead of 'aplibc' as the invocation.
 
 3 functions:
 
