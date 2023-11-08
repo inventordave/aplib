@@ -61,6 +61,8 @@ AP SUB(AP a, AP b);
 AP MUL(AP a, AP b);
 AP DIV(AP a, AP b);
 
+AP EXP(AP a, AP b);
+
 
 int MSD(int num)	{
 	
@@ -96,7 +98,7 @@ void print_ASCII(char start, char end)	{
 	
 	if( (start<32 || end<32) )	{
 		
-		printf("A scurrilous attempt was made to print the non-printable ascii characters below codepoint 32. Or even those new_ap-fangled extended-ascii characters above codepoint 127. This is an outrage, and the function is immediately returning!");
+		printf("A scurrilous attempt was made to print the non-printable ascii characters below codepoint 32. Or even those new-fangled extended-ascii characters above codepoint 127. This is an outrage, and the function is immediately returning!");
 		return;
 	}
 	

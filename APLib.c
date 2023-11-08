@@ -1,10 +1,12 @@
 // APlib.c
 
 #include <stdlib.h>
+#include <assert.h>
 #include <stdio.h>
 #include <string.h>
 
 #include "APLib.h"
+#include "Dave_IEEE754.h"
 
 
 int main(int argc, char **argv)	{
@@ -61,25 +63,34 @@ int main(int argc, char **argv)	{
 		B.major = strdup(argv[2]);
 	}
 	
-	printf("Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major);
+	printf( "Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major );
 	
 	NL;
 	
 	// ADD
 	C = ADD(A, B);
-	printf("%c%s ADD %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major);
+	printf( "%c%s ADD %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
 	
 	NL;
 	
 	// SUB
 	C = SUB(A, B);
-	printf("%c%s SUB %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major);
+	printf( "%c%s SUB %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	
+	NL;
+
+	// MUL
+	C = MUL(A, B);
+	printf( "%c%s MUL %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
 	
 	NL;
 	
-	// MUL
-	C = MUL(A, B);
-	printf( "%c%s MUL %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	// EXP
+	C = EXP(A, B);
+	if( C.sign=='-' )
+		B.sign='+';
+	
+	printf( "%c%s EXP %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major );
 	
 	printf( "\nCompleted.\n" );
 	
@@ -103,7 +114,48 @@ short int minimum(short int a, short int b)	{
 	return a;
 }
 
+
+AP EXP(AP a, AP b)	{
 	
+	// if b (exp) is negative, flip sign.
+	
+	if( sign(&b)=='-' )	{
+		
+		b.sign='+';
+		printf("\nExponent is negative. Converting to positive (%c%s)\n", b.sign, b.major );
+	}
+	
+	// a * a, b-1 times
+	// if b=0, result = 1
+	AP c = new_ap(1, 0);
+	c.major = strdup( "1" );
+	
+	AP temp = new_ap(1,0);
+	temp.major = strdup( "0" );
+	
+	if( cmp(&b,&temp)==0 )	{
+		
+		return c;
+	}
+	else	{
+		
+		AP d = SUB(b, c);
+		AP e = new_ap(1,0);
+		e.major = strdup( "0" );
+		AP result = copy(&a);
+		while( cmp(&d, &e)==+1 )	{
+			
+			result = MUL(result, a);
+			d = SUB(d,c);
+		}
+		
+		if( sign(&a)=='-' )
+			result.sign='-';
+		
+		return result;
+	}
+}
+
 AP ADD(AP a, AP b)	{
 	
 	int flag = 0;
@@ -193,7 +245,7 @@ AP ADD(AP a, AP b)	{
 
 AP SUB(AP a, AP b)	{
 	
-	if( (a.sign=='+') && (b.sign=='+') && (cmp(&a,&b)==+1) )	{
+	if( (a.sign=='+') && (b.sign=='+') && ( (cmp(&a,&b)==+1) || (cmp(&a,&b)==0) ) )	{
 
 		int i, j, k, valA, valB, valC;
 		AP c = new_ap(strlen(a.major)+1,0);
@@ -223,6 +275,21 @@ AP SUB(AP a, AP b)	{
 			c.major[k] = '0' + value;
 		}
 	
+		
+		int len = strlen(c.major);
+		char * _ = malloc(len+1);
+		_ = strdup( c.major );
+		for( i=0; i<len; i++ )
+			if( _[i] == '0' )
+				++c.major;
+			else
+				break;
+	
+		free( _ );
+	
+		if( *c.major == '\0' )
+			--c.major;
+		
 		return c;
 	}
 	
@@ -296,7 +363,7 @@ AP MUL(AP a, AP b)  {
 		char * result_row = ResultArray[t];
 		
 		if(result_row==NULL)
-			continue;
+			assert(result_row);
 		
 		free( d.major );
 		
