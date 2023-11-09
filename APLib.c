@@ -4,12 +4,40 @@
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "APLib.h"
 #include "Dave_IEEE754.h"
 
 
 int main(int argc, char **argv)	{
+	
+	int y = str2int(argv[1]);
+	int x = _2k_BinarySearch(y);
+	
+	printf("Nearest Max 2k exponent for value %d is %d\n", y, x);
+	
+	
+	return 0;
+	/**
+	AP _a = new_ap( strlen(argv[1]), 0 );
+	_a.major = strdup( argv[1] );
+	int result1 = _2kMax(_a);
+	int result2 = _2kMin(_a);
+	
+	printf( "For value '%s', the nearest Max 2k-form is 2 ^ %d, nearest Min 2k-form is 2 ^ %d\n", _a.major, result1, result2 );
+	
+	return 0;
+	*/
+	
+	AP a = new_ap( strlen(argv[1]), 0 );
+	a.major = strdup( argv[1] );
+	
+	char * result = DEC_2_BIN(a);
+	printf( "String = %s\n", result );
+	
+	return 0;
+	
 	
 	if( argc < 3 )	{
 		
@@ -98,20 +126,142 @@ int main(int argc, char **argv)	{
 }
 
 
-short int maximum(short int a, short int b)	{
+// This function takes a decimal AP Integer, and returns a char * binary-format string.
+// Does not assume string-length-binaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
+// It is, however, a method for converting Dec->Bin.
+char * DEC_2_BIN(AP input)	{ 
 
-	if( b>a )
-		return b;
+	int length = strlen(input.major);
+	int flag = 1;
+	AP stack[length];
 	
-	return a;
+	
+	char binary_stack[256];
+	int pointer;
+	int bs_pointer = 0;
+	
+	AP a = new_ap( length, 0 );
+	
+	AP result = new_ap( length, 0 );
+	
+	while( flag )	{
+
+		pointer = 0;
+		
+		int i;
+		for( i=0; i<length; i++ )	{
+			
+			a.major[i] = input.major[i];
+			
+			pack_trailing_zeroes( a.major, length, (length-i-1) );
+			
+			int dividend = a.major[i] - '0';
+			int remainder = dividend % 2;
+			int quotient = dividend / 2;
+			
+			result.major[i] = quotient + '0';
+			
+			// if a_substring != LSDigit (units position)
+			// if it is, the remainder is noted as a binary digit 1, and the remainder itself disgarded.
+			
+
+			
+			
+			if( remainder )	{
+				
+				if( i==(length-1) )	{
+			
+					binary_stack[bs_pointer++] = '1';
+				}
+				else
+					result.major[i+1] = '5';
+			}
+			else	{
+				
+				if( i==(length-1) )	{
+			
+					binary_stack[bs_pointer++] = '0';
+				}
+				else
+					result.major[i+1] = '0';
+			}
+
+			pack_trailing_zeroes( result.major, length, (length-i-2) );
+			
+			stack[pointer++] = copy(&result);
+
+			// finally...
+			
+			a.major[i] = '0';
+			result.major[i] = '0';
+			result.major[i+1] = '0';
+		}	
+		
+
+		input.major = strdup( "0" );
+		for(int k = 0; k < pointer; k++ )
+			input = ADD(input, stack[k]);
+		
+		length = strlen(input.major);
+		
+		int l = strlen(a.major)-strlen(input.major);
+		
+		for( int z=0; z<l; z++ )
+			++a.major;
+
+		pack_trailing_zeroes( a.major, length, length);
+		
+		AP t = new_ap(1,0);
+		t.major = strdup( "0" );
+		
+		if( cmp(&input,&t)==0 )
+			flag = 0;
+	}
+	
+	char * b_str = (char *)malloc( bs_pointer+1 );
+	
+	for(int k=0; k<bs_pointer; k++)	{
+		
+		b_str[k] = binary_stack[bs_pointer-1-k];
+	}
+	
+	return b_str;
 }
 
-short int minimum(short int a, short int b)	{
+
+int _2kMax(AP input)	{
 	
-	if( b<a )
-		return b;
+	char * bin_string = DEC_2_BIN(input);
 	
-	return a;
+	int len_bin_string = strlen(bin_string);
+	
+	if( bin_string[0]=='1' ) // only necessary for bit-strings with leading '0's, which is not true for return values of DEC_2_BIN()
+	for( int i=1; i < len_bin_string; i++ )	{
+		
+		if( bin_string[i]=='1' )	{
+			
+			return len_bin_string;
+		}
+	}
+
+	return len_bin_string-1;
+}
+
+int _2kMin(AP input)	{
+	
+	char * bin_string = DEC_2_BIN(input);
+	
+	int len_bin_string = strlen(bin_string);
+	
+	for( int i=0; i<len_bin_string; i++ )	{
+		
+		if( bin_string[i]=='1')	{
+			
+			return len_bin_string - 1 - i;
+		}
+	}
+	
+	return 0;
 }
 
 
@@ -471,35 +621,6 @@ signed int overflow(AP * c, int result, signed int k) {
 }
 
 
-char tt(AP a, AP b)	{
-	
-	signed int ag = cmp(&a,&b);
-	
-	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
-		return '+';
-	
-	if( (ag==-1) && (a.sign=='-') && (b.sign=='+') )
-		return '+';
-	
-	if( (ag==-1) && (a.sign=='-') && (b.sign=='-') )
-		return '-';
-	
-	if( (ag==-1) && (a.sign=='+') && (b.sign=='-') )
-		return '-';
-	
-	
-	if( (ag==+1) && (a.sign=='-') && (b.sign=='-') )
-		return '-';
-
-	if( (ag==+1) && (a.sign=='+') && (b.sign=='-') )
-		return '+';
-	
-	if( (ag==+1) && (a.sign=='-') && (b.sign=='+') )
-		return '-';
-	
-	return '+';
-	
-}
 
 AP new_ap(ollie maj, ollie min)	{
 
@@ -589,11 +710,74 @@ void flip_sign(AP * a)	{
 }
 
 
+char tt(AP a, AP b)	{
+	
+	signed int ag = cmp(&a,&b);
+	
+	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
+		return '+';
+	
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='+') )
+		return '+';
+	
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+	
+	if( (ag==-1) && (a.sign=='+') && (b.sign=='-') )
+		return '-';
+	
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+
+	if( (ag==+1) && (a.sign=='+') && (b.sign=='-') )
+		return '+';
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='+') )
+		return '-';
+	
+	return '+';
+	
+}
+
 char tt_mul(AP * a, AP * b)	{
 
 	if( sign(a)!=sign(b) )
 		return '-';
 	
 	return '+';
+}
+
+
+int str2int(char *input)	{
+	
+	int len = strlen(input), i = 0, result = 0;
+	
+	if (input[0] == '-')
+		i = 1;
+
+	for(; i<len; i++)
+		result = result * 10 + ( input[i] - '0' );
+	
+	if (input[0] == '-')
+		result = 0 - result;
+	
+	return result;
+}
+
+short int maximum(short int a, short int b)	{
+
+	if( b>a )
+		return b;
+	
+	return a;
+}
+
+short int minimum(short int a, short int b)	{
+	
+	if( b<a )
+		return b;
+	
+	return a;
 }
 

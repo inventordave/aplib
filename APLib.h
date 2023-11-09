@@ -63,6 +63,14 @@ AP DIV(AP a, AP b);
 
 AP EXP(AP a, AP b);
 
+char * DEC_2_BIN(AP input);
+int _2kMax(AP input);
+int _2kMin(AP input);
+
+int str2int(char *input);
+
+
+
 
 int MSD(int num)	{
 	
