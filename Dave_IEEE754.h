@@ -224,9 +224,6 @@
 			int offset = 0;
 			bitmask = 0;
 
-			if( i>0 )
-				offset = i * 8 + (1*i);
-
 			for( int k=0; k<8; k++ )
 				bitmask += (str[offset++] - '0') << (7 - k);
 
@@ -245,9 +242,6 @@
 			
 			int offset = 0;
 			bitmask = 0;
-
-			if( i>0 )
-				offset = i * 8 + (1*i);
 
 			for( int k=0; k<8; k++ )
 				bitmask += (str[offset++] - '0') << (7 - k);
