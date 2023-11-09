@@ -1,9 +1,9 @@
 
 aplibc: aplibc.o
-	gcc -Wall -mconsole -g aplibc.o -o aplibc.exe
+	gcc -Wall -mconsole -g aplibc.o  -o aplibc.exe
 	
 aplibc.o: aplib.c aplib.h
-	gcc -Wall -c -g aplib.c -o aplibc.o 
+	gcc -Wall -c -g aplib.c  -o aplibc.o
 	
 
 clean:
