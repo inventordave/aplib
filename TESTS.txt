@@ -1,0 +1,20 @@
+1. Are internal floats "big-endian"? I don't think so, but I need to check. CHECKED: Little-Endian.
+
+
+IEEE_writeFloat( &ff, str );
+// Correctly writes a BIN string (generated from "char *" IEEE_readFloat( float )) to an internal float variable. That internal float
+// value is consistent with the input fp-value passed to IEEE_readFloat(float)
+
+struct IEEE654_Float* IEEE_writeFloatStruct( &f );
+float IEEE_readFloatStruct( f2 );
+// The above 2 functions conserve the fp-value when a float is passed into IEEE_writeFloat(), and the resultant IEEE654_Float struct is then
+// passed to IEEE_readFloatStruct.
+
+Tests (in test.c:fs_test1()) on the construction and access of the IEEE654_Float struct are failing. The 2 problems are that I assume internally the float encoding is "flat" (effectively big-endian, with the sign bit at byte 1, bit 7), and
+I am green to using bit-field structs. I need to research.
+UPDATE: I assumed that the internal float representation is little-endian (sign bit at bit 25), which I am sure it is, hence the "char * IEEE_convertFloatString2BigEndian( char * str )" function, which in previous testing indicated the sign bit was internally at bit 25. HOwever, when updating test function fs_test1() to convert the float bin_str to big-endian, and then writing it back to the float storage, the output of the test did not change.
+UPDATE: Did some quick testing, and simultaneously remembered when reading about bit fields that seemingly accessing 2 bit-fields that occupy the same byte I think resolve to a single value. So, "sign" and "exponent", occupying 1 and 7 bits consecutively, exponent is returning a negative number when the float scalar value is negative, and "int exponent" is returning a positive number when the float is a negative value.
+UPDATE: I have been running tests without an internet connection to reference online resources, and thus cannot research the problem. Accessing struct->sign for both positive and negative floats gives the same printf(%d) value: -1.
+
+OPTION: Look at the method for reading an internal float to a string in function "char * IEEE_readFloat( float f )". You use the "struct container" wrapper method, and that works correctly. Use that method, and then manually extract and write the bit-fields from the string to the IEEE654_Float struct fields.
+

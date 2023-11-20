@@ -1,27 +1,134 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
+#include <error.h>
 
 #include "Dave_IEEE754.h"
 
+#define PRINT_LINE printf( "---------------------------\n" );
 
-/**
+// FUNCTION DECLS
+void test(void);
+void fs_test1(void);
+void q_test(float);
+int main2(int argc, char **argv);
+int main3(int argc, char **argv);
 
-	Here is a simple solution I cooked up for accessing the internal bit-representation of floats. It's trivially extendable to doubles, you simply need to allocate sufficient memory for the "struct container" that wraps the target float storage. The (very simple) method uses a char * pointer called "offset" in my code, which acts as an l-value for a (char *) cast of the containing struct as r-value. This trivially internally-flattens the struct as an array of char's (bytes - sizeof(1) ). Then the inner-most loop scans, from MSB to LSB of each individual byte in the struct internal array, and does an AND mask against the bit (from bit 7 to bit 0), and if it's a 1, prints 1, or if a 0 ,prints 0.
-	As my system is little-endian, the LSByte is printed as the first row, and the MSByte printed as the 4th row, but each row, each byte, is printed with the MSB printed left-most. This obviously means that the left-most bit of the 4th row is the sign bit, for signed r-values.
+int main(int argc, char **argv)	{
 	
-*/
+	test();
+	NL;
+	PRINT_LINE;
+	
+	int a = main2(argc, argv);
+	NL;
+	PRINT_LINE
+	fs_test1();
+	
+	return 0;
+}
+
+void test()	{
+	
+	char * decimal = "543212362746234636432864963483264873264932649823649";
+	
+	AP a = new_ap( strlen(decimal), 0 );
+	a.major = strdup( decimal );
+	
+	char * binary = DEC_2_BIN(a, 1);
+	
+	char * ret_decimal = BIN_2_DEC(binary);
+	
+	printf( "decimal = %s\n", decimal );
+	printf( "binary = %s\n", binary );
+	printf( "back again = %s\n", ret_decimal );
+	
+	return;
+}
+
+void fs_test1()	{
+	
+	// This test function is to test construction and access to struct "IEEE654_Float"
+	struct IEEE654_Float * a;
+	
+	float f = -12.12;
+	
+	char * f_str = IEEE_readFloat( f );
+	f_str = IEEE_convertFloatString2BigEndian( f_str );
+	
+	IEEE_writeFloat( &f, f_str );
+	
+	a = IEEE_writeFloatStruct( &f );
+
+	if (a->sign != 1)
+		printf( "The sign bit is incorrect. The value is %d\n", a->sign );
+	else
+		printf( "The sign bit can be accessed and has the correct value.\n" );
+	
+	printf( "struct IEEE654_Float.exponent = %d\n", a->exponent );
+	
+	
+	free( a );
+	
+	f = +12.12;
+	
+	f_str = IEEE_readFloat( f );
+	f_str = IEEE_convertFloatString2BigEndian( f_str );
+	IEEE_writeFloat( &f, f_str );
+	
+	a = IEEE_writeFloatStruct( &f );
+	if (a->sign != 0)
+		printf( "The sign bit is incorrect. The value is %d\n", a->sign );
+	else
+		printf( "The sign bit can be accessed and has the correct value.\n" );
+
+	printf( "struct IEEE654_Float.exponent = %d\n", a->exponent );
+	
+	assert( a->exponent < 128 );
+	
+	return;
+}
+
+void q_test( float f )	{
+	
+	/*
+	1. create float.
+	2. convert float to string, then printf
+	3. create ieee_float object from &float
+	4. read ieee_float object to float
+	5. convert float to string, then printf
+	6. when correct, both printed strings should be identical
+	*/
+	
+	char * str = IEEE_readFloat( f );
+	//str = IEEE_convertFloatString2BigEndian( str );
+	printf( "f := %f\n", f );
+	
+	float ff;
+	IEEE_writeFloat( &ff, str );
+	printf( "ff := %f\n", ff );
+	
+
+	struct IEEE654_Float* f2 = IEEE_writeFloatStruct( &f );
+	float _f = IEEE_readFloatStruct( f2 );
+	printf( "_f = %f\n", _f );
+	
+	printf( "f := %s\n", str );
+	
+	return;
+}
 
 
-int main2(int argc, char **argv)	{
+int main3(int argc, char **argv)	{
 	
 	struct IEEE754 * lib = initIEEE754();
 	
 	char * str = malloc(32+1);
-	str = strdup( "10000101011010111111011001000010" );
+	str = strdup( "10000101011010111111011011000010" );
 	
 	float a = 17.1f;
 	
+	printf( "Value stored in float = %f\nWriting new value to float.\n", a );
 	lib->writeFloat( &a, str );
 	
 	printf( "Value stored in float = %f\n", a );
@@ -29,7 +136,7 @@ int main2(int argc, char **argv)	{
 	return 0;
 }
 
-int main(int argc, char **argv)	{
+int main2(int argc, char **argv)	{
 
 	struct IEEE754 * lib = initIEEE754();
 

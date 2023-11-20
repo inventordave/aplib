@@ -4,7 +4,18 @@
 	#include <stdlib.h>
 	#include <string.h>
 	#include <assert.h>
+	#include "APlib.h"
+/**
 
+	Here is a simple solution I cooked up for accessing the internal bit-representation of floats. It's trivially extendable to doubles, you simply need to allocate sufficient memory for the "struct container" that wraps the target float storage. The (very simple) method uses a char * pointer called "offset" in my code, which acts as an l-value for a (char *) cast of the containing struct as r-value. This trivially internally-flattens the struct as an array of char's (bytes - sizeof(1) ). Then the inner-most loop scans, from MSB to LSB of each individual byte in the struct internal array, and does an AND mask against the bit (from bit 7 to bit 0), and if it's a 1, prints 1, or if a 0 ,prints 0.
+	As my system is little-endian, the LSByte is printed as the first row, and the MSByte printed as the 4th row, but each row, each byte, is printed with the MSB printed left-most. This obviously means that the left-most bit of the 4th row is the sign bit, for signed r-values.
+	
+*/
+
+	char * IEEE_readFloat( float f );
+	char * IEEE_convertFloatString2BigEndian( char * str );
+	
+	
 	typedef struct IEEE754	{
 		
 		char * (*readFloat)( float f );
@@ -21,7 +32,48 @@
 
 	} IEEE754;
 
+	typedef struct IEEE654_Float	{
+		
+		int significand:24;
+		
+		int sign:1;
+		
+		int exponent:7;
+		
+	} IEEE654_Float;
+	
+	
+	
+	struct IEEE654_Float * IEEE_writeFloatStruct( float * f )	{
+		
+		struct IEEE654_Float * a = malloc( sizeof(IEEE654_Float) );
+		
+		char * i = (char *)a;
+		
+		char * k = (char *)f;
+		
+		for( int z=0; z<4; z++ )
+			i[z] = k[z];
+		
+		return a;
 
+	}
+	
+
+	
+	float IEEE_readFloatStruct( struct IEEE654_Float* f )	{
+
+		float a;
+		
+		char * i = (char *)&a;
+		
+		char * k = (char *)f;
+		
+		for( int z=0; z<4; z++ )
+			i[z] = k[z];
+		
+		return a;
+	}		
 
 	char * IEEE_convertDoubleString2BigEndian( char * str )	{
 		
@@ -219,9 +271,9 @@
 		char * mem = (char *)dest;
 		char bitmask;
 		
+		int offset = 0;
 		for( int i=0; i<4; i++ )	{
 
-			int offset = 0;
 			bitmask = 0;
 
 			for( int k=0; k<8; k++ )
