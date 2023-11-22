@@ -67,9 +67,10 @@ void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes );
 int str2int(char *input);
 char * int2str(int v);
 
-
 // BASE CONVERSION FNCS
-char * BIN_2_DEC(char * bin)	{
+char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (decimal) string.
+
+*/
 
 	AP dec = new_ap( strlen(bin)+1, 0 );
 	AP mult = new_ap( strlen(bin)+1, 0 );
@@ -105,9 +106,7 @@ char * BIN_2_DEC(char * bin)	{
 	return result;
 }
 
-char * DEC_2_BIN(AP input, int packed)	{ 
-
-/** This function takes a decimal AP Integer, and returns a char * binary-format string.
+char * DEC_2_BIN(AP input, int packed)	{  /** This function takes a decimal (base10) Integer, and returns a binary (base2) string.
 Does not assume string-length-boundaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
 It is, however, a method for converting Dec->Bin.
 Param "int packed" is a flag to determine if the returned binary string should be rounded in length to a multiple of 8.
@@ -916,59 +915,13 @@ int str2int(char *input)	{
 	return result;
 }
 
-
-// EXTRA FNCS
-void print_ASCII(char start, char end)	{
+inline char * int2str(int v)	{
 	
-	if( (start<32 || end<32) )	{
-		
-		printf("A scurrilous attempt was made to print the non-printable ascii characters below codepoint 32. Or even those new-fangled extended-ascii characters above codepoint 127. This is an outrage, and the function is immediately returning!");
-		return;
-	}
+	char * str = (char *)malloc(32);
 	
-	if( start>end )	{
+	sprintf(str, "%d", v); // itoa()
 	
-		char temp;
-		temp = start;
-		start = end;
-		end = temp;
-	}
-	
-	for( signed short int i=start; ; i+=5 )	{
-		
-		if( i>end )
-			i = end;
-		
-		char j=(char)i;
-		signed int k = (end-i);
-		
-		if( k>4 )
-			k=4;
-		
-		switch(k)
-		{
-			case 4:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
-			case 3:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
-			case 2:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
-			case 1:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
-			case 0:
-				printf("[%d]:=(%c)", j, j);
-			default:
-				NL;
-			break;
-		}
-		
-		if(i==end)
-			return;
-	}
+	return str;
 }
 
 

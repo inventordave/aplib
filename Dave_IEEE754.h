@@ -51,7 +51,7 @@ char * IEEE_convertFloatString2BigEndian( char * str );
 // CORE FNCS
 struct IEEE754_Float * IEEE_writeFloatStruct( float * f )	{
 	
-	struct IEEE754_Float * a = malloc( sizeof(IEEE754_Float) );
+	struct IEEE754_Float * a = (struct IEEE754_Float *)malloc( sizeof(IEEE754_Float) );
 	
 	char * i = (char *)a;
 	
@@ -207,7 +207,7 @@ char * IEEE_readFloat( float f )	{
 
 	} container;
 	
-	struct container * tc = malloc( sizeof(float) ); // 4 bytes for the float. Change to sizeof(double), which is 8, for a double.
+	struct container * tc = (struct container *)malloc( sizeof(float) ); // 4 bytes for the float. Change to sizeof(double), which is 8, for a double.
 	
 	tc->f = f;
 	
