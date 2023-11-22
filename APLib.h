@@ -77,7 +77,11 @@ AP EXP(AP a, AP b);
 
 char * DEC_2_BIN(AP input, int packed);
 char * BIN_2_DEC(char * bin);
+
+int DIV_BY_2_PRINT_ROWS = 1;
+
 AP DIV_BY_2(AP a);
+
 int _2kMax(AP input);
 int _2kMin(AP input);
 
@@ -131,6 +135,20 @@ AP DIV_BY_2(AP a)	{
 	
 	a.major[i] = '\0'; //NULL
 	
+	int len = strlen( a.major );
+	for( i=0; i<len; i++ )
+		if( a.major[i]=='0' )	{
+			
+			++a.major;
+			--len;
+			--i;
+		}
+		else
+			break;
+
+	if( a.major[0]=='\0' )
+		--a.major;
+	
 	return a;
 }
 
@@ -173,7 +191,7 @@ char * BIN_2_DEC(char * bin)	{
 
 
 // This function takes a decimal AP Integer, and returns a char * binary-format string.
-// Does not assume string-length-binaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
+// Does not assume string-length-boundaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
 // It is, however, a method for converting Dec->Bin.
 // Param "int packed" is a flag to determine if the returned binary string should be rounded in length to a multiple of 8.
 // In other words, 127 would be "01111111" instead of "1111111". An argument of 0 means "do not round", a non-0 value means
@@ -191,6 +209,9 @@ char * DEC_2_BIN(AP input, int packed)	{
 	while ( flag )	{
 		
 		check=DIV_BY_2(check);
+		if( DIV_BY_2_PRINT_ROWS==1 )
+			printf( "\t%c%s\n", check.sign, check.major );
+			
 		++length;
 		
 		if( cmp(&check,&t)<= 0 )
@@ -339,16 +360,28 @@ int _2kMax(AP input)	{
 	
 	int len_bin_string = strlen(bin_string);
 	
-	if( bin_string[0]=='1' ) // only necessary for bit-strings with leading '0's, which is not always true for return values of DEC_2_BIN()
-	for( int i=1; i < len_bin_string; i++ )	{
-		
-		if( bin_string[i]=='1' )	{
+	int i = 0;
+	loop:
+	if( bin_string[i]=='1' )	{
+		// only necessary for bit-strings with leading '0's, which is not always true for return values of DEC_2_BIN()
+		int k = i;
+		for( ++i; i < len_bin_string; i++ )	{
 			
-			return len_bin_string;
+			if( bin_string[i]=='1' )	{
+				
+				return len_bin_string - k;
+			}
 		}
+		
+		return len_bin_string - k - 1;
 	}
-
-	return len_bin_string-1;
+	else	{
+	
+		++i;
+		goto loop;
+	}
+	
+	return 0;
 }
 
 int _2kMin(AP input)	{

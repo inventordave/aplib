@@ -7,25 +7,197 @@
 
 #define PRINT_LINE printf( "---------------------------\n" );
 
+// Bins for inconvenient return results.
+int dummy_int;
+
+
 // FUNCTION DECLS
 void test(void);
+int basicTest(int argc, char **argv);
+
 void fs_test1(void);
 void q_test(float);
+void testADD(void);
+
 int main2(int argc, char **argv);
 int main3(int argc, char **argv);
 
+int test2kMax(AP input)	{
+	
+	DIV_BY_2_PRINT_ROWS = 0;
+	int a = _2kMax(input);
+	DIV_BY_2_PRINT_ROWS = 1;
+	return a;
+}
+
+
 int main(int argc, char **argv)	{
+	
+	dummy_int = basicTest(argc, argv);
+	NL;
+	PRINT_LINE;
+	
+	char * test_num;
+	AP input = new_ap( 256, 0 );
+	
+	if( argc > 3 )
+		test_num = strdup( argv[3] );
+	else
+		test_num = strdup( "17011979" );
+	
+	if( test_num[0]=='+' )	{
+	
+		input.sign = '+';
+		++test_num;
+	}
+	else if( test_num[0]=='-' )	{
+		
+		input.sign = '-';
+		++test_num;
+	}
+	
+	input.major = strdup( test_num );
+	
+	int packed = 1;
+	char * str = DEC_2_BIN(input, packed);
+	
+	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.major, str );
+	NL;
+	PRINT_LINE;
+	
+	
+	dummy_int = test2kMax(input);
+
+	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.major, dummy_int );
+	NL;
+	PRINT_LINE;
+	
+	
+	return 0;
 	
 	test();
 	NL;
 	PRINT_LINE;
 	
-	int a = main2(argc, argv);
+	dummy_int = main2(argc, argv);
 	NL;
 	PRINT_LINE
+	
 	fs_test1();
+	NL;
+	PRINT_LINE;
+	
+	testADD();
+	NL;
+	PRINT_LINE;
+	
 	
 	return 0;
+}
+
+int basicTest(int argc, char **argv)	{
+
+	if( argc < 3 )	{
+		
+		printf("Please pass 2 (possibly signed) integers on the cmd-line, and invoke the program again. Exiting...\n");
+		exit(0);
+	}
+	
+	NL;
+	
+	AP A, B, C;
+	A = new_ap( 10, 0 );
+	B = new_ap( 10, 0 );
+	
+	// Arg A
+	if( argv[1][0] == '-' )	{
+		
+		A.sign = '-';
+		++argv[1];
+		A.major = strdup(argv[1]);
+	}
+	else if( argv[1][0] == '+' )	{
+
+		A.sign = '+';
+		++argv[1];
+		A.major = strdup(argv[1]);
+		
+	}
+	else	{
+		
+		A.major = strdup(argv[1]);
+		A.sign = '+';
+	}
+	
+	// Arg B
+	if( argv[2][0] == '-' )	{
+		
+		B.sign = '-';
+		++argv[2];
+		B.major = strdup(argv[2]);
+	}
+	else if( argv[2][0] == '+' )	{
+
+		B.sign = '+';
+		++argv[2];
+		B.major = strdup(argv[2]);
+		
+	}
+	else	{
+			
+		B.sign = '+';
+		B.major = strdup(argv[2]);
+	}
+	
+	printf( "Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major );
+	
+	NL;
+	
+	// ADD
+	C = ADD(A, B);
+	printf( "%c%s ADD %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	
+	NL;
+	
+	// SUB
+	C = SUB(A, B);
+	printf( "%c%s SUB %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	
+	NL;
+
+	// MUL
+	C = MUL(A, B);
+	printf( "%c%s MUL %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	
+	NL;
+	
+	// EXP
+	printf( "The EXP operator may take a while with a larger exponent. Please be patient...\n" );
+	C = EXP(A, B);
+	if( C.sign=='-' )
+		B.sign='+';
+	
+	
+	printf( "%c%s EXP %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	
+	printf( "\nCompleted.\n" );
+	
+	return 0;
+}
+
+void testADD()	{
+	
+	AP a = new_ap( 10, 0 );
+	AP b = new_ap( 10, 0 );
+	
+	a.major = strdup( "222222" );
+	b.major = strdup( "1024" );
+	
+	AP c = ADD(a, b);
+	
+	printf( "%s ADD %s = %s\n", a.major, b.major, c.major );
+	
+	return;
 }
 
 void test()	{
