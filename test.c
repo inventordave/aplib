@@ -1,42 +1,58 @@
+// TEST.C
+
+/** INFORMATIVE SECTION
+	This is the test driver for APLib and Dave's IEEE754-Lib. To account for regression issues, all tests run every time "test" is invoked. Thus, if any new features break historical correctness, thus any of the tests, it will become apparent from the test subroutine output.
+*/
+
+
+// STDLIB INC'S
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
 #include <error.h>
 
+// LIB INC'S
 #include "Dave_IEEE754.h"
+#include "APlib.h"
 
+
+// STATIC DEFS
 #define PRINT_LINE printf( "---------------------------\n" );
 
-// Bins for inconvenient return results.
+
+// BINS
 int dummy_int;
 
 
-// FUNCTION DECLS
-void test(void);
-int basicTest(int argc, char **argv);
+// HELPER FNCS
+void pause()	{
 
-void fs_test1(void);
-void q_test(float);
-void testADD(void);
-
-int main2(int argc, char **argv);
-int main3(int argc, char **argv);
-
-int test2kMax(AP input)	{
-	
-	DIV_BY_2_PRINT_ROWS = 0;
-	int a = _2kMax(input);
-	DIV_BY_2_PRINT_ROWS = 1;
-	return a;
+	getchar();
+	return;
 }
 
 
+// TEST FUNCTION DECLS
+void test(void);
+int basicTest(int argc, char **argv);
+void fs_test1(void);
+void q_test(float);
+void testADD(void);
+int readFloatTest(int argc, char **argv);
+int writeFloatTest(int argc, char **argv);
+int test2kMax(AP input);
+
+
+// MAIN() ENTRYPOINT
 int main(int argc, char **argv)	{
 	
+	// TEST 1
 	dummy_int = basicTest(argc, argv);
 	NL;
 	PRINT_LINE;
+	pause();
 	
+	// TEST 2
 	char * test_num;
 	AP input = new_ap( 256, 0 );
 	
@@ -60,39 +76,56 @@ int main(int argc, char **argv)	{
 	
 	int packed = 1;
 	char * str = DEC_2_BIN(input, packed);
-	
 	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.major, str );
 	NL;
 	PRINT_LINE;
+	pause();
 	
-	
+	// TEST 3
 	dummy_int = test2kMax(input);
-
 	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.major, dummy_int );
 	NL;
 	PRINT_LINE;
+	pause();
 	
-	
-	return 0;
-	
+	// TEST 4
 	test();
 	NL;
 	PRINT_LINE;
+	pause();
 	
-	dummy_int = main2(argc, argv);
+	// TEST 5
+	dummy_int = readFloatTest(argc, argv);
 	NL;
-	PRINT_LINE
+	PRINT_LINE;
+	pause();
 	
+	// TEST 6
 	fs_test1();
 	NL;
 	PRINT_LINE;
+	pause();
 	
+	// TEST 7
 	testADD();
 	NL;
 	PRINT_LINE;
+	pause();
 	
 	
+	// TESTS COMPLETE.
+	printf( "End of Tests. Exiting.\n" );
 	return 0;
+}
+
+
+// TEST FNCS
+int test2kMax(AP input)	{
+	
+	DIV_BY_2_PRINT_ROWS = 0;
+	int a = _2kMax(input);
+	DIV_BY_2_PRINT_ROWS = 1;
+	return a;
 }
 
 int basicTest(int argc, char **argv)	{
@@ -220,8 +253,8 @@ void test()	{
 
 void fs_test1()	{
 	
-	// This test function is to test construction and access to struct "IEEE654_Float"
-	struct IEEE654_Float * a;
+	// This test function is to test construction and access to struct "IEEE754_Float"
+	struct IEEE754_Float * a;
 	
 	float f = -12.12;
 	
@@ -237,7 +270,7 @@ void fs_test1()	{
 	else
 		printf( "The sign bit can be accessed and has the correct value.\n" );
 	
-	printf( "struct IEEE654_Float.exponent = %d\n", a->exponent );
+	printf( "struct IEEE754_Float.exponent = %d\n", a->exponent );
 	
 	
 	free( a );
@@ -254,7 +287,7 @@ void fs_test1()	{
 	else
 		printf( "The sign bit can be accessed and has the correct value.\n" );
 
-	printf( "struct IEEE654_Float.exponent = %d\n", a->exponent );
+	printf( "struct IEEE754_Float.exponent = %d\n", a->exponent );
 	
 	assert( a->exponent < 128 );
 	
@@ -281,7 +314,7 @@ void q_test( float f )	{
 	printf( "ff := %f\n", ff );
 	
 
-	struct IEEE654_Float* f2 = IEEE_writeFloatStruct( &f );
+	struct IEEE754_Float* f2 = IEEE_writeFloatStruct( &f );
 	float _f = IEEE_readFloatStruct( f2 );
 	printf( "_f = %f\n", _f );
 	
@@ -290,8 +323,7 @@ void q_test( float f )	{
 	return;
 }
 
-
-int main3(int argc, char **argv)	{
+int writeFloatTest(int argc, char **argv)	{
 	
 	struct IEEE754 * lib = initIEEE754();
 	
@@ -308,7 +340,7 @@ int main3(int argc, char **argv)	{
 	return 0;
 }
 
-int main2(int argc, char **argv)	{
+int readFloatTest(int argc, char **argv)	{
 
 	struct IEEE754 * lib = initIEEE754();
 

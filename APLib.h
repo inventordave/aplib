@@ -3,59 +3,36 @@
 #ifndef DAVE_APLIB
 #define DAVE_APLIB
 
-// Make this any number of bytes you want. The new_ap(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
-#define MAX_LENGTH_AP_PART 1023
-// ((2^8)^8)^4 is probably the magnitude of MAX_VALUE (long long int) on 64-bit Intel-ISA-compatible architectures
-// or, 2^(8*8*4), or, 2^256 (64*4)
+// STDLIB INC'S
+#include <stdlib.h>
+#include <stdio.h>
+#include <string.h>
+#include <math.h>
+#include <assert.h>
 
-#define NEW_LINE printf("\n")
+// SUGAR
+#define NEW_LINE printf("\n");
 #define NL NEW_LINE
 
-#define ollie unsigned long long int
-typedef struct	{
+// STATIC DEFS
+#define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The new_ap(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
+
+// CORE DATA STRUCTURE
+typedef struct	AP {
 
 	char * major;
 	char * minor;
 	char sign;
 	
-	ollie length;
-	ollie major_length;
-	ollie minor_length;
+	int length;
+	int major_length;
+	int minor_length;
 	
 } AP;
 
-void free_ap(AP a)	{
-	
-	free( a.major );
-	free( a.minor );
-}
 
-int MSD(int num);
-void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes );
-
-typedef struct	{
-	
-	AP n;
-	AP m;
-	
-	char sign;
-	
-} N_M;
-
-#define EXTEND_STRING 		\
-		char * temp = malloc( strlen(c.major) + 1 + l); \
-		strcpy( temp, c.major ); \
-		\
-		for(int x=0; x < l; x++)	{	\
-			\
-			strcat( temp, "0");	\
-		}	\
-		\
-		free( c.major ); \
-		c.major = temp;
-
-
-AP new_ap(ollie maj, ollie min);
+// FNC PROTOTYPES
+AP new_ap(int maj, int min);
 void clear(AP * a);
 AP copy(AP * a);
 void flip_sign(AP * a);
@@ -72,87 +49,26 @@ AP SUB(AP a, AP b);
 
 AP MUL(AP a, AP b);
 AP DIV(AP a, AP b);
+int DIV_BY_2_PRINT_ROWS = 1;
+AP DIV_BY_2(AP a);
 
 AP EXP(AP a, AP b);
 
 char * DEC_2_BIN(AP input, int packed);
 char * BIN_2_DEC(char * bin);
 
-int DIV_BY_2_PRINT_ROWS = 1;
-
-AP DIV_BY_2(AP a);
-
 int _2kMax(AP input);
 int _2kMin(AP input);
 
-int str2int(char *input);
+void free_ap(AP a);
+int MSD(int num);
+void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes );
 
+int str2int(char *input);
 char * int2str(int v);
 
 
-
-AP DIV_BY_2(AP a)	{
-	
-	int overflow = 0;
-	int value;
-	int i;
-	for( i=0; i<strlen(a.major); i++ )	{
-		
-		
-		loop:
-		
-		value = a.major[i] - '0';
-		
-		if( value>9	)	{
-			// roll over the remainder, ie value=10-value
-			
-			int value2 = value;
-			
-			while( value2 >= 0 )
-				value2 -= 10;
-			
-			value2 += 10;
-
-			a.major[i] = '0' + value2;
-			a.major[i+1] += (value % 10);	
-		}
-
-		value = a.major[i] - '0';
-		
-		int result = floor( value/2 );
-		result += overflow;
-		a.major[i] = result + '0';
-		
-		if( a.major[i] - '0' >= 10 )
-			goto loop;
-		
-		if( value%2!= 0 )
-			overflow = 5;
-		else
-			overflow = 0;
-
-	}
-	
-	a.major[i] = '\0'; //NULL
-	
-	int len = strlen( a.major );
-	for( i=0; i<len; i++ )
-		if( a.major[i]=='0' )	{
-			
-			++a.major;
-			--len;
-			--i;
-		}
-		else
-			break;
-
-	if( a.major[0]=='\0' )
-		--a.major;
-	
-	return a;
-}
-
-
+// BASE CONVERSION FNCS
 char * BIN_2_DEC(char * bin)	{
 
 	AP dec = new_ap( strlen(bin)+1, 0 );
@@ -189,6 +105,7 @@ char * BIN_2_DEC(char * bin)	{
 	return result;
 }
 
+char * DEC_2_BIN(AP input, int packed)	{ 
 
 // This function takes a decimal AP Integer, and returns a char * binary-format string.
 // Does not assume string-length-boundaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
@@ -196,7 +113,6 @@ char * BIN_2_DEC(char * bin)	{
 // Param "int packed" is a flag to determine if the returned binary string should be rounded in length to a multiple of 8.
 // In other words, 127 would be "01111111" instead of "1111111". An argument of 0 means "do not round", a non-0 value means
 // "round up string-length to multiple of 8".
-char * DEC_2_BIN(AP input, int packed)	{ 
 
 	int length = 0;
 	
@@ -354,6 +270,7 @@ char * DEC_2_BIN(AP input, int packed)	{
 }
 
 
+// 2k FNCS
 int _2kMax(AP input)	{
 	
 	char * bin_string = DEC_2_BIN(input, 0);
@@ -402,46 +319,7 @@ int _2kMin(AP input)	{
 }
 
 
-AP EXP(AP a, AP b)	{
-	
-	// if b (exp) is negative, flip sign.
-	if( sign(&b)=='-' )	{
-		
-		b.sign='+';
-		printf("\nExponent is negative. Converting to positive (%c%s)\n", b.sign, b.major );
-	}
-	
-	// a * a, b-1 times
-	// if b=0, result = 1
-	AP c = new_ap(1, 0);
-	c.major = strdup( "1" );
-	
-	AP temp = new_ap(1,0);
-	temp.major = strdup( "0" );
-	
-	if( cmp(&b,&temp)==0 )	{
-		
-		return c;
-	}
-	else	{
-		
-		AP d = SUB(b, c);
-		AP e = new_ap(1,0);
-		e.major = strdup( "0" );
-		AP result = copy(&a);
-		while( cmp(&d, &e)==+1 )	{
-			
-			result = MUL(result, a);
-			d = SUB(d,c);
-		}
-		
-		if( sign(&a)=='-' )
-			result.sign='-';
-		
-		return result;
-	}
-}
-
+// CORE ARITHMETIC OPERATORS
 AP ADD(AP a, AP b)	{
 	
 	int flag = 0;
@@ -663,31 +541,245 @@ AP MUL(AP a, AP b)  {
 }
 
 AP DIV(AP a, AP b)  {
-  
-/**
 
-	a[i-end] = a[i] + '0' * end
+	return new_ap(1, 0);
+}
+
+AP DIV_BY_2(AP a)	{
 	
-	for( b=0; b<strlen(b); b++ )
+	int overflow = 0;
+	int value;
+	int i;
+	for( i=0; i<strlen(a.major); i++ )	{
 		
+		loop:
+		
+		value = a.major[i] - '0';
+		
+		if( value>9	)	{
+			// roll over the remainder, ie value=10-value
+			
+			int value2 = value;
+			
+			while( value2 >= 0 )
+				value2 -= 10;
+			
+			value2 += 10;
 
+			a.major[i] = '0' + value2;
+			a.major[i+1] += (value % 10);	
+		}
 
-a = 1242
-b = 26
+		value = a.major[i] - '0';
+		
+		int result = floor( value/2 );
+		result += overflow;
+		a.major[i] = result + '0';
+		
+		if( a.major[i] - '0' >= 10 )
+			goto loop;
+		
+		if( value%2!= 0 )
+			overflow = 5;
+		else
+			overflow = 0;
 
-47.769....
+	}
+	
+	a.major[i] = '\0'; //NULL
+	
+	int len = strlen( a.major );
+	for( i=0; i<len; i++ )
+		if( a.major[i]=='0' )	{
+			
+			++a.major;
+			--len;
+			--i;
+		}
+		else
+			break;
 
+	if( a.major[0]=='\0' )
+		--a.major;
+	
+	return a;
+}
 
-
-
-
-*/
-
- return new_ap(1, 0);
-
+AP EXP(AP a, AP b)	{
+	
+	// if b (exp) is negative, flip sign.
+	if( sign(&b)=='-' )	{
+		
+		b.sign='+';
+		printf("\nExponent is negative. Converting to positive (%c%s)\n", b.sign, b.major );
+	}
+	
+	// a * a, b-1 times
+	// if b=0, result = 1
+	AP c = new_ap(1, 0);
+	c.major = strdup( "1" );
+	
+	AP temp = new_ap(1,0);
+	temp.major = strdup( "0" );
+	
+	if( cmp(&b,&temp)==0 )	{
+		
+		return c;
+	}
+	else	{
+		
+		AP d = SUB(b, c);
+		AP e = new_ap(1,0);
+		e.major = strdup( "0" );
+		AP result = copy(&a);
+		while( cmp(&d, &e)==+1 )	{
+			
+			result = MUL(result, a);
+			d = SUB(d,c);
+		}
+		
+		if( sign(&a)=='-' )
+			result.sign='-';
+		
+		return result;
+	}
 }
 
 
+// CREATE, DUPLICATE, RESET & FREE AP TYPE FNCS
+AP new_ap(int maj, int min)	{
+
+	AP result;
+	result.major = (char *)malloc(maj+1);
+	result.minor = (char *)malloc(min+1);
+	
+	if( (result.major==NULL)||(result.minor==NULL) )	{
+		
+		printf("AP new_ap(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
+		exit(0);
+	}
+	
+	int i;
+	
+	for( i=0; i<maj; i++)
+		result.major[i] = '0';
+	
+	result.major[maj] = '\0';
+	
+	for( i=0; i<min; i++)
+		result.minor[i] = '0';
+	
+	result.minor[min] = '\0';
+
+	result.length = maj + min;
+	result.major_length = maj;
+	result.minor_length = min;
+	
+	result.sign = '+';
+	return result;
+}
+
+AP copy(AP * a)	{
+	
+	AP _ = new_ap(strlen(a->major),strlen(a->minor));
+	
+	strcpy(_.major, a->major);
+	strcpy(_.minor, a->minor);
+	
+	_.sign = a->sign;
+	
+	_.length = a->length;
+	_.major_length = a->major_length;
+	_.minor_length = a->minor_length;
+	
+	return _;
+}
+
+void clear(AP * a)	{
+	
+	int i;
+	for( i=0; i< (int)strlen(a->major); i++)
+		a->major[i] = '0';
+	
+	a->major[i] = '\0';
+	
+	for( i=0; i< (int)strlen(a->minor); i++)
+		a->minor[i] = '0';
+	
+	a->minor[i] = '\0';
+	
+	a->sign = '+';
+}
+
+void free_ap(AP a)	{
+	
+	free( a.major );
+	free( a.minor );
+}		
+
+
+// SIGN FNCS
+char sign(AP * a)	{
+
+	return a->sign;
+}
+
+void set_sign(AP * a, char sym)	{
+
+	if( sym!='+' && sym!='-' )
+		sym='+';
+	
+	a->sign = sym;
+}
+
+void flip_sign(AP * a)	{
+
+	if( a->sign == '-' )
+		a->sign = '+';
+	else
+		a->sign = '-';
+}
+
+char tt(AP a, AP b)	{
+	
+	signed int ag = cmp(&a,&b);
+	
+	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
+		return '+';
+	
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='+') )
+		return '+';
+	
+	if( (ag==-1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+	
+	if( (ag==-1) && (a.sign=='+') && (b.sign=='-') )
+		return '-';
+	
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='-') )
+		return '-';
+
+	if( (ag==+1) && (a.sign=='+') && (b.sign=='-') )
+		return '+';
+	
+	if( (ag==+1) && (a.sign=='-') && (b.sign=='+') )
+		return '-';
+	
+	return '+';
+	
+}
+
+char tt_mul(AP * a, AP * b)	{
+
+	if( sign(a)!=sign(b) )
+		return '-';
+	
+	return '+';
+}
+
+
+// GENERAL HELPER FNCS
 signed short int cmp(AP * a, AP * b)	{
 	
 	
@@ -697,8 +789,8 @@ signed short int cmp(AP * a, AP * b)	{
 	while( *(b->major)=='0' )
 		++b->major;
 	
-	ollie len_a = strlen(a->major);
-	ollie len_b = strlen(b->major);
+	int len_a = strlen(a->major);
+	int len_b = strlen(b->major);
 	
 	if( len_a<len_b )
 		return -1;
@@ -706,7 +798,7 @@ signed short int cmp(AP * a, AP * b)	{
 	if( len_a>len_b )
 		return +1;
 	
-	for( ollie test=0; test<len_a; test++ )	{
+	for( int test=0; test<len_a; test++ )	{
 		
 		if( a->major[test]>b->major[test] )
 			return +1;
@@ -732,7 +824,7 @@ signed int overflow(AP * c, int result, signed int k) {
     
     temp[0] = '0';
     
-    ollie x;
+    int x;
     for(x = 0; x < strlen(c->major); x++) {
       
       temp[x+1] = c->major[x];
@@ -781,170 +873,6 @@ signed int overflow(AP * c, int result, signed int k) {
 
 }
 
-
-
-AP new_ap(ollie maj, ollie min)	{
-
-	AP result;
-	result.major = (char *)malloc(maj+1);
-	result.minor = (char *)malloc(min+1);
-	
-	if( (result.major==NULL)||(result.minor==NULL) )	{
-		
-		printf("AP new_ap(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
-		exit(0);
-	}
-	
-	ollie i;
-	
-	for( i=0; i<maj; i++)
-		result.major[i] = '0';
-	
-	result.major[maj] = '\0';
-	
-	for( i=0; i<min; i++)
-		result.minor[i] = '0';
-	
-	result.minor[min] = '\0';
-
-	result.length = maj + min;
-	result.major_length = maj;
-	result.minor_length = min;
-	
-	result.sign = '+';
-	return result;
-}
-
-
-AP copy(AP * a)	{
-	
-	AP _ = new_ap(strlen(a->major),strlen(a->minor));
-	
-	strcpy(_.major, a->major);
-	strcpy(_.minor, a->minor);
-	
-	_.sign = a->sign;
-	
-	_.length = a->length;
-	_.major_length = a->major_length;
-	_.minor_length = a->minor_length;
-	
-	return _;
-}
-
-void clear(AP * a)	{
-	
-	ollie i;
-	for( i=0; i< (ollie)strlen(a->major); i++)
-		a->major[i] = '0';
-	
-	a->major[i] = '\0';
-	
-	for( i=0; i< (ollie)strlen(a->minor); i++)
-		a->minor[i] = '0';
-	
-	a->minor[i] = '\0';
-	
-	a->sign = '+';
-}
-		
-
-char sign(AP * a)	{
-
-	return a->sign;
-}
-
-void set_sign(AP * a, char sym)	{
-
-	if( sym!='+' && sym!='-' )
-		sym='+';
-	
-	a->sign = sym;
-}
-
-void flip_sign(AP * a)	{
-
-	if( a->sign == '-' )
-		a->sign = '+';
-	else
-		a->sign = '-';
-}
-
-
-char tt(AP a, AP b)	{
-	
-	signed int ag = cmp(&a,&b);
-	
-	if( (sign(&a)=='+') && (sign(&b)=='+') ) // x2, a < b, a > b
-		return '+';
-	
-	if( (ag==-1) && (a.sign=='-') && (b.sign=='+') )
-		return '+';
-	
-	if( (ag==-1) && (a.sign=='-') && (b.sign=='-') )
-		return '-';
-	
-	if( (ag==-1) && (a.sign=='+') && (b.sign=='-') )
-		return '-';
-	
-	
-	if( (ag==+1) && (a.sign=='-') && (b.sign=='-') )
-		return '-';
-
-	if( (ag==+1) && (a.sign=='+') && (b.sign=='-') )
-		return '+';
-	
-	if( (ag==+1) && (a.sign=='-') && (b.sign=='+') )
-		return '-';
-	
-	return '+';
-	
-}
-
-char tt_mul(AP * a, AP * b)	{
-
-	if( sign(a)!=sign(b) )
-		return '-';
-	
-	return '+';
-}
-
-
-int str2int(char *input)	{
-	
-	int len = strlen(input), i = 0, result = 0;
-	
-	if (input[0] == '-')
-		i = 1;
-
-	for(; i<len; i++)
-		result = result * 10 + ( input[i] - '0' );
-	
-	if (input[0] == '-')
-		result = 0 - result;
-	
-	return result;
-}
-
-short int maximum(short int a, short int b)	{
-
-	if( b>a )
-		return b;
-	
-	return a;
-}
-
-short int minimum(short int a, short int b)	{
-	
-	if( b<a )
-		return b;
-	
-	return a;
-}
-
-
-
-
 int MSD(int num)	{
 	
   short int rd = num % 10;
@@ -974,7 +902,24 @@ void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes )	{
 	}
 }
 
+int str2int(char *input)	{
+	
+	int len = strlen(input), i = 0, result = 0;
+	
+	if (input[0] == '-')
+		i = 1;
 
+	for(; i<len; i++)
+		result = result * 10 + ( input[i] - '0' );
+	
+	if (input[0] == '-')
+		result = 0 - result;
+	
+	return result;
+}
+
+
+// EXTRA FNCS
 void print_ASCII(char start, char end)	{
 	
 	if( (start<32 || end<32) )	{
@@ -1028,4 +973,6 @@ void print_ASCII(char start, char end)	{
 	}
 }
 
+
 #endif
+
