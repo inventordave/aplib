@@ -1,16 +1,17 @@
 #ifndef DAVE_IEEE754
 #define DAVE_IEEE754
 
+// INFORMATIVE SECTION
+/** Here is a simple solution I cooked up for accessing the internal bit-representation of floats.
+As my system is little-endian, the LSByte is printed first, and the MSByte printed as the 4th subsequence. This obviously means that the left-most bit of the 4th subsequence (bits 24-31) is the sign bit, for signed r-values. There is a "convert string to big-endian" helper function to format the string properly for printing/screen output.
+*/
+
+
 // STDLIB INC'S
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "APlib.h"
-
-// INFORMATIVE SECTION
-/**
-Here is a simple solution I cooked up for accessing the internal bit-representation of floats. As my system is little-endian, the LSByte is printed first, and the MSByte printed as the 4th subsequence. This obviously means that the left-most bit of the 4th subsequence (bits 24-31) is the sign bit, for signed r-values. There is a "convert string to big-endian" helper function to format the string properly for printing/screen output.
-*/
 
 
 // CORE DATA STRUCTURES

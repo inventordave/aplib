@@ -43,7 +43,7 @@ The APlib/IEEE754 library is not finished yet, but in general the functionality 
 CURRENT TO-DO:
 The next core arithmetic operator (function) to implement is DIV(a,b), which implements a/b (division). The method I am using is emulating the paper-based "long division" technique. I similarly implemented MUL(a,b) (a x b) by using the paper-based "multiply-per-digit-fused-add-rows" method we all know from school.
 
-I hope my coding of this library so far hasn't been too sh^t.
+I hope my coding of this library so far hasn't been too sh^t. Also in there are a smattering of lightweight but useful general helper functions. There is a skeleton implementation of a method for processing args/switches passed to your user program on the command-line. It's very simple, and you would need to use the skeleton function to guide you to code the specific if-blocks for checking for a specific potential arg/switch. Just look at "getOptions.c" for the general idea. Also in that TU is a general skeleton function for pre-processing input strings for validity/safety-checking. It's called "sanitizeStr(...)" and is very simple, checking an input c-string char-by-char for any invalid chars (as defined by you when you implement the concrete function), and responding if it finds one.
 
 Dave (Lee).
 
