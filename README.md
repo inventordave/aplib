@@ -3,17 +3,12 @@ An arbitrary-precision library.
 
 In development. Currently produces correct results for 2 signed integer inputs.
 
-To compile, type "make aplibc" on the command-line. Assumes you have GCC available.
+To compile, type "make test" on the command-line. Assumes you have GCC available.
 
 Invoke:
 
-aplibc %1 %2
+test %1 %2 %3
 
-To run regression tests (in other words, the sequence of test functions in chronological order), compile test.exe as such:
-
-make test
-
-Then simply run test.exe on the command-line. 
 
 
 4 functions so far:
