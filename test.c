@@ -15,8 +15,8 @@
 
 // LIB INC'S
 #include "Dave_IEEE754.h"
+#include "APlib.h"
 #include "APlib-output.h"
-
 #include "getOptions.h"
 
 
