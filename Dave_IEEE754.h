@@ -11,6 +11,9 @@ As my system is little-endian, the LSByte is printed first, and the MSByte print
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+
+
+// CUSTOM INC'S
 #include "APlib.h"
 
 
@@ -32,13 +35,14 @@ typedef struct IEEE754	{
 } IEEE754;
 
 typedef struct IEEE754_Float	{
+
+	int sign;
+	
+	int exponent;
+
 	// NOT COMPLETE!
-	int significand:24;
-	
-	int sign:1;
-	
-	int exponent:7;
-	
+	int significand;
+
 } IEEE754_Float;
 
 
@@ -53,15 +57,27 @@ struct IEEE754_Float * IEEE_writeFloatStruct( float * f )	{
 	
 	struct IEEE754_Float * a = (struct IEEE754_Float *)malloc( sizeof(IEEE754_Float) );
 	
-	char * i = (char *)a;
+	//char * i = (char *)a;
 	
 	char * k = (char *)f;
 	
-	for( int z=0; z<4; z++ )
-		i[z] = k[z];
+	a->sign = (int) ( (k[3] & 0b10000000 ) >> 7 );
+	a->exponent = (int) ((unsigned)k[3]) & 0b01111111;
+	
+	char * temp = (char *)malloc(25);
+	char * section = (char *)malloc(9);
+	
+	char * f_str = IEEE_readFloat( *f );
+	
+	// 24 bits
+	a->significand = (int) (str2int( IEEE_convertFloatString2BigEndian(f_str) /*k[2] . k[1] . k[0]*/) & 0b00000000111111111111111111111111);
+	
+	printf( "a->sign = %d\n", a->sign );
+	
+	free( temp );
+	free( section );
 	
 	return a;
-
 }
 
 float IEEE_readFloatStruct( struct IEEE754_Float* f )	{
@@ -73,7 +89,7 @@ float IEEE_readFloatStruct( struct IEEE754_Float* f )	{
 	char * k = (char *)f;
 	
 	for( int z=0; z<4; z++ )
-		i[z] = k[z];
+		i[3-z] = k[z];
 	
 	return a;
 }		

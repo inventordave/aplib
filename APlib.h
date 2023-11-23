@@ -10,6 +10,10 @@
 #include <math.h>
 #include <assert.h>
 
+
+// CUSTOM INC'S
+
+
 // SUGAR
 #define NEW_LINE printf("\n");
 #define NL NEW_LINE
@@ -17,7 +21,7 @@
 // STATIC DEFS
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The new_ap(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
-// CORE DATA STRUCTURE
+// CORE DATA STRUCTURES/TYPES
 typedef struct	AP {
 
 	char * major;
@@ -29,6 +33,35 @@ typedef struct	AP {
 	int minor_length;
 	
 } AP;
+
+typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
+
+typedef struct	APExp	{ // AP op AP
+
+	AP A;
+	AP B;
+
+	OPCODE _operator;
+
+} APExp;
+
+typedef struct APExpC	{ // (AP op AP) op (AP op AP)
+	
+	APExp A;
+	APExp B;
+	
+	OPCODE _operator;
+
+} APExpC;
+
+typedef struct APExpC_2	{ // (APExpC op APExpC)
+
+	APExpC A;
+	APExpC B;
+	
+	OPCODE _operator;
+	
+} APExpC_2;
 
 
 // FNC PROTOTYPES
@@ -49,10 +82,14 @@ AP SUB(AP a, AP b);
 
 AP MUL(AP a, AP b);
 AP DIV(AP a, AP b);
-int DIV_BY_2_PRINT_ROWS = 1;
+int DIV_BY_2_PRINT_ROWS = 0;
 AP DIV_BY_2(AP a);
 
 AP EXP(AP a, AP b);
+
+inline int lcm_test(int, int[], int[]);
+int LCM(int, int, int);
+int GCD(int a, int b, int lcm);
 
 char * DEC_2_BIN(AP input, int packed);
 char * BIN_2_DEC(char * bin);
@@ -106,7 +143,7 @@ char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (dec
 	return result;
 }
 
-char * DEC_2_BIN(AP input, int packed)	{  /** This function takes a decimal (base10) Integer, and returns a binary (base2) string.
+char * DEC_2_BIN(AP input, int packed)	{  /** This function takes a decimal (base10) AP Integer, and returns a binary (base2) string.
 Does not assume string-length-boundaries of byte-padding, i.e, an input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
 It is, however, a method for converting Dec->Bin.
 Param "int packed" is a flag to determine if the returned binary string should be rounded in length to a multiple of 8.
@@ -123,6 +160,7 @@ In other words, 127 would be "01111111" instead of "1111111". An argument of 0 m
 	while ( flag )	{
 		
 		check=DIV_BY_2(check);
+
 		if( DIV_BY_2_PRINT_ROWS==1 )
 			printf( "\t%c%s\n", check.sign, check.major );
 			
@@ -608,7 +646,7 @@ AP EXP(AP a, AP b)	{
 	if( sign(&b)=='-' )	{
 		
 		b.sign='+';
-		printf("\nExponent is negative. Converting to positive (%c%s)\n", b.sign, b.major );
+		printf("Exponent is negative. Converting to positive (%c%s)\n", b.sign, b.major );
 	}
 	
 	// a * a, b-1 times
@@ -640,6 +678,72 @@ AP EXP(AP a, AP b)	{
 		
 		return result;
 	}
+}
+
+
+// VARIOUS MATH FNCS
+int LCM(int a, int b, int flag)	{
+
+	signed int M1 = 0, M2 = 0;
+	#define MAX_ITER 4096
+	int R1[MAX_ITER] = {0}, R2[MAX_ITER] = {0};
+	int val = 1, inc = 0, match = 0;
+
+	if(flag)
+		val = 2;
+	
+	M1 = a; M2 = b;
+	
+	while (!match)	{
+		
+		if (inc >= MAX_ITER)	{
+			
+			printf("Overflow error: More than %d iterations required.\n", MAX_ITER);
+			exit(1);
+		}
+		
+		R1[inc] = (int)M1*val; R2[inc] = (int)M2*val;
+		
+		match = lcm_test(inc, R1, R2);
+		
+		++inc;
+		++val;
+	}
+	
+	//printf("The LCM for %d and %d is %d.\n", M1, M2, R1[inc-1]);
+
+	return R1[inc-1];
+}
+
+inline int lcm_test(int max, int R1[], int R2[])	{
+	
+	for (int a = 0; a <= max; a++)
+		for (int b = 0; b <= max; b++)
+			if (R1[a]==R2[b])
+				return 1;
+			
+	return 0;
+}
+
+int lcm_example(int argc, char **argv)	{
+	
+	int flagSet = 0;
+	
+	if((argc == 4) && (argv[3][0] == '-') && (argv[3][1] == 'n'))	{
+		
+		//printf("Flag set!\n");
+		flagSet = 1;
+	}
+	
+	int a = str2int(argv[1]);
+	int b = str2int(argv[2]);
+	
+	int lcm = LCM(a, b, flagSet);
+	int gcd = 1; // = GCD(a, b, lcm);
+	
+	printf( "lcm := (%d)\ngcd := (%d)\n", lcm, gcd );
+	
+	return 0;
 }
 
 

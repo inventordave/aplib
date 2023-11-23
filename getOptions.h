@@ -16,12 +16,12 @@
 // FNC PROTOTYPES
 signed int getOptions(int * argc, char ** argv);
 void rotate(int * argc, char * argv[]);
-void sanitizeStr(char * fn);
+void sanitizeStr(char * str);
 inline int seq(char *a, char *b);
 
 
 // EXAMPLE USAGE
-int _main(int argc, char **argv)	{
+int getopt_main(int argc, char **argv)	{
 	
 	int status = getOptions( &argc, argv );
 	
@@ -108,9 +108,11 @@ signed int getOptions(int * argc, char ** argv)	{
 				strcpy(ignoreList, argv[1]);
 				rotate(argc, argv); // remember for 2-part (key-value) cmd-line switches, must manually call rotate(), as it needs to be invoked twice, as it is removing 2 strings from **argv, not 1. rotate() is auto-invoked once.			}
 			
-			continue;
-		}
+				continue;
+			}
 
+		}
+		
 		status = -1;
 		break;
 	}
@@ -120,13 +122,11 @@ signed int getOptions(int * argc, char ** argv)	{
 
 
 // EXTRA FNCS
-void sanitizeStr(char * fn)	{ // General method for pre-processing of an input c-string (safety).
-
-	char invalid = '\0';
+void sanitizeStr(char * str)	{ // General method for pre-processing of an input c-string (safety).
 	
-	while((*fn) != '\0')	{
+	while((*str) != '\0')	{
 		
-		switch(*fn)	{
+		switch(*str)	{
 
 			case 92: // \ backslash
 			case 34: // " double-quote
@@ -137,21 +137,21 @@ void sanitizeStr(char * fn)	{ // General method for pre-processing of an input c
 			case 62: // > gt
 			case 63: // ? question-mark
 			case 124:// | pipe
-			
-				invalid = *fn;
-				printf( "Invalid char ('%c') (%d).\n", invalid, invalid );
+
+				// printf( "Invalid char ('%c') (%d).\n", *str, *str );
+				// Uncomment above line to see reporting to stdout of detected invalid chars in th einput string.
+				*str = '.'; // Arbitrary printable-char to replace invalid char with.
 				break;
 			
 			default:
-				//printf( "Char ok: '%c'\n", (*fn) );
+				//printf( "Char ok: '%c'\n", (*str) );
 				break;	
 		}
 		
-		++fn;
+		++str;
 	}
 }
 
-// EXTRA FNCS
 void print_ASCII(char start, char end)	{
 	
 	if( (start<32 || end<32) )	{
