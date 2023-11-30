@@ -16,17 +16,49 @@ Utilizes my repo "ColorConsole", currently located at https://github.com/invento
 
 // CUSTOM INC'S
 #include "APlib.h"
-#include "cc/ansivt2.h" // From https:://github.com/inventordave2/ColorConsole
+#include "ansivt2.h" // From https:://github.com/inventordave2/ColorConsole
 
 //ColorConsole object file (see it's repo) needs to be available to link to this file, and presumably a 3rd object file representing
 // your user program's entry-point (main function).
 
+/*
+DECIMAL/BINARY STRINGS (SIGN SYMBOL +/-)
 
+1 = BRIGHT_BLUE, 0 = BRIGHT_YELLOW (BINARY)
+SIGN: + = bright_green, - = bright_red
+DEC digits: BRIGHT_WHITE
+
+OPERATORS (ADD, SUB, ETC, +, -, *, /, ^) - BRIGHT_CYAN
+Program text output FG_BRIGHT_CYAN
+
+Test function output.
+
+NL: words, punctuation
+*/
+
+/**
+	extern char FG_BLACK[8];
+	extern char FG_RED[8];
+	extern char FG_GREEN[8];
+	extern char FG_YELLOW[8];
+	extern char FG_BLUE[8];
+	extern char FG_MAGENTA[8];
+	extern char FG_CYAN[8];
+	extern char FG_WHITE[8];
+
+	extern char FG_BRIGHT_BLACK[8];
+	extern char FG_BRIGHT_RED[8];
+	extern char FG_BRIGHT_GREEN[8];
+	extern char FG_BRIGHT_YELLOW[8];
+	extern char FG_BRIGHT_BLUE[8];
+	extern char FG_BRIGHT_MAGENTA[8];
+	extern char FG_BRIGHT_CYAN[8];
+	extern char FG_BRIGHT_WHITE[8];
+*/
 // DATA STRUCTURES/TYPES
 
 
 // FNC PROTOTYPES
-void print( char * format_string, ... );
 void setFGColor( int cc );
 void setBGColor( int cc );
 void setStyle( int sc ); // eg, +i, +b, -i, -b, and so on.
@@ -35,6 +67,14 @@ char * truncateAP( AP a );
 char * generateSVG( APExp exp );
 char * generateLatex_Exp( APExp exp );
 char * generateLatex_Number( AP a );
+
+char * formatSign(char sign);
+char * formatBinary(char * bin_string);
+char * formatAP(AP a);
+
+void normal();
+char * c(char * str, char * col);
+void print( char * str );
 
 #endif
 

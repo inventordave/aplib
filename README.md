@@ -52,6 +52,9 @@ I am also integrating my ANSI/VT lightweight colourization library into the APli
 I have a Bison/Flex sample program I wrote, which was a simple calculator, and skeleton expression evaluator. I also have (not on github) a term re-writer function, so if I had enough time in front of me, I could bring all these subsystems together and we would eventually have a pretty great arbitrary-precision suite of front-end and back-end components. I have even written my own Lexer and Parser (in Javascript), so a modified version of the C language ("C-" ?) that supported ap (therefore arbitrary-length) numerical values !and literals! might be a fun endgame.
 
 
+Tests have been ported to "tests.c". Included by "ap.c", the Test Program.
+
+
 I hope my coding of this library so far hasn't been too sh^t. Also in there are a smattering of lightweight but useful general helper functions. There is a skeleton implementation of a method for processing args/switches passed to your user program on the command-line. It's very simple, and you would need to use the skeleton function to guide you to code the specific if-blocks for checking for a specific potential arg/switch. Just look at "getOptions.c" for the general idea. Also in that TU is a general skeleton function for pre-processing input strings for validity/safety-checking. It's called "sanitizeStr(...)" and is very simple, checking an input c-string char-by-char for any invalid chars (as defined by you when you implement the concrete function), and responding if it finds one.
 
 Dave (Lee).
