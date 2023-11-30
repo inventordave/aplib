@@ -14,7 +14,7 @@ clean:
 
 
 
-# Below is copied from Werner Stroop's wregex library Makefile. I've embedded the required components in this "APlib" repo for internal regex functionality. A full snapshot of his repo can be found as one of "my" public repositories at https://github.com/inventordave2/wregex . Also, probably from Werner's own Github page.
+# Below is copied from Werner Stroop's wregex library Makefile. I've embedded the required components in this "APlib" repo for internal regex functionality. A full snapshot of his repo can be found as one of "my" public repositories at https://github.com/inventordave2/regex_w . Also, probably from Werner's own Github page.
 
 CC=gcc
 CFLAGS=-c -Wall
