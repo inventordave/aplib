@@ -633,9 +633,68 @@ AP MUL(AP a, AP b)  {
 	return c;
 }
 
+#define strlen strlen_
+
+ollie strlen_(char * str)	{ ollie i = 0; while( str[i++] != '\0' ) ; return i-1; }
+ollie LSD_OFFSET(char * a)	{
+
+	ollie f = 0;
+	int g = 0;
+
+	ollie i;
+	for( i=0; i < strlen(a); i++ )
+		
+		if( a[i] == '0' )	{
+			if( g==0 )	{
+				f = i;
+				g = 1;
+			}
+		}
+		else	{
+			
+			f = i;
+			g = 0;
+		}
+	}
+	
+	return i;
+}
+
+char * substring_(char * source, ollie start, ollie end)	{
+
+	char * _ = (char *)malloc( (end-start)+1 );
+	
+	for( ollie i=0;i<(end-start);i++ )
+		_[i] = source[start+i];
+	
+	_[i] = '\0';
+
+	return _;
+}
+
+
+
 AP DIV(AP a, AP b)  {
 
-	return new_ap(1, 0);
+	AP c;
+	ollie offset = strlen(b) - 1;
+	AP remainder = new_ap( 0, 0 );
+	
+	remainder.major = substring_(a.major, 0, offset);
+	
+	AP dropdown = new_ap(1, 0); AP zero = new_ap(1, 0);
+	
+	AP v;
+	AP inc = new_ap(1, 0); inc.major[0] = '1';
+	
+	while( offset<LSD_OFFSET(a.major) )	{
+		
+		v.major[0] = '0';
+		
+		while( MUL(b, v) <= 
+		
+	}
+	
 }
 
 AP DIV_BY_2(AP a)	{
@@ -650,17 +709,11 @@ AP DIV_BY_2(AP a)	{
 		value = a.major[i] - '0';
 		
 		if( value>9	)	{
-			// roll over the remainder, ie value=10-value
-			
-			int value2 = value;
-			
-			while( value2 >= 0 )
-				value2 -= 10;
-			
-			value2 += 10;
-
-			a.major[i] = '0' + value2;
-			a.major[i+1] += (value % 10);	
+			// roll over the remainder
+			char remainder = value % 10;
+			char _ = value - remainder;
+			a.major[i] = '0' + _;
+			a.major[i+1] += remainder;	
 		}
 
 		value = a.major[i] - '0';
@@ -939,6 +992,12 @@ char tt_mul(AP * a, AP * b)	{
 
 
 // GENERAL HELPER FNCS
+
+char peek(int c, char * str)	{
+
+	return str[c - 1];	// clearly, char at str[0] is considered digit "1"
+}
+
 signed short int cmp(AP * a, AP * b)	{
 	
 	
