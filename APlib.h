@@ -24,7 +24,10 @@
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The new_ap(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
 
+
+
 // CORE DATA STRUCTURES/TYPES
+#define ollie unsigned long long int
 typedef struct	AP {
 
 	char * major;
@@ -36,6 +39,7 @@ typedef struct	AP {
 	int minor_length;
 	
 } AP;
+
 
 typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
 

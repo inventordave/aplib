@@ -635,7 +635,15 @@ AP MUL(AP a, AP b)  {
 
 #define strlen strlen_
 
-ollie strlen_(char * str)	{ ollie i = 0; while( str[i++] != '\0' ) ; return i-1; }
+ollie strlen_(char * str)	{
+	
+	ollie i = 0;
+	while( str[i++] != '\0' )
+		;
+	return i-1;
+}
+
+
 ollie LSD_OFFSET(char * a)	{
 
 	ollie f = 0;
@@ -655,16 +663,16 @@ ollie LSD_OFFSET(char * a)	{
 			f = i;
 			g = 0;
 		}
-	}
 	
-	return i;
+	return i-1;
 }
 
 char * substring_(char * source, ollie start, ollie end)	{
 
 	char * _ = (char *)malloc( (end-start)+1 );
 	
-	for( ollie i=0;i<(end-start);i++ )
+	ollie i;
+	for( i=0;i<(end-start);i++ )
 		_[i] = source[start+i];
 	
 	_[i] = '\0';
@@ -676,26 +684,146 @@ char * substring_(char * source, ollie start, ollie end)	{
 
 AP DIV(AP a, AP b)  {
 
-	AP c;
-	ollie offset = strlen(b) - 1;
-	AP remainder = new_ap( 0, 0 );
+	int fractional = 0;
 	
-	remainder.major = substring_(a.major, 0, offset);
+	AP c = new_ap(0, 0);
+	ollie offset = strlen(b.major) - 1;
+	AP remainder = new_ap( strlen(b.major) , 0 );
 	
-	AP dropdown = new_ap(1, 0); AP zero = new_ap(1, 0);
+	ollie i;
+	for(i=0;i<strlen(b.major);i++)
+		remainder.major[i] = a.major[i];
 	
-	AP v;
+	remainder.major[i] = '\0';
+	
+	AP dropdown = new_ap(1, 0); AP zero = new_ap(1, 0); zero.major[0] = '0';
+	
+	AP v = new_ap(1, 0); v.major[0] = '0';
 	AP inc = new_ap(1, 0); inc.major[0] = '1';
 	
-	while( offset<LSD_OFFSET(a.major) )	{
+	AP temp;
+	AP v2;
+	AP result;
+	ollie lsd_a = strlen(a.major)-1;
+	ollie lsd_minor_a = LSD_OFFSET(a.minor);
+	
+	dropdown.major[0] = a.major[offset+1];
+	
+	int MAX_LOOPS = 0;
+	loop: 
+	
+	while( offset<=lsd_a )	{
+		
+		++MAX_LOOPS;
+		if( MAX_LOOPS>100 )
+			goto loop2;
 		
 		v.major[0] = '0';
 		
-		while( MUL(b, v) <= 
+		temp = MUL(b,v);
+		while( cmp( &temp, &remainder) < 1 )	{
+			
+			v2 = ADD(v, inc);
+			free( v.major );
+			v = copy(&v2);
+			free( v2.major );
+			
+			free( temp.major );
+			temp = MUL(b,v);
+		}
 		
+		v2 = SUB(v, inc);
+		free( v.major );
+		v = copy(&v2);
+		free( v2.major );
+		
+		result = MUL(b, v);
+		v2 = SUB(remainder, result);
+		free( result.major );
+		free( remainder.major );
+		remainder = copy(&v2);
+		
+		#define CONCAT(__a,__b) strcat(__a.major, __b.major)
+		CONCAT(c,v);
+		
+		
+
+		free( v2.major );
+		
+			if( remainder.major[0] > '0' )
+				CONCAT(remainder,dropdown);
+			else
+				remainder.major[0] = dropdown.major[0];
+
+
+		++offset;
+		
+		if( (!fractional) && ((offset+1)<strlen(a.major)) )
+			dropdown.major[0] = a.major[offset+1];
+		else
+			dropdown.major[0] = '0';
+		
+		if( fractional )
+			if( cmp(&remainder, &zero) == 0 )
+				break;
 	}
 	
+	// fractional overflow
+	fractional = 1;
+	offset = 0;
+	dropdown.major[0] = '0';
+	
+	if( cmp(&remainder, &zero) == 1 )
+		goto loop;
+	
+	loop2:
+	
+	printf( "The fixed-point for the answer is positioned to the right of digit %d.\n", (int) lsd_a );
+	
+	/**
+	
+	i=0;
+	ollie j=0;
+	
+	while( i==0 )	{
+		
+		if( c.major[j++]=='0' )
+			;
+		else
+			i=1;
+	}
+	
+	--j;
+	
+	char * lhs = (char *)malloc(lsd_a+2);
+	char * rhs = (char *)malloc( 1+strlen(c.major)-(lsd_a+1));
+	
+	for( i=0; i<(lsd_a+1); i++)
+		lhs[i] = c.major[i];
+	
+	lhs[i] = '\0';
+	
+	j = 0;
+	for( ; i<strlen(c.major); i++)
+		rhs[j++] = c.major[i];
+	
+	rhs[j] = '\0';
+	*/
+	
+	
+	
+	printf( "Result of %s / %s = (%s)\n", a.major, b.major, c.major );
+	
+	printf( "Result of Accumulation: (%s)\n", ACCUMULATE( c.major ) );
+
+	exit(0);
+	
+	return c;
 }
+
+
+
+
 
 AP DIV_BY_2(AP a)	{
 	

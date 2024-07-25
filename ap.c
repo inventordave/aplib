@@ -23,7 +23,7 @@
 #include "ansivt2.h"
 #include "tests.h"
 
-#include "../regex/wregex.h"
+#include "wregex.h"
 
 // STATIC DEFS
 #define PRINT_LINE printf( "---------------------------\n" );
@@ -110,6 +110,20 @@ int main(int argc, char **argv)	{
 	colorMode();
 	
 	printf( "%s", FG_BRIGHT_WHITE );
+	
+	// div(a,b)
+	
+	AP _1 = new_ap( 1024, 0 );
+	AP _2 = new_ap( 1024, 0 );
+	
+	strcpy( _1.major, argv[1] );
+	strcpy( _2.major, argv[2] );
+	
+	AP _3 = DIV( _1, _2 );
+	
+	printf( "Result of %s / %s = %s\n", _1.major, _2.major, _3.major );
+	
+	return 0;
 	
 	struct _TESTS TESTS_;
 	struct _TESTS * TESTS = &TESTS_;
