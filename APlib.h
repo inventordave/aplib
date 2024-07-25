@@ -18,6 +18,7 @@
 // SUGAR
 #define NEW_LINE printf("\n");
 #define NL NEW_LINE
+#define bool int
 
 
 // STATIC DEFS

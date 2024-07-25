@@ -31,7 +31,7 @@
 
 // BINS
 int dummy_int;
-
+extern int maxLoopsSet;
 
 typedef struct TEST_ENTRY {
 	
@@ -120,6 +120,11 @@ int main(int argc, char **argv)	{
 	strcpy( _2.major, argv[2] );
 	
 	AP _3 = DIV( _1, _2 );
+	
+	if( argc>3 )
+		maxLoopsSet = str2int( argv[2] );
+	else
+		maxLoopsSet = 100;
 	
 	printf( "Result of %s / %s = %s\n", _1.major, _2.major, _3.major );
 	

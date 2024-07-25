@@ -646,15 +646,16 @@ ollie strlen_(char * str)	{
 
 ollie LSD_OFFSET(char * a)	{
 
-	ollie f = 0;
-	int g = 0;
+	ollie strlen_a = strlen(a);
 
 	ollie i;
-	for( i=0; i < strlen(a); i++ )
+	ollie f = 0;
+	bool g = 0;
+	for( i=0; i < strlen_a; i++ )
 		
 		if( a[i] == '0' )	{
 			if( g==0 )	{
-				f = i;
+				f = i-1;
 				g = 1;
 			}
 		}
@@ -663,16 +664,17 @@ ollie LSD_OFFSET(char * a)	{
 			f = i;
 			g = 0;
 		}
-	
-	return i-1;
+
+
+	return f;
 }
 
 char * substring_(char * source, ollie start, ollie end)	{
 
-	char * _ = (char *)malloc( (end-start)+1 );
+	char * _ = (char *)malloc( (end-start)+1+1 );
 	
 	ollie i;
-	for( i=0;i<(end-start);i++ )
+	for( i=0;i<(end-start)+1;i++ )
 		_[i] = source[start+i];
 	
 	_[i] = '\0';
@@ -681,10 +683,67 @@ char * substring_(char * source, ollie start, ollie end)	{
 }
 
 
+#define ACC_COPY 1
+char * ACCUMULATE( char * apstr )
+{
+	// init.
+	ollie apstr_len = strlen(apstr);
+	
+	char * _;
+	{
+		#if ACC_COPY==1
+		AP bkp = new_ap( apstr_len, 0 );
+		_ = bkp.major;
+		#else
+		_ = apstr;
+		#endif
+	}
+	_[0] = apstr[0];
+	
+	char c;
+	ollie i;
+	for( i=apstr_len;i>0;--i )	{
+		
+		c = apstr[i];
 
+		// safetycheck
+		if( c<'0' )
+			c = '0';
+		else
+		if( c>'9' )	{
+			
+			_[i-1] = (apstr[i-1]) + ((c-10)-'0');
+			c = c-10;
+		}
+		
+		if( c>='5' )
+			_[i-1] = apstr[i-1]+1;
+		else // this is a roll-up function, not a roll-down function.
+			_[i-1] = apstr[i-1];
+
+
+		_[i] = c;
+	}
+	
+	// safetycheck
+	if( _[0]>'9' )
+		_[0] = '9';
+	else if( _[0]<'0' )
+		_[0] = '0';
+
+
+	return _;
+}
+
+int maxLoopsSet;
 AP DIV(AP a, AP b)  {
 
 	int fractional = 0;
+	int L0 = 1;
+	int dd = 0;
+	
+	//char * wp;
+	//char * fp;
 	
 	AP c = new_ap(0, 0);
 	ollie offset = strlen(b.major) - 1;
@@ -704,19 +763,28 @@ AP DIV(AP a, AP b)  {
 	AP temp;
 	AP v2;
 	AP result;
-	ollie lsd_a = strlen(a.major)-1;
-	ollie lsd_minor_a = LSD_OFFSET(a.minor);
+	ollie strlen_a = strlen(a.major);
+	//ollie strlen_minor_a = LSD_OFFSET(a.minor);
 	
-	dropdown.major[0] = a.major[offset+1];
+	if( strlen(a.major)>strlen(b.major) )
+		dropdown.major[0] = a.major[offset+1];
+	else
+		dropdown.major[0] = '0';
 	
-	int MAX_LOOPS = 0;
-	loop: 
 	
-	while( offset<=lsd_a )	{
+	int LOOPS = 0;
+	
+	int MAX_LOOPS = 100;
+	if( maxLoopsSet )
+		MAX_LOOPS = maxLoopsSet;
+
+	//int count = 0;
+	loop:
+	while( offset<strlen_a )	{
 		
-		++MAX_LOOPS;
-		if( MAX_LOOPS>100 )
-			goto loop2;
+		++LOOPS;
+		if( LOOPS>MAX_LOOPS )
+			goto maxIterations;
 		
 		v.major[0] = '0';
 		
@@ -742,46 +810,95 @@ AP DIV(AP a, AP b)  {
 		free( result.major );
 		free( remainder.major );
 		remainder = copy(&v2);
+		free( v2.major );
+
 		
 		#define CONCAT(__a,__b) strcat(__a.major, __b.major)
+		
+		//printf( "Row %d:\t'%s' + '%s'\n", count, c.major, v.major );
+		//++count;
 		CONCAT(c,v);
 		
-		
+		if( !fractional )
+			if( L0==1 )	{
 
-		free( v2.major );
+				if( v.major[0]=='0' )	{
+					
+						++c.major;
+				}
+				else
+					L0=0;
+			}
 		
-			if( remainder.major[0] > '0' )
+		if( remainder.major[0] > '0' )
 				CONCAT(remainder,dropdown);
 			else
 				remainder.major[0] = dropdown.major[0];
 
+		if( fractional )	{
+			
+			if( cmp(&remainder, &zero) == 0 )	{
+				break;
+			}
+		}
+		else	{
+
+			if( (offset+1)<strlen_a )
+				dropdown.major[0] = a.major[offset+1];
+			else
+				dropdown.major[0] = '0';
+		}
 
 		++offset;
-		
-		if( (!fractional) && ((offset+1)<strlen(a.major)) )
-			dropdown.major[0] = a.major[offset+1];
-		else
-			dropdown.major[0] = '0';
-		
-		if( fractional )
-			if( cmp(&remainder, &zero) == 0 )
-				break;
 	}
 	
+	
 	// fractional overflow
-	fractional = 1;
+	
+	if( fractional==0 )	{
+		
+		fractional = 1;
+		if( cmp(&c, &zero)==0 )
+			--c.major;
+		
+		dd = strlen(c.major);
+		
+		//wp = strdup( c.major );
+	}
+	
 	offset = 0;
 	dropdown.major[0] = '0';
 	
 	if( cmp(&remainder, &zero) == 1 )
 		goto loop;
 	
-	loop2:
+	maxIterations: // Upper-bound for precision of calculation reached.
+	// RESULT COMPUTED.
 	
-	printf( "The fixed-point for the answer is positioned to the right of digit %d.\n", (int) lsd_a );
+	//printf( "The fixed-point for the answer is positioned to the right of digit %d.\n", (int) strlen_a-1 );
+	
+	for( i=0; i<dd; i++ )
+		printf( "%c", c.major[i] );
+	
+	printf( "." );
+	
+	for( ; i<strlen(c.major); i++ )	
+		printf( "%c", c.major[i] );
+	
+	NL;
+
+	
+	//printf( "Result of %s / %s = (%s.%s)\n", a.major, b.major, wp, fp );
+	
+	//char * _;
+	//printf( "Result of Accumulation: (%s)\n", _ = ACCUMULATE( c.major ) );
+	//free( _ );
+
+	exit(0);
+	
+	return c;
 	
 	/**
-	
 	i=0;
 	ollie j=0;
 	
@@ -809,16 +926,7 @@ AP DIV(AP a, AP b)  {
 	
 	rhs[j] = '\0';
 	*/
-	
-	
-	
-	printf( "Result of %s / %s = (%s)\n", a.major, b.major, c.major );
-	
-	printf( "Result of Accumulation: (%s)\n", ACCUMULATE( c.major ) );
 
-	exit(0);
-	
-	return c;
 }
 
 
@@ -1137,6 +1245,7 @@ signed short int cmp(AP * a, AP * b)	{
 	
 	int len_a = strlen(a->major);
 	int len_b = strlen(b->major);
+	
 	
 	if( len_a<len_b )
 		return -1;
