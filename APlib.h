@@ -12,7 +12,7 @@
 
 
 // CUSTOM INC'S
-#include "ansivt2.h"
+#include "colour.h"
 
 
 // SUGAR
@@ -22,7 +22,7 @@
 
 
 // STATIC DEFS
-#define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The new_ap(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
+#define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
 
 
@@ -73,32 +73,86 @@ typedef struct APExpC_2	{ // (APExpC op APExpC)
 
 
 // FNC PROTOTYPES
-AP new_ap(int maj, int min);
+AP NewAP(int maj, int min);
 void clear(AP * a);
-AP copy(AP * a);
+AP Copy(AP * a);
 void flip_sign(AP * a);
 void set_sign(AP * a, char sym);
 char sign(AP * a);
 
 signed short int cmp(AP *, AP *);
 signed int overflow(AP * c, int result, signed int k);
-char tt(AP a, AP b);
+char tt(AP A, AP B);
 char tt_mul(AP * a, AP * b);
 
-AP ADD(AP a, AP b);
-AP SUB(AP a, AP b);
+typedef struct __lens	{
 
-AP MUL(AP a, AP b);
-AP DIV(AP a, AP b);
+	ollie precision;
+	ollie offset;
+} lens;
+
+
+
+AP AD(AP A, AP B);
+AP SUB(AP A, AP B);
+
+AP MUL(AP A, AP B);
+
+#define FP 0
+AP DIV(AP A, AP B, int precision);
+#define DIVIDE DIV
+
+
 extern int DIV_BY_2_PRINT_ROWS;
-AP DIV_BY_2(AP a);
 
-AP EXP(AP a, AP b);
+int setPart( AP A, int min_or_maj, char * digits )	{
 
-char * AND(char * lhs, char * rhs);
-char * OR (char * lhs, char * rhs);
-char * EX_OR(char * lhs, char * rhs);
+	char * success;
+	char * _;
+	
+	if( min_or_maj==1 )
+		_ = A.major;
+	else
+		_ = A.minor;
+	
+	if( strlen(_) < strlen(digits) )
+		success = (char *)realloc(_, strlen(digits)+1);
+	
+	_ = success;
+	
+	ollie i;
+	for( i=0; i<strlen(_); i++ )
+		_[i] = digits[i];
+	
+	_[i] = '\0';
+	
+	return i;
+}
+
+AP RECIPROCAL( AP A )	{
+	
+	AP _1 = NewAP( 1, 0 ); 
+	setPart(_1,1,"1");
+	
+	AP B = DIV( _1,A,FP );
+	
+	return B;
+}
+
+// These are full-precision by nature.
+AP DIV_BY_2(AP A);
+AP EXP(AP A, AP B);
+AP RECIPROCAL( AP A );
+
+#define D2 DIV_BY_2
+#define E EXP
+
+char * AND(char * LHS, char * RHS);
+char * OR (char * LHS, char * RHS);
+char * XOR(char * LHS, char * RHS);
 char * NOT(char * v);
+char * NAND(char * LHS, char *RHS);
+
 
 
 int lcm_test(int, int[], int[]);
@@ -111,9 +165,9 @@ char * BIN_2_DEC(char * bin);
 int _2kMax(AP input);
 int _2kMin(AP input);
 
-void free_ap(AP a);
+void FreeAP(AP A);
 int MSD(int num);
-void pack_trailing_zeroes( char * curr_row, int array_length, int num_zeroes );
+void pack_trailing_zeroes( char * curr_row, int Array_length, int num_zeroes );
 char * fill_leading_zeroes( char * str, int num_zeroes );
 
 int str2int(char *input);

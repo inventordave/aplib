@@ -57,15 +57,15 @@ char * formatBinary(char *bin_string)	{
 	return str;
 }
 
-char * formatAP(AP a)	{
+char * formatAP(AP A)	{
 	
-	char * str = (char *)malloc( strlen(a.major)+1+1+(8*3) );
+	char * str = (char *)malloc( strlen(A.major)+1+1+(8*3) );
 	
-	strcpy( str, formatSign(a.sign) );
-	str[ strlen(str) ] = a.sign;
+	strcpy( str, formatSign(A.sign) );
+	str[ strlen(str) ] = A.sign;
 	
 	strcat( str, FG_BRIGHT_CYAN );
-	strcat( str, a.major );
+	strcat( str, A.major );
 	strcat( str, NORMAL );
 	
 	return str;

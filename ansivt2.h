@@ -1,6 +1,6 @@
-#ifndef BYPASS_ANSIVT_GUARD
+#ifndef BYPASS_ANSIVT_GUArd
 
-	#define BYPASS_ANSIVT_GUARD 1
+	#define BYPASS_ANSIVT_GUArd 1
 	
 	extern char ansivt;
 	

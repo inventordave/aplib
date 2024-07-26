@@ -1,10 +1,5 @@
 // TEST.C
 
-/** INFORMATIVE SECTION
-	This is the test driver for APLib and Dave's IEEE754-Lib. To account for regression issues, all tests run every time "test" is invoked. Thus, if any new features break historical correctness, thus any of the tests, it will become apparent from the test subroutine output.
-*/
-
-
 // STDLIB INC'S
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,95 +8,20 @@
 #include <stdint.h>
 #include <windows.h>
 
-
 // LIB INC'S
 #include "ap.h"
-#include "Dave_IEEE754.h"
+#include "I754.h"
 #include "APlib.h"
 #include "APlib-output.h"
 #include "getOptions.h"
-#include "ansivt2.h"
+#include "colour.h"
 #include "tests.h"
-
-#include "wregex.h"
 
 // STATIC DEFS
 #define PRINT_LINE printf( "---------------------------\n" );
 
-
 // BINS
 int dummy_int;
-extern int maxLoopsSet;
-
-typedef struct TEST_ENTRY {
-	
-	void (*addr)(int argc, char **argv);
-	char * ref;
-	uint32_t index;
-} TEST_ENTRY;
-
-typedef struct _TESTS	{
-
-	struct TEST_ENTRY entries[256];
-	int length;
-	
-} _TESTS;
-
-
-char * formatString( char * fmt, ... )	{
-
-	char * str = (char *)malloc(1024);
-	str[0] = '\0';
-
-	//sprintf( str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
-
-	return str;
-}
-
-void addTest( struct _TESTS * T, char * ref, void * fnc )	{
-
-		struct TEST_ENTRY ENTRY;
-		ENTRY.addr = fnc;
-		ENTRY.ref = strdup( ref );
-		ENTRY.index = T->length;
-		T->entries[T->length] = ENTRY;
-		
-		++T->length;
-}
-
-void colorMode()	{
-
-	#define STD_OUTPUT_HANDLE ((DWORD)-11)
-	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-
-	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
-	BOOL color = SetConsoleMode(
-		StdHandle,
-		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	);
-
-	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
-	//print( msg_str );
-	
-	if(color == 0)	{
-		
-		printf( "ANSI/VT Support Not Available.\n" );
-		resetAnsiVtCodes(0);
-	}
-	else
-		resetAnsiVtCodes(1);
-
-	return;
-}
-
-void ap_exit(int status)	{
-
-	printf( "\n%sAPSuite is exiting.%s\n", FG_RED, NORMAL );
-	printf( "%s", NORMAL );
-	exit(status);
-}
-
 
 
 // MAIN() ENTRYPOINT
@@ -326,46 +246,77 @@ int main(int argc, char **argv)	{
 	
 }
 
+void addTest( struct _TESTS * T, char * ref, void * fnc )	{
+
+		struct TEST_ENTRY ENTRY;
+		ENTRY.addr = fnc;
+		ENTRY.ref = strdup( ref );
+		ENTRY.index = T->length;
+		T->entries[T->length] = ENTRY;
+		
+		++T->length;
+}
+
+void colorMode()	{
+
+	#define STD_OUTPUT_HANDLE ((DWORD)-11)
+	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+
+	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	
+	BOOL color = SetConsoleMode(
+		StdHandle,
+		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	);
+
+	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
+	//print( msg_str );
+	
+	if(color == 0)	{
+		
+		printf( "ANSI/VT Support Not Available.\n" );
+		resetAnsiVtCodes(0);
+	}
+	else
+		resetAnsiVtCodes(1);
+
+	return;
+}
+
+void ap_exit(int status)	{
+
+	printf( "\n%sAPSuite is exiting.%s\n", FG_RED, NORMAL );
+	printf( "%s", NORMAL );
+	exit(status);
+}
+
+
 
 // HELPER FNCS
-void pause()	{
 
-	getchar();
-	return;
-}
 
-void arg_assert( int argc, int min )	{
-	
-	if( (argc-1)<min )	{
-		
-		printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
-		exit(1);
-	}
 
-	return;
-}
-
-void parseAP(AP * a, char * str)	{
+void parseAP(AP * A, char * str)	{
 
 	// Arg A
 	if( str[0] == '-' )	{
 
-		a->sign = '-';
+		A->sign = '-';
 		//str[0] = '0';
 		++str;
-		a->major = strdup(str);
+		A->major = strdup(str);
 	}
 	else if( str[0] == '+' )	{
 
-		a->sign = '+';
+		A->sign = '+';
 		//str[0] = '0';
 		++str;
-		a->major = strdup(str);
+		A->major = strdup(str);
 	}
 	else	{
 
-		a->major = strdup(str);
-		a->sign = '+';
+		A->major = strdup(str);
+		A->sign = '+';
 	}
 
 	return;

@@ -5,11 +5,28 @@
 // CUSTOM INC'S
 #include "aplib.h"
 
+// HELPER TYPES
+extern int maxLoopsSet;
 
-// HELPER FNCS DECLS
+typedef struct TEST_ENTRY;
+typedef struct _TESTS;
+
+typedef struct TEST_ENTRY {
+	
+	void (*addr)(int argc, char **argv);
+	char * ref;
+	uint32_t index;
+} TEST_ENTRY;
+typedef struct _TESTS	{
+
+	struct TEST_ENTRY entries[256];
+	int length;
+	
+} _TESTS;
+
+// HELPER FNCS
 void parseAP(AP * a, char * str); // checks (char *) decimal string for leading sign, and populates AP object accordingly.
-void pause(); // waits for user to press a key before continuing.
-void arg_assert( int argc, int min ); // custom ASSERT() for number of args passed on cmd-line.
+
 void colorMode(); // activates ANSI/VT support via "cc/colorconsole"
 void ap_exit(int status); // always call this on system exit.
 

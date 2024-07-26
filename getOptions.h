@@ -4,7 +4,7 @@
 
 // INFORMATIVE SECTION
 /** A straightforward skeletal subsystem for processing a variable number of args passed on the cmd-line. Look in core function "getOptions".
-	Essentially, the idea is that the getOptions function would return a status code of -1 if any of the cmd-line were unrecognized as they passed through the scan loop in the "for(;;)" block of the function. It is in this block that an individual (unordered) cmd-line arg/switch (contained in an argv[i] indice) is detected, and if identified, you simply implement how your program reacts to that cmd-line arg. Very simple, just browse through the getOptions(...) function, and remember to pass &argc as a pointer, and argv to the function. Internally, the function modifies the value of argc, until it is finally reduced to 0 (indicating that all cmd-line invocation parts - args - have been scanned). This means that unless you store a copy before invoking the function, the initial value of argc will be lost.
+	Essentially, the idea is that the getOptions function would return A status code of -1 if any of the cmd-line were unrecognized as they passed through the scan loop in the "for(;;)" block of the function. It is in this block that an individual (unordered) cmd-line arg/switch (contained in an argv[i] indice) is detected, and if identified, you simply implement how your program reacts to that cmd-line arg. Very simple, just browse through the getOptions(...) function, and remember to pass &argc as a pointer, and argv to the function. Internally, the function modifies the value of argc, until it is finally reduced to 0 (indicating that all cmd-line invocation parts - args - have been scanned). This means that unless you store a copy before invoking the function, the initial value of argc will be lost.
 */
 
 
@@ -52,12 +52,12 @@ signed int getOptions(int * argc, char ** argv)	{
 
 	int status = +1;
 
-	// EXAMPLE L-VALUE OBJECTS. You would probably define them in TU/static scope.
-	int FLAGS = 0;
+	// EXAMPLE L-value OBJECTS. You would probably define them in TU/static scope.
+	int flagS = 0;
 	char * outputFile = (char *)malloc(262); outputFile[0] = '\0';
 	char * ignoreList = (char *)malloc(1024); ignoreList[0] = '\0';
 	
-	// EXAMPLE R-VALUES. Again, at design-time, you would probably place these in static scope.
+	// EXAMPLE R-valueS. Again, at design-time, you would probably place these in static scope.
 	int RECURSE = 1;
 	int OTF = 2;
 	char * defaultIgnoreList = (char *)malloc(1024); defaultIgnoreList[0] = '\0';
@@ -72,14 +72,14 @@ signed int getOptions(int * argc, char ** argv)	{
 		
 		if(seq(argv[0], "-r"))	{
 			
-			FLAGS |= RECURSE;
+			flagS |= RECURSE;
 			continue;
 		}
 		
 		if(seq(argv[0], "-o"))	{
 
 			strcpy(outputFile, argv[1]);
-			FLAGS |= OTF;
+			flagS |= OTF;
 			
 			rotate(argc, argv);
 			// 2 components,
@@ -121,7 +121,7 @@ signed int getOptions(int * argc, char ** argv)	{
 }
 
 
-// EXTRA FNCS
+// extra FNCS
 void sanitizeStr(char * str)	{ // General method for pre-processing of an input c-string (safety).
 	
 	while((*str) != '\0')	{
@@ -144,7 +144,7 @@ void sanitizeStr(char * str)	{ // General method for pre-processing of an input 
 				break;
 			
 			default:
-				//printf( "Char ok: '%c'\n", (*str) );
+				//printf( "char ok: '%c'\n", (*str) );
 				break;	
 		}
 		

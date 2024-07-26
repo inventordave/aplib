@@ -1,9 +1,9 @@
 // T£STS.c
 #include "tests.h"
-#include "Aplib.h"
+#include "aplib.h"
 #include "ap.h"
-#include "Dave_IEEE754.h"
-#include "APlib-output.h"
+#include "I754.h"
+#include "aPlib-output.h"
 
 
 // TEST FNCS
@@ -13,12 +13,12 @@ void exOrTest(int argc, char ** argv)	{
 	char * b =           "0001111101011111";
 	
 	int len_a = strlen(a);
-	int len_b = strlen(b);
+	int len_B = strlen(b);
 	
-	char * c = EX_OR(a, b);
+	char * c = XOR(a, b);
 	
-	int a_or_b = (len_a>=len_b)?1:0;
-	int diff = a_or_b?(len_a-len_b):(len_b-len_a);
+	int a_or_B = (len_a>=len_B)?1:0;
+	int diff = a_or_B?(len_a-len_B):(len_B-len_a);
 	
 	char * buf = (char *)malloc(diff + 1);
 	char * dummy = (char *)malloc(1);
@@ -31,8 +31,8 @@ void exOrTest(int argc, char ** argv)	{
 	
 	buf[diff] = '\0';
 	
-	printf( "%s%s\n", a_or_b?dummy:buf, formatBinary(a) );
-	printf( "%s%s\n", a_or_b?buf:dummy, formatBinary(b) );
+	printf( "%s%s\n", a_or_B?dummy:buf, formatBinary(a) );
+	printf( "%s%s\n", a_or_B?buf:dummy, formatBinary(b) );
 	printf( "%s\n", formatBinary(c) );
 	
 	free( buf );
@@ -67,7 +67,7 @@ void orTest(int argc, char ** argv)	{
 	
 	printf( "%s%s\n", a_or_b?dummy:buf, a );
 	printf( "%s%s\n", a_or_b?buf:dummy, b );
-	printf( "%s\n", formatBinary(c) );
+	printf( "%s\n", formatbinary(c) );
 	
 	free( buf );
 	free( dummy );
@@ -94,12 +94,12 @@ void andTest(int argc, char **argv)	{
 	char * b =           "0001111101011111";
 	
 	int len_a = strlen(a);
-	int len_b = strlen(b);
+	int len_B = strlen(b);
 	
-	char * c = AND(a, b);
+	char * c = aND(a, B);
 	
-	int a_or_b = (len_a>=len_b)?1:0;
-	int diff = a_or_b?(len_a-len_b):(len_b-len_a);
+	int a_or_B = (len_a>=len_B)?1:0;
+	int diff = a_or_B?(len_a-len_B):(len_B-len_a);
 	
 	char * buf = (char *)malloc(diff + 1);
 	char * dummy = (char *)malloc(1);
@@ -112,8 +112,8 @@ void andTest(int argc, char **argv)	{
 	
 	buf[diff] = '\0';
 	
-	printf( "%s%s\n", a_or_b?dummy:buf, formatBinary(a) );
-	printf( "%s%s\n", a_or_b?buf:dummy, formatBinary(b) );
+	printf( "%s%s\n", a_or_B?dummy:buf, formatBinary(a) );
+	printf( "%s%s\n", a_or_B?buf:dummy, formatBinary(b) );
 	printf( "%s\n", formatBinary(c) );
 	
 	free( buf );
@@ -127,20 +127,20 @@ void test2kMax(int argc, char **argv)	{
 	int temp = DIV_BY_2_PRINT_ROWS;
 	DIV_BY_2_PRINT_ROWS = 0;
 	
-	AP input;
-	parseAP(&input, argv[1]);
+	aP input;
+	parseaP(&input, argv[1]);
 	
 	char * _ = input.major;
 	
 	int a = _2kMax(input);
 	DIV_BY_2_PRINT_ROWS = temp;
 	
-	printf( "%s %s %s %s\n", c("Minimum Maximal 2k exponent for", FG_BRIGHT_MAGENTA), c(_, FG_BRIGHT_GREEN), c("=", FG_CYAN), c(int2str(a), FG_BRIGHT_GREEN) );
+	printf( "%s %s %s %s\n", c("Minimum Maximal 2k exponent for", FG_BRIGHT_MaGENTa), c(_, FG_BRIGHT_GREEN), c("=", FG_CYaN), c(int2str(a), FG_BRIGHT_GREEN) );
 	
 	return;
 }
 
-void basicTest(int argc, char **argv)	{ // ADD, SUB, MUL, EXP
+void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 
 	arg_assert( argc, 2 );
 	
@@ -153,58 +153,58 @@ void basicTest(int argc, char **argv)	{ // ADD, SUB, MUL, EXP
 	
 	NL;
 	
-	AP A, B, C;
-	A = new_ap( 10, 0 );
-	B = new_ap( 10, 0 );
+	aP a, B, C;
+	a = NewaP( 10, 0 );
+	B = NewaP( 10, 0 );
 	
-	// Arg A
-	parseAP(&A, argv[1]);
+	// arg a
+	parseaP(&a, argv[1]);
 	
-	// Arg B
-	parseAP(&B, argv[2]);
+	// arg B
+	parseaP(&B, argv[2]);
 	
 	
-	printf( "Values Entered:\na = %c%s\nb = %c%s\n", A.sign, A.major, B.sign, B.major );
+	printf( "values Entered:\na = %c%s\nb = %c%s\n", a.sign, a.major, B.sign, B.major );
 	
 	NL;
 	
-	// ADD
-	C = ADD(A, B);
-	printf( "%c%s + %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	// aD
+	C = aD(a, B);
+	printf( "%c%s + %c%s = %c%s", a.sign, a.major, B.sign, B.major, C.sign, C.major );
 	
 	NL;
 	
 	// SUB
-	C = SUB(A, B);
-	printf( "%c%s %s-%s %c%s = %c%s", A.sign, A.major, FG_BRIGHT_GREEN, NORMAL, B.sign, B.major, C.sign, C.major );
+	C = SUB(a, B);
+	printf( "%c%s %s-%s %c%s = %c%s", a.sign, a.major, FG_BRIGHT_GREEN, NORMaL, B.sign, B.major, C.sign, C.major );
 	
 	NL;
 
 	// MUL
-	C = MUL(A, B);
-	printf( "%c%s MUL %c%s = %c%s", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	C = MUL(a, B);
+	printf( "%c%s MUL %c%s = %c%s", a.sign, a.major, B.sign, B.major, C.sign, C.major );
 	
 	NL;
 	
 	// EXP
 	printf( "The EXP operator may take a while with a larger exponent. Please be patient...\n" );
-	C = EXP(A, B);
+	C = EXP(a, B);
 	if( C.sign=='-' )
 		B.sign='+';
 	
 	
-	printf( "%c%s EXP %c%s = %c%s\n", A.sign, A.major, B.sign, B.major, C.sign, C.major );
+	printf( "%c%s EXP %c%s = %c%s\n", a.sign, a.major, B.sign, B.major, C.sign, C.major );
 	
 	printf( "\nCompleted." );
 	
 	return;
 }
 
-void dec_2_bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_2_DEC)
+void dec_2_Bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_2_DEC)
 	
 	char * decimal = "543212362746234636432864963483264873264932649823649";
 	
-	AP a = new_ap( strlen(decimal), 0 );
+	aP a = NewaP( strlen(decimal), 0 );
 	a.major = strdup( decimal );
 	
 	char * binary = DEC_2_BIN(a, 1);
@@ -220,8 +220,8 @@ void dec_2_bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_
 
 void fs_test1(int argc, char **argv)	{
 	
-	// This test function is to test construction and access to struct "IEEE754_Float"
-	struct IEEE754_Float * a;
+	// This test function is to test construction and access to struct "I754_Float"
+	struct I754_Float * a;
 	
 	float f = -85.125f;
 	
@@ -288,10 +288,10 @@ void q_test(int argc, char **argv)	{
 	print( c("If both values are the same, it indicates readFloat() & writeFloat() are working correctly.\n", FG_YELLOW) );
 	
 
-	struct IEEE754_Float* f2 = IEEE_writeFloatStruct( &f );
+	struct I754_Float* f2 = IEEE_writeFloatStruct( &f );
 	float _f = IEEE_readFloatStruct( f2 );
 	printf( "_f = %f\n", _f );
-	printf( "%sIf the above value is the same as (%f), it indicates writeFloatStruct() & readFloatStruct() are working correctly.%s\n", FG_YELLOW, f, NORMAL );
+	printf( "%sIf the above value is the same as (%f), it indicates writeFloatStruct() & readFloatStruct() are working correctly.%s\n", FG_YELLOW, f, NORMaL );
 	
 	printf( "BIN(%f) := %s\n", f, formatBinary(str) );
 	printf( "BE (%f) := %s\n", f, formatBinary(IEEE_convertFloatString2BigEndian( str )) );
@@ -302,24 +302,24 @@ void q_test(int argc, char **argv)	{
 
 void writeFloatTest(int argc, char **argv)	{
 	
-	struct IEEE754 * lib = initIEEE754();
+	struct I754 * lib = initI754();
 	
 	float a = 1701.79f;
 
 	char * str = malloc(32+1);
 	str = strdup( IEEE_readFloat( a ) );
 
-	printf( "Value stored in float = %f\nWriting new value to float.\n", a );
+	printf( "value stored in float = %f\nWriting new value to float.\n", a );
 	lib->writeFloat( &a, str );
 	
-	printf( "Value stored in float = %f\n", a );
+	printf( "value stored in float = %f\n", a );
 	
 	return;
 }
 
 void readFloatTest(int argc, char **argv)	{
 
-	struct IEEE754 * lib = initIEEE754();
+	struct I754 * lib = initI754();
 
 	float f;
 	

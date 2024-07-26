@@ -28,7 +28,7 @@ DECIMAL/BINARY STRINGS (SIGN SYMBOL +/-)
 SIGN: + = bright_green, - = bright_red
 DEC digits: BRIGHT_WHITE
 
-OPERATORS (ADD, SUB, ETC, +, -, *, /, ^) - BRIGHT_CYAN
+OPERATORS (AD, SUB, ETC, +, -, *, /, ^) - BRIGHT_CYAN
 Program text output FG_BRIGHT_CYAN
 
 Test function output.
@@ -62,15 +62,15 @@ NL: words, punctuation
 void setFGColor( int cc );
 void setBGColor( int cc );
 void setStyle( int sc ); // eg, +i, +b, -i, -b, and so on.
-char * truncateAP( AP a );
+char * truncateAP( AP A );
 
 char * generateSVG( APExp exp );
 char * generateLatex_Exp( APExp exp );
-char * generateLatex_Number( AP a );
+char * generateLatex_Number( AP A );
 
 char * formatSign(char sign);
 char * formatBinary(char * bin_string);
-char * formatAP(AP a);
+char * formatAP(AP A);
 
 void normal();
 char * c(char * str, char * col);

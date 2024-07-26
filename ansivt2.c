@@ -1,5 +1,5 @@
 #include <string.h>
-#include "ansivt2.h"
+#include "colour.h"
 
 	char ansivt;
 	
@@ -131,76 +131,76 @@ char resetAnsiVtCodes(char f)	{
 void swap4color( char * fg, char * bg )	{
 	
 	if( strlen(fg)==0 || !strcmp(fg,"0") )
-		goto _bg;
+		goto _Bg;
 	
 	if( !strcmp( fg, "black" ) )	{
 		strcpy( fg, FG_BLACK );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "red" ) )	{
 		strcpy( fg, FG_RED );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "green" ) )	{
 		strcpy( fg, FG_GREEN );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "yellow" ) )	{
 		strcpy( fg, FG_YELLOW );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "blue" ) )	{
 		strcpy( fg, FG_BLUE );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "magenta" ) )	{
 		strcpy( fg, FG_MAGENTA );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "cyan" ) )	{
 		strcpy( fg, FG_CYAN );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "white" ) )	{
 		strcpy( fg, FG_WHITE );
-		goto _bg;
+		goto _Bg;
 	}
-	if( !strcmp( fg, "bright_black" ) )	{
+	if( !strcmp( fg, "bright_Black" ) )	{
 		strcpy( fg, FG_BRIGHT_BLACK );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_red" ) )	{
 		strcpy( fg, FG_BRIGHT_RED );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_green" ) )	{
 		strcpy( fg, FG_BRIGHT_GREEN );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_yellow" ) )	{
 		strcpy( fg, FG_BRIGHT_YELLOW );
-		goto _bg;
+		goto _Bg;
 	}
-	if( !strcmp( fg, "bright_blue" ) )	{
+	if( !strcmp( fg, "bright_Blue" ) )	{
 		strcpy( fg, FG_BRIGHT_BLUE );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_magenta" ) )	{
 		strcpy( fg, FG_BRIGHT_MAGENTA );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_cyan" ) )	{
 		strcpy( fg, FG_BRIGHT_CYAN );
-		goto _bg;
+		goto _Bg;
 	}
 	if( !strcmp( fg, "bright_white" ) )	{
 		strcpy( fg, FG_BRIGHT_WHITE );
-		goto _bg;
+		goto _Bg;
 	}
 
 		return; // non-null invalid entry
 	
-	_bg:
+	_Bg:
 	
 	if( strlen(bg)==0 )	{
 	
@@ -239,7 +239,7 @@ void swap4color( char * fg, char * bg )	{
 		strcpy( bg, BG_WHITE );
 		
 	}
-	if( !strcmp( bg, "bright_black" ) )	{
+	if( !strcmp( bg, "bright_Black" ) )	{
 		strcpy( bg, BG_BRIGHT_BLACK );
 		
 	}
@@ -255,7 +255,7 @@ void swap4color( char * fg, char * bg )	{
 		strcpy( bg, BG_BRIGHT_YELLOW );
 	
 	}
-	if( !strcmp( bg, "bright_blue" ) )	{
+	if( !strcmp( bg, "bright_Blue" ) )	{
 		strcpy( bg, BG_BRIGHT_BLUE );
 		
 	}
