@@ -1,36 +1,46 @@
-APlib.
+AP v0.1
 
-An arbitrary-precision library.
+An arbitrary-precision AriTHmAtiC library, developed by "Dave", sometimes known as "RickyBobby170*".
 
-In development, going reasonably well. Currently produces correct results for 2 signed integer inputs for the core arithmetic operators (implemented as functions).
+-/-------
+Makefile assumes GCC Make, targeting GCC C.
+"vtcolour" assumes Windows, but implements ANSI/VT in the control-code implementation part.
 
-Essentially, you simply include "APlib.h" and/or "Dave_IEEE754.h" in your program source, and by the miracle of quantum mechanics, electrical engineering, and boolean logic, the lovely functions that I have implemented thus far will be available to your user program.
-Also, if file "cc/ansivt2.h" is being requested by the compiler, go to my "ColorConsole" repo at https://github.com/inventordave2/ColorConsole, and clone it into an immediate subdirectory "./cc/" of the directory containing your copy of "Dave_IEEE754.h"/"APlib.h". ColorConsole is a vanilla ANSI/VT implementation, or in other words, it generates colourized output to the console (bear in mind, I am developing this on a Windows box, not Linux, so I target the Windows command console).
 
-To compile the test suite, type "make ap" on the command-line. Assumes you have GCC available.
+The library is still fleshing-out, and going reasonably well. The library produces correct results for 2 signed integer inputs for the core arithmetic operators (implemented as functions). It also produces correct results for fp outputs, for any rational A/B.
+
+Essentially, you simply include "APlib.h" and/or "I754.h" in your program source, and by the miracle of quantum mechanics, electrical engineering, and boolean logic, the lovely functions that I have implemented thus far will be available to your user program.
+
+"vtcolour" is a vanilla ANSI/VT implementation, or in other words, it generates colourized output to the console (bear in mind, I am developing this on a Windows box, not Linux, so I target the Windows command console).
+
+To compile the test suite, type "make ap" on the command-line.
+
+To see what I'm doing in my active sandbox, type "make sandbox" in the working directory for my codebase. 
+
 
 Invoke:
 
-ap %1 %2 %3
+./build/AP.exe %1 %2 %3
 
-Where the 3 operands are (possibly signed) integer strings.
+Where operands %2 and %3 are (possibly signed) integer decimal-strings.
 
 
 4 core arithmetic operators so far:
 
-ADD(a, b)
-SUB(a, b)
-MUL(a, b)
-EXP(a, b)
-(Note: EXP() currently converts a negative exponent (param b), to a positive integer, simply by changing the sign.)
+ADD( A,B )
+SUB( A,B )
+MUL( A,B )
+DIV( A,B )
+EXP( A,B )
+(Note: EXP() currently converts a negative exponent (param B), to a positive integer, simply by changing the sign.)
 
 As well as several secondary functions:
 
-DIV_BY_2(ap a)
-BIN_2_DEC(cstring str)
-DEC_2_BIN(ap a, int packed)
-"_2kMax(ap a)"
-"_2kMin(ap a)"
+DIV_BY_2( AP A )
+BIN_2_DEC( cstring A )
+DEC_2_BIN( AP A, int p )
+max2k( AP A )
+min2k( AP A )
 
 
 As the lib is ultimately for ap real-valued numbers, the functions take as operands an object called AP, which has a .major and .minor component. Populate the .major component of 2 AP operands with an ascii-char based Integer string (e.g. a.major -> "1234").

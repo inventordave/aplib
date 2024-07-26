@@ -3,7 +3,7 @@
 #include "aplib.h"
 #include "ap.h"
 #include "I754.h"
-#include "aPlib-output.h"
+#include "ap_io.h"
 
 
 // TEST FNCS
@@ -132,7 +132,7 @@ void test2kMax(int argc, char **argv)	{
 	
 	char * _ = input.major;
 	
-	int a = _2kMax(input);
+	int a = max2k(input);
 	DIV_BY_2_PRINT_ROWS = temp;
 	
 	printf( "%s %s %s %s\n", c("Minimum Maximal 2k exponent for", FG_BRIGHT_MaGENTa), c(_, FG_BRIGHT_GREEN), c("=", FG_CYaN), c(int2str(a), FG_BRIGHT_GREEN) );

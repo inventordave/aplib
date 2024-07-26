@@ -1,7 +1,7 @@
-// APlib.h
+// aplib.h
 
-#ifndef DAVE_APLIB
-#define DAVE_APLIB
+#ifndef DAVE_aplib
+#define DAVE_aplib
 
 // STDLIB INC'S
 #include <stdlib.h>
@@ -12,6 +12,7 @@
 
 
 // CUSTOM INC'S
+#include "lib.h"
 #include "colour.h"
 
 
@@ -25,40 +26,33 @@
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
 
-
-
 // CORE DATA STRUCTURES/TYPES
-#define ollie unsigned long long int
-typedef struct	AP {
 
-	char * major;
-	char * minor;
-	char sign;
-	
-	int length;
-	int major_length;
-	int minor_length;
-	
-} AP;
+typedef struct
+AP {
+char * major;
+char * minor;
+char sign;
+}
+AP;
 
 
 typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
 
-typedef struct	APExp	{ // AP op AP
-
-	AP A;
-	AP B;
-
-	OPCODE _operator;
-
-} APExp;
+typedef struct
+APExp { // AP OP AP
+AP A;
+AP B;
+OPCODE OP;
+}
+APExp;
 
 typedef struct APExpC	{ // (AP op AP) op (AP op AP)
 	
 	APExp A;
 	APExp B;
 	
-	OPCODE _operator;
+	OPCODE OP;
 
 } APExpC;
 
@@ -67,50 +61,117 @@ typedef struct APExpC_2	{ // (APExpC op APExpC)
 	APExpC A;
 	APExpC B;
 	
-	OPCODE _operator;
+	OPCODE OP;
 	
 } APExpC_2;
 
 
 // FNC PROTOTYPES
-AP NewAP(int maj, int min);
-void clear(AP * a);
-AP Copy(AP * a);
-void flip_sign(AP * a);
-void set_sign(AP * a, char sym);
-char sign(AP * a);
+AP NewAP( large,large );
+void ClearAP( AP* );
+AP CopyAP( AP* );
+void flipSign( AP* );
+void setSign( AP*,char );
+char getSign( AP* );
 
-signed short int cmp(AP *, AP *);
-signed int overflow(AP * c, int result, signed int k);
-char tt(AP A, AP B);
-char tt_mul(AP * a, AP * b);
+signed short int cmpAP( AP*,AP* );
+signed int overflow( AP*, int result, signed int k );
+char tt( AP,AP );
+char tt_mul( AP*,AP* );
+
+#define part byte
+statusCode setPart( AP, char *, part );
+
+AP DefaultPrecision;
 
 typedef struct __lens	{
 
-	ollie precision;
-	ollie offset;
+	large precision;
+	large offset;
 } lens;
 
 
 
-AP AD(AP A, AP B);
-AP SUB(AP A, AP B);
+AP ADD( AP A, AP B );
+AP ADDP( AP A, AP B, AP P );
 
-AP MUL(AP A, AP B);
 
-#define FP 0
-AP DIV(AP A, AP B, int precision);
+
+
+AP SUB( AP A, AP B );
+AP SUBP( AP A, AP B, AP P );
+#define SUBTRACT SUB
+#define SUBTRACTP SUBP
+
+
+AP MUL( AP A, AP B );
+AP MULP( AP A, AP B, AP P );
+#define MULTIPLY MUL
+#define MULTIPLYP MULP
+
+AP DIV( AP A, AP B );
+AP DIVP( AP A, AP B, AP P );
 #define DIVIDE DIV
-
+#define DIVIDEP DIVP
+#define SUBDIVIDE DIVIDE
+#define SUBDIVIDEP DIVIDEP
 
 extern int DIV_BY_2_PRINT_ROWS;
 
-int setPart( AP A, int min_or_maj, char * digits )	{
+char* memp( large numParts, large numBytes );
+
+
+char* mem( large numBytes );
+
+
+
+
+void* cmem( large nb )	{ return calloc( nb,1 ); }
+
+char* zmem( large nb );
+char* zmem( large nb )	{
+
+	char* _ = (char*) malloc( nb+1 );
+	
+	large i;
+	for( i=0; i<nb; i++ )
+		_[i] = '0';
+
+	_[i] = '\0';
+	
+	return _;
+}
+
+#define PartW 1
+#define PartF 2
+#define SignPart 0
+
+
+statusCode setPartW( AP A, char * _ )	{
+
+	return setPart( A, _, PartW );
+}
+statusCode setPartF( AP A, char * _ )	{
+
+	return setPart( A, _, PartF );
+}
+
+statusCode setPart( AP A, char * digits, int sign_maj_min )	{
+
+	if( sign_maj_min==SignPart )	{
+
+		A->sign = *digits;
+		
+		if( A->sign==digits[0] )
+		freturn SUCCESS;
+		else
+		return FAIL;
+	}
 
 	char * success;
 	char * _;
 	
-	if( min_or_maj==1 )
+	if( sign_maj_min==1 )
 		_ = A.major;
 	else
 		_ = A.minor;
@@ -120,7 +181,7 @@ int setPart( AP A, int min_or_maj, char * digits )	{
 	
 	_ = success;
 	
-	ollie i;
+	large i;
 	for( i=0; i<strlen(_); i++ )
 		_[i] = digits[i];
 	
@@ -129,15 +190,7 @@ int setPart( AP A, int min_or_maj, char * digits )	{
 	return i;
 }
 
-AP RECIPROCAL( AP A )	{
-	
-	AP _1 = NewAP( 1, 0 ); 
-	setPart(_1,1,"1");
-	
-	AP B = DIV( _1,A,FP );
-	
-	return B;
-}
+AP RECIPROCAL( AP A );
 
 // These are full-precision by nature.
 AP DIV_BY_2(AP A);
@@ -162,8 +215,8 @@ int GCD(int a, int b, int lcm);
 char * DEC_2_BIN(AP input, int packed);
 char * BIN_2_DEC(char * bin);
 
-int _2kMax(AP input);
-int _2kMin(AP input);
+int max2k(AP input);
+int min2k(AP input);
 
 void FreeAP(AP A);
 int MSD(int num);

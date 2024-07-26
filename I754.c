@@ -25,7 +25,7 @@ struct I754_Float * IEEE_writeFloatStruct( float * f )	{
 	free( temp );
 	free( section );
 	
-	return A;
+	return a;
 }
 
 float IEEE_readFloatStruct( struct I754_Float* f )	{

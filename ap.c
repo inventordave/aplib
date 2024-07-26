@@ -11,8 +11,8 @@
 // LIB INC'S
 #include "ap.h"
 #include "I754.h"
-#include "APlib.h"
-#include "APlib-output.h"
+#include "aplib.h"
+#include "ap_io.h"
 #include "getOptions.h"
 #include "colour.h"
 #include "tests.h"
@@ -33,8 +33,8 @@ int main(int argc, char **argv)	{
 	
 	// div(a,b)
 	
-	AP _1 = new_ap( 1024, 0 );
-	AP _2 = new_ap( 1024, 0 );
+	AP _1 = newAP( 1024, 0 );
+	AP _2 = newAP( 1024, 0 );
 	
 	strcpy( _1.major, argv[1] );
 	strcpy( _2.major, argv[2] );
@@ -179,7 +179,7 @@ int main(int argc, char **argv)	{
 	
 	// TEST 2
 	char * test_num;
-	AP input = new_ap( 256, 0 );
+	AP input = newAP( 256, 0 );
 	
 	if( argc > 3 )
 		test_num = strdup( argv[3] );

@@ -1,7 +1,7 @@
 // INCOMPLETE_H
 
-#ifndef APLIB_DEV_SANDBOX
-#define APLIB_DEV_SANDBOX
+#ifndef aplib_DEV_SANDBOX
+#define aplib_DEV_SANDBOX
 
 char * formatString( char * fmt, ... );
 

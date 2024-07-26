@@ -12,7 +12,7 @@
 
 
 // CUSTOM INC'S
-#include "APlib.h"
+#include "aplib.h"
 
 
 // CORE DATA STRUCTURES
