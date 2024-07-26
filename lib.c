@@ -1,13 +1,65 @@
+// LIB_C
 // DAVE'S DAVELIB.
 
+
+// INC'S
+#include "io.h"
 #include "lib.h"
 
-int seq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
+
+// 'TOGGLE'
+toggle fliptoggle( toggle* t )	{
+	
+	if( *t==1 )
+	*t=0;
+	else
+	*t=1;
+
+	return *t;
+}
+
+// DAVELIB FNC'S
+
+
+// SANITIZESTR: General method for pre-processing of an input c-string (safety).
+char* sanitizeStr( char* _ )	{
+	
+	while((*_) != '\0')	{
+		
+		switch(*_)	{
+
+			case 92: // \ backslash
+			case 34: // " double-quote
+			case 42: // * star
+			case 47: // / forward-slash
+			case 58: // : colon
+			case 60: // < lt
+			case 62: // > gt
+			case 63: // ? question-mark
+			case 124:// | pipe
+
+				// printf( "Invalid char ('%c') (%d).\n", *_, *_ );
+				// Uncomment above line to see reporting to stdout of detected invalid chars in the input string.
+				*_ = '.'; // Arbitrary printable-char to replace invalid char with.
+				break;
+			
+			default:
+				//printf( "char ok: '%c'\n", (*str) );
+				break;	
+		}
+		
+		++_;
+	}
+}
+
+// SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
+int seq(char *a, char *b) {
 
 	return (strcmp(a, b) == 0);
 }
 
-// should return 0 for match, +n for larger LHS, -n for larger RHS.
+// STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
+#define strcmp strcmp_
 int strcmp_( char* LHS, char* RHS ){
 
 	if( strlen(LHS)==strlen(RHS) ){
@@ -24,16 +76,16 @@ int strcmp_( char* LHS, char* RHS ){
 	
 	return 0;
 }
-#define strcmp strcmp_
 
-// simply pauses interactivity in console-mode until a key is pressed.
+// PAUSE: Simply pauses interactivity in console-mode until a key is pressed.
 void pause()	{
 
 	getchar();
 	return;
 }
 
-// custom assert() for the cmd-line args count. Pass the "argc" Env variable to it, with the min number of cmd-line args needed to continue (does not include argv[0], the executable name!).
+// ARG_ASSERT: Custom assert() for the cmd-line args count. Pass the "argc" Env variable to it, with the min number of cmd-line args needed to continue
+// Does not include argv[0], which by system default holds the executable name ,so just the min-count for actual args passed.)
 void arg_assert( int argc, int min )	{
 	
 	if( (argc-1)<min ){
@@ -42,5 +94,4 @@ void arg_assert( int argc, int min )	{
 
 	return;
 }
-
 

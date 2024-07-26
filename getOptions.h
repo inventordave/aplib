@@ -15,10 +15,9 @@
 
 // FNC PROTOTYPES
 signed int getOptions(int * argc, char ** argv);
-void rotate(int * argc, char * argv[]);
+void rotate(int * argc, char * argv[]); // ruddy useful, shifts the cmd-line arguments array left, removing the one at argv[0]
 void sanitizeStr(char * str);
 extern  int seq(char *a, char *b);
-
 
 // EXAMPLE USAGE
 int getopt_main(int argc, char **argv)	{
@@ -48,12 +47,12 @@ void rotate(int * argc, char * argv[])	{
 	*argc -= 1;
 }
 
-signed int getOptions(int * argc, char ** argv)	{
+signed int getOptions( int* argc, char** argv )	{
 
 	int status = +1;
 
 	// EXAMPLE L-value OBJECTS. You would probably define them in TU/static scope.
-	int flagS = 0;
+	int flags = 0;
 	char * outputFile = (char *)malloc(262); outputFile[0] = '\0';
 	char * ignoreList = (char *)malloc(1024); ignoreList[0] = '\0';
 	
@@ -66,20 +65,20 @@ signed int getOptions(int * argc, char ** argv)	{
 		
 		rotate(argc, argv); // consume last cmd-line component, first time around, that's the program binary ".exe" name.
 
-		if(*argc==0)		
+		if( *argc==0 )		
 			// all cmd-line args consumed.
 			break;
 		
-		if(seq(argv[0], "-r"))	{
+		if( seq(argv[0], "-r") )	{
 			
 			flagS |= RECURSE;
 			continue;
 		}
 		
-		if(seq(argv[0], "-o"))	{
+		if( seq(argv[0], "-o") )	{
 
-			strcpy(outputFile, argv[1]);
-			flagS |= OTF;
+			strcpy( outputFile, argv[1] );
+			flags |= OTF;
 			
 			rotate(argc, argv);
 			// 2 components,
@@ -90,23 +89,24 @@ signed int getOptions(int * argc, char ** argv)	{
 			continue;
 		}
 		
-		if(seq(argv[0], "-c"))	{
+		if( seq(argv[0], "-c") )	{
 
-		// ...
+		// ... some action here based on your program's feature
 			continue;
 		}
 		
-		if(seq(argv[0], "-i"))	{
+		if( seq(argv[0], "-i") )	{
 			
-			if(argv[1][0] == '-')	{ // This identifies the next cmd-line string to be a seperate switch, therefore...
+			if( argv[1][0] == '-' )	{ // This identifies the next cmd-line string to be a seperate switch, therefore...
 				
 				printf( "Used '-i' switch, but passed no DIR_BLOCK list! Assuming default list.\n" );
-				strcpy(ignoreList, defaultIgnoreList);
+				strcpy( ignoreList, defaultIgnoreList );
 			}
 			else	{
 				
-				strcpy(ignoreList, argv[1]);
-				rotate(argc, argv); // remember for 2-part (key-value) cmd-line switches, must manually call rotate(), as it needs to be invoked twice, as it is removing 2 strings from **argv, not 1. rotate() is auto-invoked once.			}
+				strcpy( ignoreList, argv[1] );
+				rotate( argc, argv );
+				// remember, for 2-part (key-value) cmd-line switches, you must manually call rotate(), as it needs to be invoked twice, as it is removing 2 strings from **argv, not 1. rotate() is auto-invoked once.			}
 			
 				continue;
 			}
@@ -121,36 +121,7 @@ signed int getOptions(int * argc, char ** argv)	{
 }
 
 
-// extra FNCS
-void sanitizeStr(char * str)	{ // General method for pre-processing of an input c-string (safety).
-	
-	while((*str) != '\0')	{
-		
-		switch(*str)	{
-
-			case 92: // \ backslash
-			case 34: // " double-quote
-			case 42: // * star
-			case 47: // / forward-slash
-			case 58: // : colon
-			case 60: // < lt
-			case 62: // > gt
-			case 63: // ? question-mark
-			case 124:// | pipe
-
-				// printf( "Invalid char ('%c') (%d).\n", *str, *str );
-				// Uncomment above line to see reporting to stdout of detected invalid chars in th einput string.
-				*str = '.'; // Arbitrary printable-char to replace invalid char with.
-				break;
-			
-			default:
-				//printf( "char ok: '%c'\n", (*str) );
-				break;	
-		}
-		
-		++str;
-	}
-}
+// EXTRA FNCS
 
 void print_ASCII(char start, char end)	{
 	
