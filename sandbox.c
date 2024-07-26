@@ -6,7 +6,7 @@
 #include "aplib.h"
 #include "sandbox.h"
 
-
+main
 
 char * formatString( char * fmt, ... )	{
 

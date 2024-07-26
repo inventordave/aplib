@@ -1,8 +1,7 @@
-// DAVE'S I754 dev-silo
+// DAVE'S i754 dev-silo
 // 
-#ifndef I754
-#define I754
-
+#ifndef DAVE_i754
+#define DAVE_i754
 
 
 // STDLIB INC'S
@@ -16,7 +15,7 @@
 
 
 // CORE DATA STRUCTURES
-typedef struct I754	{
+typedef struct i754	{
 	
 	char * (*readFloat)( float f );
 	char * (*reaDouble)( double f );
@@ -30,9 +29,9 @@ typedef struct I754	{
 	void (*writeFloat)(float * dest, char * str);
 	void (*writeDouble)(double * dest, char * str);
 
-} I754;
+} i754;
 
-typedef struct I754_Float	{
+typedef struct i754_Float	{
 
 	int sign;
 	
@@ -41,11 +40,11 @@ typedef struct I754_Float	{
 	// NOT COMPLETE!
 	int significand;
 
-} I754_Float;
+} i754_Float;
 
 
 // FNC PROTOTYPES
-struct I754 * initI754();
+struct i754 * initi754();
 
 char * IEEE_readFloat( float f );
 char * IEEE_reaDouble( double f );
@@ -56,8 +55,8 @@ void IEEE_writeDouble(double * dest, char * str);
 char * IEEE_convertFloatString2BigEndian( char * str );
 char * IEEE_convertDoubleString2BigEndian( char * str );
 
-struct I754_Float * IEEE_writeFloatStruct( float * f );
-float IEEE_readFloatStruct( struct I754_Float* f );
+struct i754_Float * IEEE_writeFloatStruct( float * f );
+float IEEE_readFloatStruct( struct i754_Float* f );
 
 unsigned short int IEEE_getFloatBit( char * str, unsigned int offset );
 unsigned short int IEEE_getDoubleBit( char * str, unsigned int offset );

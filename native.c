@@ -1,21 +1,14 @@
-
+// NATIVE_C
+// APLIB SUBMODULE FOR NATIVE (CHIP_LIMITED_PRECISION) FUNCTIONS.
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
 #include "native.h"
-
-#define toggle char
-#define L 171
-#define R 79
-
-#define ON 1
-#define OFF 0
 
 
 // i = ith prime number, if n is set, i is ignored. n will test for a prime number. f is a flag, set to TRUE if you want the ith prime number, or if you want to test if the arg u pass is literally prime.
-large isprime ( large i, toggle f )	{
+large isprime ( large i )	{
 	
 	toggle report;
 	
@@ -92,4 +85,81 @@ large isprime ( large i, toggle f )	{
 }
 
 
+
+int primedata(unsigned int min, unsigned int max, unsigned int step)	{
+	// step: if set to 1, the step increment is to accumulate +1 for each prime number discovered.
+	// if set to 2, the step increment is the distance to the current prime from the last prime (v. low number, usually single digits)
+	// otherwise, the step increment is accumulative of each step-change between each pair of current & last prime number.
+	// remember, the only even prime number is 2, so only need to check odd-numbers.
+	
+	char * s = allocs(1024*8*10);
+	
+	unsigned int p = 0;
+	unsigned int p2 = 0;
+	unsigned int c = 0;
+	
+	max += 1;
+	
+	if(min<=2)	{
+	
+		cat(5, s, "['", itoa2(2), "', ", itoa2(0), "],\n");
+		
+		/**
+		strcat(s, itoa(2));
+		strcat(s, "', ");
+		strcat(s, itoa(0));
+		strcat(s, "],\n");
+		*/
+		
+		min = 3;
+		
+		p2 = prime(0, 2, 0);
+		c++;
+	}
+	
+	if((min%2)==0)
+		min++;
+	
+	if(p2==0)
+		p2 = prime(0, min, 0);
+	
+	while(min<max)	{
+		
+		if(p = prime(0, min, 0))	{
+			
+			if(step==1)
+				c++;
+			
+			else if(step==2)
+				c = p - p2;
+			
+			else
+				c = c + (p - p2);
+			
+			sprintf(s, "%s%s%d", s, "['", p);
+			strcat(s, "', ");
+			strcat(s, itoa2(c));
+			strcat(s, "],  ");
+			
+			p2 = p;
+		}
+		
+		min += 2;
+	}
+
+	printf("\n%s\n", s);
+
+	free(s);
+	return 1;
+	
+	/**
+	
+		The outputted string is in the following format, but the numbers will be different:
+		
+		['2',  2],
+		['3',  3],
+		['4'   3],
+		['5',  5]	
+	*/
+}
 

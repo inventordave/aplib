@@ -2,7 +2,7 @@
 #include "tests.h"
 #include "aplib.h"
 #include "ap.h"
-#include "I754.h"
+#include "i754.h"
 #include "ap_io.h"
 
 
@@ -124,8 +124,8 @@ void andTest(int argc, char **argv)	{
 
 void test2kMax(int argc, char **argv)	{
 	
-	int temp = DIV_BY_2_PRINT_ROWS;
-	DIV_BY_2_PRINT_ROWS = 0;
+	int temp = DIVBY2_PRINT_ROWS;
+	DIVBY2_PRINT_ROWS = 0;
 	
 	aP input;
 	parseaP(&input, argv[1]);
@@ -133,7 +133,7 @@ void test2kMax(int argc, char **argv)	{
 	char * _ = input.major;
 	
 	int a = max2k(input);
-	DIV_BY_2_PRINT_ROWS = temp;
+	DIVBY2_PRINT_ROWS = temp;
 	
 	printf( "%s %s %s %s\n", c("Minimum Maximal 2k exponent for", FG_BRIGHT_MaGENTa), c(_, FG_BRIGHT_GREEN), c("=", FG_CYaN), c(int2str(a), FG_BRIGHT_GREEN) );
 	
@@ -220,8 +220,8 @@ void dec_2_Bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_
 
 void fs_test1(int argc, char **argv)	{
 	
-	// This test function is to test construction and access to struct "I754_Float"
-	struct I754_Float * a;
+	// This test function is to test construction and access to struct "i754_Float"
+	struct i754_Float * a;
 	
 	float f = -85.125f;
 	
@@ -288,7 +288,7 @@ void q_test(int argc, char **argv)	{
 	print( c("If both values are the same, it indicates readFloat() & writeFloat() are working correctly.\n", FG_YELLOW) );
 	
 
-	struct I754_Float* f2 = IEEE_writeFloatStruct( &f );
+	struct i754_Float* f2 = IEEE_writeFloatStruct( &f );
 	float _f = IEEE_readFloatStruct( f2 );
 	printf( "_f = %f\n", _f );
 	printf( "%sIf the above value is the same as (%f), it indicates writeFloatStruct() & readFloatStruct() are working correctly.%s\n", FG_YELLOW, f, NORMaL );
@@ -302,7 +302,7 @@ void q_test(int argc, char **argv)	{
 
 void writeFloatTest(int argc, char **argv)	{
 	
-	struct I754 * lib = initI754();
+	struct i754 * lib = initi754();
 	
 	float a = 1701.79f;
 
@@ -319,7 +319,7 @@ void writeFloatTest(int argc, char **argv)	{
 
 void readFloatTest(int argc, char **argv)	{
 
-	struct I754 * lib = initI754();
+	struct i754 * lib = initi754();
 
 	float f;
 	

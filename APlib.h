@@ -17,9 +17,12 @@
 
 
 // SUGAR
-#define NEW_LINE printf("\n");
-#define NL NEW_LINE
-#define bool int
+
+AP AP0;
+AP AP1;
+
+char* s0 = "0";
+char* s1 = "1";
 
 
 // STATIC DEFS
@@ -74,13 +77,14 @@ void flipSign( AP* );
 void setSign( AP*,char );
 char getSign( AP* );
 
+char peek( large,char* );
+
 signed short int cmpAP( AP*,AP* );
 signed int overflow( AP*, int result, signed int k );
-char tt( AP,AP );
+char tt( AP*,AP* );
 char tt_mul( AP*,AP* );
 
-#define part byte
-statusCode setPart( AP, char *, part );
+#define part toggle
 
 AP DefaultPrecision;
 
@@ -91,18 +95,15 @@ typedef struct __lens	{
 } lens;
 
 
+AP NOP( AP,AP );
 
 AP ADD( AP A, AP B );
 AP ADDP( AP A, AP B, AP P );
-
-
-
 
 AP SUB( AP A, AP B );
 AP SUBP( AP A, AP B, AP P );
 #define SUBTRACT SUB
 #define SUBTRACTP SUBP
-
 
 AP MUL( AP A, AP B );
 AP MULP( AP A, AP B, AP P );
@@ -116,88 +117,34 @@ AP DIVP( AP A, AP B, AP P );
 #define SUBDIVIDE DIVIDE
 #define SUBDIVIDEP DIVIDEP
 
-extern int DIV_BY_2_PRINT_ROWS;
+AP RECIPROCAL( AP A );
+AP RECIPROCAL2( AP A, AP B );
+#define N1 RECIPROCAL
+#define NM RECIPROCAL2
+AP RECIPROCALP( AP A, large P );
+AP RECIPROCAL2P( AP A, AP B, large P );
 
-char* memp( large numParts, large numBytes );
+extern int DIVBY2_PRINT_ROWS;
 
-
-char* mem( large numBytes );
-
-
-
-
-void* cmem( large nb )	{ return calloc( nb,1 ); }
-
-char* zmem( large nb );
-char* zmem( large nb )	{
-
-	char* _ = (char*) malloc( nb+1 );
-	
-	large i;
-	for( i=0; i<nb; i++ )
-		_[i] = '0';
-
-	_[i] = '\0';
-	
-	return _;
-}
 
 #define PartW 1
 #define PartF 2
 #define SignPart 0
 
 
-statusCode setPartW( AP A, char * _ )	{
 
-	return setPart( A, _, PartW );
-}
-statusCode setPartF( AP A, char * _ )	{
+statusCode setPart( AP* A, char * digits, int sign_maj_min );
+statusCode setPartW( AP* A, char * _ );
+statusCode setPartF( AP* A, char * _ );
 
-	return setPart( A, _, PartF );
-}
 
-statusCode setPart( AP A, char * digits, int sign_maj_min )	{
 
-	if( sign_maj_min==SignPart )	{
-
-		A->sign = *digits;
-		
-		if( A->sign==digits[0] )
-		freturn SUCCESS;
-		else
-		return FAIL;
-	}
-
-	char * success;
-	char * _;
-	
-	if( sign_maj_min==1 )
-		_ = A.major;
-	else
-		_ = A.minor;
-	
-	if( strlen(_) < strlen(digits) )
-		success = (char *)realloc(_, strlen(digits)+1);
-	
-	_ = success;
-	
-	large i;
-	for( i=0; i<strlen(_); i++ )
-		_[i] = digits[i];
-	
-	_[i] = '\0';
-	
-	return i;
-}
-
-AP RECIPROCAL( AP A );
 
 // These are full-precision by nature.
-AP DIV_BY_2(AP A);
+AP DIVBY2(AP A);
 AP EXP(AP A, AP B);
-AP RECIPROCAL( AP A );
 
-#define D2 DIV_BY_2
+#define D2 DIVBY2
 #define E EXP
 
 char * AND(char * LHS, char * RHS);
@@ -215,13 +162,13 @@ int GCD(int a, int b, int lcm);
 char * DEC_2_BIN(AP input, int packed);
 char * BIN_2_DEC(char * bin);
 
-int max2k(AP input);
-int min2k(AP input);
+large max2k(AP input);
+large min2k(AP input);
 
 void FreeAP(AP A);
 int MSD(int num);
 void pack_trailing_zeroes( char * curr_row, int Array_length, int num_zeroes );
-char * fill_leading_zeroes( char * str, int num_zeroes );
+char * fill_leading_zeroes( char * str, large num_zeroes );
 
 int str2int(char *input);
 char * int2str(int v);

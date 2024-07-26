@@ -29,7 +29,7 @@ int getopt_main(int argc, char **argv)	{
 }
 
 // SUGAR
- int seq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
+int seq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
 
 	return (strcmp(a, b) == 0);
 }

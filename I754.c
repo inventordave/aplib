@@ -1,9 +1,9 @@
-#include "I754.h"
+#include "i754.h"
 
 // CORE FNCS
-struct I754_Float * IEEE_writeFloatStruct( float * f )	{
+struct i754_Float * IEEE_writeFloatStruct( float * f )	{
 	
-	struct I754_Float * a = (struct I754_Float *)malloc( sizeof(I754_Float) );
+	struct i754_Float * a = (struct i754_Float *)malloc( sizeof(i754_Float) );
 	
 	//char * i = (char *)a;
 	
@@ -28,7 +28,7 @@ struct I754_Float * IEEE_writeFloatStruct( float * f )	{
 	return a;
 }
 
-float IEEE_readFloatStruct( struct I754_Float* f )	{
+float IEEE_readFloatStruct( struct i754_Float* f )	{
 
 	float a;
 	
@@ -274,9 +274,9 @@ void IEEE_writeDouble(double * dest, char * str)	{
 	}
 }
 
-struct I754 * initI754()	{
+struct i754 * initi754()	{
 	
-	struct I754 * lib = malloc( sizeof(struct I754) );
+	struct i754 * lib = malloc( sizeof(struct i754) );
 	
 	lib->readFloat = IEEE_readFloat;
 	lib->reaDouble = IEEE_reaDouble;
