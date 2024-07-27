@@ -4,6 +4,10 @@
 #define colouriser colorMode
 #define colourizer colouriser
 
+extern char resetAnsiVtCodes(char);
+void SetVT( char *, char * );
+
+
 extern char ansivt;
 
 extern char FG_BLACK[8];
@@ -44,8 +48,7 @@ extern char BG_BRIGHT_WHITE[8];
 
 extern char NORMAL[8];
 
-extern char resetAnsiVtCodes(char);
-void swap4color( char *, char * );
+
 
 #endif
 

@@ -6,6 +6,7 @@
 #define DAVELIB_HEADER_FILE
 
 // INC'S
+#include <string.h>
 #include "io.h"
 
 // USEFUL CONSTANTS

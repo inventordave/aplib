@@ -29,6 +29,7 @@ int main(int argc, char **argv)	{
 	if( argc<3 )
 		exit( print( "Not enough command-line args passed. You should pass an Operator, then 2 Integer values, with at least 1 space between each of the 3 args.\n") );
 
+	init_();
 	colorMode();
 	
 	AP (*OP)( AP A, AP B );
@@ -80,8 +81,8 @@ int main(int argc, char **argv)	{
 	
 	// div(a,b)
 	
-	AP _1 = newAP( 1024, 0 );
-	AP _2 = newAP( 1024, 0 );
+	AP _1 = NewAP( 1024, 0 );
+	AP _2 = NewAP( 1024, 0 );
 	
 	strcpy( _1.major, argv[1] );
 	strcpy( _2.major, argv[2] );
@@ -226,7 +227,7 @@ int main(int argc, char **argv)	{
 	
 	// TEST 2
 	char * test_num;
-	AP input = newAP( 256, 0 );
+	AP input = NewAP( 256, 0 );
 	
 	if( argc > 3 )
 		test_num = strdup( argv[3] );

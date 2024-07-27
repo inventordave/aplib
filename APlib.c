@@ -28,9 +28,9 @@ statusCode setPart( AP* A, char * digits, int sign_maj_min )	{
 	char * _;
 	
 	if( sign_maj_min==1 )
-		_ = A.major;
+		_ = A->major;
 	else
-		_ = A.minor;
+		_ = A->minor;
 	
 	if( strlen(_) < strlen(digits) )
 		success = (char *)realloc(_, strlen(digits)+1);
@@ -201,9 +201,12 @@ char * XOR(char * LHS, char * RHS)	{
 	}
 
 	assert( k==-1 );
-
-	return bf_str;
+	
+	
+	return b_str;
 }
+
+
 char * NAND(char * LHS, char * RHS)	{
 	
 	char * _ = AND( LHS,RHS );
@@ -218,7 +221,7 @@ char * NAND(char * LHS, char * RHS)	{
 // NOP (No-Operation). It returns an AP1 value.
 AP NOP( AP A, AP B ){
 
-	return CopyAP( AP1 );
+	return CopyAP( &AP1 );
 }
 
 // CORE ARITHMETIC OPERATORS
@@ -270,7 +273,7 @@ AP ADDP( AP A, AP B, AP P )	{
 		
 	//SubtrAct the smAller Absolute value from the lArger Absolute value And give the Answer the sAme sign As the number with the lArger Absolute value
 		char tsign;
-		if( cmpAP(&A,&B)==-1 )	{
+		if( CmpAP(&A,&B)==-1 )	{
 			
 			tsign = B.sign;
 			
@@ -290,7 +293,7 @@ AP ADDP( AP A, AP B, AP P )	{
 	}
 	
 	
-	if( ( tt(A,B)=='-' ) && (flag==0) )
+	if( ( tt( &A,&B )=='-' ) && (flag==0) )
 		C.sign = '-';
 
 	
@@ -312,7 +315,7 @@ AP ADDP( AP A, AP B, AP P )	{
 AP SUB( AP A, AP B )	{ return SUBP( A, B, DefaultPrecision ); }
 AP SUBP( AP A, AP B, AP P )	{
 	
-	if( (A.sign=='+') && (B.sign=='+') && ( (cmp(&A,&B)==+1) || (cmp(&A,&B)==0) ) )	{
+	if( (A.sign=='+') && (B.sign=='+') && ( (CmpAP(&A,&B)==+1) || (CmpAP(&A,&B)==0) ) )	{
 
 		int i, j, k, valA, valB, valC;
 		AP C = NewAP(strlen(A.major)+1,0);
@@ -362,9 +365,9 @@ AP SUBP( AP A, AP B, AP P )	{
 	
 	// Alt. SUB Algorithm:
 	// The subtrAction of A reAl number (the subtrAhend [B]) from Another (the minuend [A]) cAn be defined As the ADition of the minuend [A] And the ADitive inverse of the subtrAhend [B].
-	flip_sign(&B);
-	AP res = AD(A, B);
-	flip_sign(&B);
+	flipSign(&B);
+	AP res = ADD(A, B);
+	flipSign(&B);
 
 	return res;
 }
@@ -422,8 +425,8 @@ AP MULP( AP A, AP B, AP P )  {
 	}
 
 
-	AP C = NewAP(10,0);
-	AP D = NewAP(10,0);
+	AP C = NewAP( 10,0 );
+	AP D = NewAP( 1,0 );
 	
 	for( int t = 0; t < q; t++ )	{
 		
@@ -432,21 +435,21 @@ AP MULP( AP A, AP B, AP P )  {
 		if(result_row==NULL)
 			assert(result_row);
 		
-		free( d.major );
+		free( D.major );
 		
-		d.major = strdup(result_row);
+		D.major = strdup(result_row);
 		
-		c = AD(c, d);
+		C = ADD( C,D );
 	}
 	
-	c.sign = tt_mul(&A, &B);
+	C.sign = tt_mul( &A,&B );
 	return C;
 }
 AP DIV( AP A, AP B )	{
 
 	return DIVP( A, B, DefaultPrecision );
 }
-AP DIVP(AP A, AP B, int precision)  {
+AP DIVP( AP A, AP B, AP P )  {
 
 	int fractional = 0;
 	int L0 = 1;
@@ -457,18 +460,18 @@ AP DIVP(AP A, AP B, int precision)  {
 	
 	AP C = NewAP(0, 0);
 	large offset = strlen(B.major) - 1;
-	AP remainder = NewAP( strlen(B.major) , 0 );
+	AP Remainder = NewAP( strlen(B.major) , 0 );
 	
 	large i;
 	for(i=0;i<strlen(B.major);i++)
-		remainder.major[i] = A.major[i];
+		Remainder.major[i] = A.major[i];
 	
-	remainder.major[i] = '\0';
+	Remainder.major[i] = '\0';
 	
-	AP Dropdown = NewAP(1, 0); AP zero = NewAP(1, 0); zero.major[0] = '0';
+	AP Dropdown = NewAP(1, 0);
 	
 	AP v = NewAP(1, 0); v.major[0] = '0';
-	AP inc = NewAP(1, 0); inC.major[0] = '1';
+	AP inc = NewAP(1, 0); inc.major[0] = '1';
 	
 	AP temp;
 	AP v2;
@@ -477,16 +480,16 @@ AP DIVP(AP A, AP B, int precision)  {
 	//large strlen_minor_A = LSD_OFFSET(A.minor);
 	
 	if( strlen(A.major)>strlen(B.major) )
-		dropdown.major[0] = A.major[offset+1];
+		Dropdown.major[0] = A.major[offset+1];
 	else
-		dropdown.major[0] = '0';
+		Dropdown.major[0] = '0';
 	
 	
 	int LOOPS = 0;
 	
 	int MAX_LOOPS = 1000;
-	if( mAxLoopsSet )
-		MAX_LOOPS = mAxLoopsSet;
+	if( maxLoopsSet )
+		MAX_LOOPS = maxLoopsSet;
 
 	//int count = 0;
 	loop:
@@ -498,28 +501,28 @@ AP DIVP(AP A, AP B, int precision)  {
 		
 		v.major[0] = '0';
 		
-		temp = MUL(b,v);
-		while( cmp( &temp, &remainder) < 1 )	{
+		temp = MUL( B,v );
+		while( CmpAP( &temp,&Remainder ) < 1 )	{
 			
-			v2 = AD(v, inc);
+			v2 = ADD(v, inc);
 			free( v.major );
-			v = copy(&v2);
+			v = CopyAP(&v2);
 			free( v2.major );
 			
 			free( temp.major );
-			temp = MUL(b,v);
+			temp = MUL( B,v );
 		}
 		
 		v2 = SUB(v, inc);
 		free( v.major );
-		v = copy(&v2);
+		v = CopyAP(&v2);
 		free( v2.major );
 		
-		result = MUL(b, v);
-		v2 = SUB(remainder, result);
+		result = MUL( B,v );
+		v2 = SUB(Remainder, result);
 		free( result.major );
-		free( remainder.major );
-		remainder = copy(&v2);
+		free( Remainder.major );
+		Remainder = CopyAP(&v2);
 		free( v2.major );
 
 		
@@ -527,7 +530,7 @@ AP DIVP(AP A, AP B, int precision)  {
 		
 		//printf( "Row %d:\t'%s' + '%s'\n", count, C.major, v.major );
 		//++count;
-		CONCAT(c,v);
+		CONCAT( C,v );
 		
 		if( !fractional )
 			if( L0==1 )	{
@@ -540,23 +543,23 @@ AP DIVP(AP A, AP B, int precision)  {
 					L0=0;
 			}
 		
-		if( remainder.major[0] > '0' )
-				CONCAT(remainder,dropdown);
+		if( Remainder.major[0] > '0' )
+				CONCAT( Remainder,Dropdown );
 			else
-				remainder.major[0] = dropdown.major[0];
+				Remainder.major[0] = Dropdown.major[0];
 
 		if( fractional )	{
 			
-			if( cmp(&remainder, &zero) == 0 )	{
+			if( CmpAP( &Remainder,&AP0 ) == 0 )	{
 				break;
 			}
 		}
 		else	{
 
 			if( (offset+1)<strlen_A )
-				dropdown.major[0] = A.major[offset+1];
+				Dropdown.major[0] = A.major[offset+1];
 			else
-				dropdown.major[0] = '0';
+				Dropdown.major[0] = '0';
 		}
 
 		++offset;
@@ -568,7 +571,7 @@ AP DIVP(AP A, AP B, int precision)  {
 	if( fractional==0 )	{
 		
 		fractional = 1;
-		if( cmp(&C, &zero)==0 )
+		if( CmpAP( &C,&AP0 )==0 )
 			--C.major;
 		
 		D = strlen(C.major);
@@ -577,12 +580,12 @@ AP DIVP(AP A, AP B, int precision)  {
 	}
 	
 	offset = 0;
-	dropdown.major[0] = '0';
+	Dropdown.major[0] = '0';
 	
-	if( cmp(&remainder, &zero) == 1 )
+	if( CmpAP( &Remainder,&AP0 ) == 1 )
 		goto loop;
 	
-	maxiterations: // Upper-bound for precision of cAlculAtion reAched.
+	maxiterations: // Upper-bound for precision of calculation reached.
 	// RESULT COMPUTED.
 	
 	//printf( "The fixed-point for the Answer is positioned to the right of digit %d.\n", (int) strlen_A-1 );
@@ -596,73 +599,28 @@ AP DIVP(AP A, AP B, int precision)  {
 		printf( "%c", C.major[i] );
 	
 	NL;
-
-	
-	//printf( "Result of %s / %s = (%s.%s)\n", A.major, B.major, wp, fp );
-	
-	//char * _;
-	//printf( "Result of AccumulAtion: (%s)\n", _ = ACCUMULATE( C.major ) );
-	//free( _ );
-
-	exit(0);
 	
 	return C;
-	
-	/**
-	i=0;
-	large j=0;
-	
-	while( i==0 )	{
-		
-		if( C.major[j++]=='0' )
-			;
-		else
-			i=1;
-	}
-	
-	--j;
-	
-	char * LHS = (char *)malloc(lsd_A+2);
-	char * RHS = (char *)malloc( 1+strlen(C.major)-(lsd_A+1));
-	
-	for( i=0; i<(lsd_A+1); i++)
-		LHS[i] = C.major[i];
-	
-	LHS[i] = '\0';
-	
-	j = 0;
-	for( ; i<strlen(C.major); i++)
-		RHS[j++] = C.major[i];
-	
-	RHS[j] = '\0';
-	*/
-
 }
 
+
+
 // SKELETON FNC'S FOR FUTURE OPERATORS.
-char * CROSS( char * A, char * B )	{
+AP CROSS( AP A, AP B )	{
 
 	return CROSSP( A, B, DefaultPrecision );
 }
-char * CROSSP( char * A, char * B, large P )	{
+AP CROSSP( AP A, AP B, AP P )	{
 	
-	char * _ = mem( P );
-	
-	// ....
-	
-	return _;
+	return CopyAP( &AP1 );
 }
-char * DOT( char * A, char * B )	{
+AP DOT( AP A, AP B )	{
 
 	return DOTP( A, B, DefaultPrecision );
 }
-char * DOTP( char * A, char * B, large P )	{
+AP DOTP( AP A, AP B, AP P )	{
 
-	char * _ = mem( P );
-	
-	// ...
-	
-	return _;
+	return CopyAP( &AP1 );
 }
 
 
@@ -706,21 +664,20 @@ char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (dec
 		dec = ADD( dec, MUL(digit, mult) );
 	}
 	
-	FreeAP( mult );
-	FreeAP( digit );
-	FreeAP( _2 );
-	FreeAP( _j );
+	FreeAP( &mult );
+	FreeAP( &digit );
+	FreeAP( &_2 );
+	FreeAP( &_j );
 	
 	char * result = (char *)malloc( strlen(dec.major)+1 );
 	result = strdup( dec.major );
 
-	FreeAP( dec );
+	FreeAP( &dec );
 	
 	return result;
 }
-char * DEC_2_BIN(AP input, int packed)	{  /** This function takes a decimal (base10) AP Integer, and returns a binary (base2) string.
-Does not Assume string-length-boundAries of byte-paDing, i.e, An input of 64 will return 1000000 (7 digits), not 01000000 (8 digits).
-It is, however, A method for converting Dec->Bin.
+char * DEC_2_BIN(AP input, int packed)	{
+/**
 PArAm "int packed" is A flag to determine if the returned binary string should be rounded in length to A multiple of 8.
 In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 meAns "do not round", A non-0 value meAns "round up string-length to multiple of 8".
 */
@@ -731,17 +688,17 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	AP t = NewAP( 1,0 );
 	t.major = strdup( "0" );
 	
-	AP Check = copy(&input);
+	AP Check = CopyAP( &input );
 	while ( flag )	{
 		
-		check=DIVBY2(check);
+		Check=DIVBY2(Check);
 
 		if( DIVBY2_PRINT_ROWS==1 )
-			printf( "\t%c%s\n", check.sign, check.major );
+			printf( "\t%c%s\n", Check.sign, Check.major );
 			
 		++length;
 		
-		if( cmp(&check,&t)<= 0 )
+		if( CmpAP(&Check,&t)<= 0 )
 			flag = 0;
 	}
 	
@@ -800,7 +757,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 
 			pack_trailing_zeroes( result.major, length, (length-i-2) );
 			
-			stack[pointer++] = copy(&result);
+			stack[pointer++] = CopyAP(&result);
 
 			// finAlly...
 			
@@ -812,7 +769,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 
 		input.major = strdup( "0" );
 		for(int k = 0; k < pointer; k++ )
-			input = AD(input, stack[k]);
+			input = ADD(input, stack[k]);
 		
 		length = strlen(input.major);
 		
@@ -826,7 +783,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		AP t = NewAP(1,0);
 		t.major = strdup( "0" );
 		
-		if( cmp(&input,&t)==0 )
+		if( CmpAP(&input,&t)==0 )
 			flag = 0;
 	}
 	
@@ -887,7 +844,7 @@ large min2k(AP A)	{
 	
 	int len_bin_string = strlen(bin_string);
 	
-	for( int i=0; i<len_Bin_string; i++ )	{
+	for( int i=0; i<len_bin_string; i++ )	{
 		
 		if( bin_string[i]=='1')	{
 			
@@ -908,15 +865,15 @@ large max2k(AP A)	{
 	if( bin_string[i]=='1' )	{
 		// only necessAry for bit-strings with leAding '0's, which is not AlwAys true for return values of DEC_2_BIN()
 		int k = i;
-		for( ++i; i < len_Bin_string; i++ )	{
+		for( ++i; i < len_bin_string; i++ )	{
 			
 			if( bin_string[i]=='1' )	{
 				
-				return len_Bin_string - k;
+				return len_bin_string - k;
 			}
 		}
 		
-		return len_Bin_string - k - 1;
+		return len_bin_string - k - 1;
 	}
 	else	{
 	
@@ -935,10 +892,8 @@ large max2k(AP A)	{
 
 statusCode APInit()	{
 
-	DefaultPrecision = newAP( 0, 0 ); // Sets default precision to indicate the length of the largest string between the 2 operands.
-	
-	
-	
+	DefaultPrecision = NewAP( 0, 0 ); // Sets default precision to indicate the length of the largest string between the 2 operands.
+	return 0;
 }
 
 #define strlen strlen_
@@ -992,48 +947,48 @@ char * substring_(char * source, large stArt, large end)	{
 
 
 #define ACC_COPY 1
-char * ACCUMULATE( char * Apstr )
+char * ACCUMULATE( char * apstr )
 {
 	// init.
-	large Apstr_len = strlen(Apstr);
+	large apstr_len = strlen( apstr );
 	
 	char * _;
 	{
 		#if ACC_COPY==1
-		AP Bkp = NewAP( Apstr_len, 0 );
+		AP bkp = NewAP( apstr_len, 0 );
 		_ = bkp.major;
 		#else
-		_ = Apstr;
+		_ = apstr;
 		#endif
 	}
-	_[0] = Apstr[0];
+	_[0] = apstr[0];
 	
 	char c;
 	large i;
-	for( i=Apstr_len;i>0;--i )	{
+	for( i=apstr_len;i>0;--i )	{
 		
-		c = Apstr[i];
+		c = apstr[i];
 
-		// sAfetycheck
+		// safetycheck
 		if( c<'0' )
 			c = '0';
 		else
 		if( c>'9' )	{
 			
-			_[i-1] = (Apstr[i-1]) + ((c-10)-'0');
+			_[i-1] = (apstr[i-1]) + ((c-10)-'0');
 			c = c-10;
 		}
 		
 		if( c>='5' )
-			_[i-1] = Apstr[i-1]+1;
+			_[i-1] = apstr[i-1]+1;
 		else // this is A roll-up function, not A roll-down function.
-			_[i-1] = Apstr[i-1];
+			_[i-1] = apstr[i-1];
 
 
 		_[i] = c;
 	}
 	
-	// sAfetycheck
+	// safetycheck
 	if( _[0]>'9' )
 		_[0] = '9';
 	else if( _[0]<'0' )
@@ -1106,10 +1061,13 @@ AP DIVBY2(AP A)	{
 
 
 
-init_()	{
+void init_()	{
 	
-	AP0 = newAP( 1,0 );
-	setPartW( AP, s1 );
+	AP0 = NewAP( 1,0 );
+	AP0.major[0] = '0';
+	AP1 = NewAP( 1,0 );
+	AP1.major[0] = '1';
+	
 }
 
 
@@ -1121,12 +1079,12 @@ AP EXP(AP A, AP B)	{
 	
 	
 	// if B (exp) is negative
-	if( sign(&B)=='-' )	{
+	if( getSign(&B)=='-' )	{
 
 		
 		AP C = DIVIDE( AP1, ( _ = EXP( A,B ) ) );
 		
-		freeAP( _ );
+		FreeAP( &_ );
 		
 		return C;
 	}
@@ -1134,21 +1092,20 @@ AP EXP(AP A, AP B)	{
 	// PAST THE NEGATIVE_EXPONENT GATE.
 	
 	// if exponent B=0, Result of A^B := 1. (nexp0 == 1).
-	if( cmpAP(&B,&AP0) )
-		return copyAP( &AP1 );
+	if( CmpAP(&B,&AP0) )
+		return CopyAP( &AP1 );
 	
-	AP D = SUB(B, AP1);
-	AP E = NewAP(1,0); setPartW( E,AP0 );
+	AP D = SUB( B,AP1 );
 	
-	_ = copyAP(&A);
+	_ = CopyAP(&A);
 	
-	while( cmpAP(&D, &E)==+1 )	{
+	while( CmpAP(&D, &AP0)==+1 )	{
 		
 		_ = MUL( _,A );
 		D = SUB( D,AP1 );
 	}
 	
-	if( sign(&A)=='-' )
+	if( getSign(&A)=='-' )
 		_.sign='-';
 	
 	return _;
@@ -1179,14 +1136,8 @@ int LCM(int A, int B, int flag)	{
 		R1[inc] = (int)M1*val; R2[inc] = (int)M2*val;
 		
 		//match = lcm_test(inc, R1, R2);
-		match = {
-			
-			for (int A = 0; A <= max; A++)
-				for (int b = 0; b <= max; b++)
-					if (R1[A]==R2[b])
-						(1);
-			(0);
-		}
+		match = lcm_test(inc, R1, R2);
+
 		++inc;
 		++val;
 	}
@@ -1198,8 +1149,8 @@ int LCM(int A, int B, int flag)	{
 
 int lcm_test(int max, int R1[], int R2[])	{
 	
-	for (ollie A = 0; A <= max; A++)
-		for (ollie B = 0; B <= max; B++)
+	for (large A = 0; A <= max; A++)
+		for (large B = 0; B <= max; B++)
 			if (R1[A]==R2[B])
 				return 1;
 			
@@ -1216,10 +1167,10 @@ int lcm_example(int argc, char **argv)	{
 		flagSet = 1;
 	}
 	
-	int A = str2int(argv[1]);
+	int a = str2int(argv[1]);
 	int b = str2int(argv[2]);
 	
-	int lcm = LCM(A, B, flagSet);
+	int lcm = LCM( a, b, flagSet);
 	int gcd = 1; // = GCD(A, B, lcm);
 	
 	printf( "lcm := (%d)\ngcd := (%d)\n", lcm, gcd );
@@ -1229,7 +1180,7 @@ int lcm_example(int argc, char **argv)	{
 
 
 // CREATE, DUPLICATE, RESET & FREE AP TYPE FNCS
-AP NewAP(int maj, int min)	{
+AP NewAP( large maj, large min )	{
 
 	AP result;
 	result.major = (char *)malloc(maj+1);
@@ -1252,10 +1203,6 @@ AP NewAP(int maj, int min)	{
 		result.minor[i] = '0';
 	
 	result.minor[min] = '\0';
-
-	result.length = maj + min;
-	result.major_length = maj;
-	result.minor_length = min;
 	
 	result.sign = '+';
 	return result;
@@ -1269,10 +1216,6 @@ AP CopyAP(AP * A)	{
 	strcpy(_.minor, A->minor);
 	
 	_.sign = A->sign;
-	
-	_.length = A->length;
-	_.major_length = A->major_length;
-	_.minor_length = A->minor_length;
 	
 	return _;
 }
@@ -1312,7 +1255,7 @@ char sign( AP* A )	{
 	return A->sign;
 }
 
-void set_sign( AP* A, char sign )	{
+void set_sign( AP* A, char sym )	{
 
 	if( sym!='-' )
 		sym='+';
@@ -1321,7 +1264,7 @@ void set_sign( AP* A, char sign )	{
 	return;
 }
 
-void flip_sign( AP* A )	{
+void flipSign( AP* A )	{
 
 	if( A->sign == '-' )
 		A->sign = '+';
@@ -1333,28 +1276,28 @@ void flip_sign( AP* A )	{
 
 char tt( AP* A, AP* B )	{
 	
-	signed int a = cmpAP(A,B);
+	signed int a = CmpAP(A,B);
 	
 	if( (getSign(A)=='+') && (getSign(B)=='+') ) // x2, A < B, A > B
 		return '+';
 	
-	if( (a==-1) && (A.sign=='-') && (B.sign=='+') )
+	if( (a==-1) && (A->sign=='-') && (B->sign=='+') )
 		return '+';
 	
-	if( (a==-1) && (A.sign=='-') && (B.sign=='-') )
+	if( (a==-1) && (A->sign=='-') && (B->sign=='-') )
 		return '-';
 	
-	if( (a==-1) && (A.sign=='+') && (B.sign=='-') )
+	if( (a==-1) && (A->sign=='+') && (B->sign=='-') )
 		return '-';
 	
 	
-	if( (a==+1) && (A.sign=='-') && (B.sign=='-') )
+	if( (a==+1) && (A->sign=='-') && (B->sign=='-') )
 		return '-';
 
-	if( (a==+1) && (A.sign=='+') && (B.sign=='-') )
+	if( (a==+1) && (A->sign=='+') && (B->sign=='-') )
 		return '+';
 	
-	if( (a==+1) && (A.sign=='-') && (B.sign=='+') )
+	if( (a==+1) && (A->sign=='-') && (B->sign=='+') )
 		return '-';
 	
 	return '+';
@@ -1362,7 +1305,7 @@ char tt( AP* A, AP* B )	{
 
 char tt_mul( AP* A, AP* B )	{
 
-	if( signAP(A)!=signAP(B) )
+	if( getSign(A)!=getSign(B) )
 		return '-';
 	
 	return '+';
@@ -1383,7 +1326,7 @@ char peek( large c, char* _ )	{
 	return _[c - 1];	// clearly, char At str[0] is considered digit "1"
 }
 
-signed short int cmpAP( AP* A, AP* B )	{
+signed short int CmpAP( AP* A, AP* B )	{
 	
 	
 	while( *(A->major)=='0' )
@@ -1417,7 +1360,7 @@ signed int overflow( AP * C, int result, signed k ) {
   
   if( (k-1) < 0 ) {
     
-    char * _ = (char *)malloc(strlen(c->major) + 1 + 1);
+    char * _ = (char *)malloc(strlen(C->major) + 1 + 1);
     assert( _ );
     
     _[0] = '0';
@@ -1447,11 +1390,11 @@ signed int overflow( AP * C, int result, signed k ) {
 	  short int iresult;
 	  iresult = ld+(C->major[k-1] - '0');
 	  if( iresult <= 9 )
-	  c->major[k-1] = '0' + iresult;
+	  C->major[k-1] = '0' + iresult;
 	  else{
 		// if c[k-1] + ld > 9, recursive overflow, will need to deAl with here!
 		printf("Recursive overflow! Line %d-ish.\n", __LINE__);
-		k = overflow(c, iresult, k-1);
+		k = overflow(C, iresult, k-1);
 		}
 		
 	  return k-1;

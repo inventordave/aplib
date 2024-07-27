@@ -122,8 +122,8 @@ signed int getOptions( int* argc, char** argv )	{
 
 
 // EXTRA FNCS
+void PrintASCIITable(char start, char end)	{
 
-void print_ASCII(char start, char end)	{
 	
 	if( (start<32 || end<32) )	{
 		
@@ -139,41 +139,43 @@ void print_ASCII(char start, char end)	{
 		end = temp;
 	}
 	
-	for( signed short int i=start; ; i+=5 )	{
+	for( char i=start; ; i+=5 )	{
 		
 		if( i>end )
-			i = end;
+		i = end;
 		
-		char j=(char)i;
+		char j=i;
 		signed int k = (end-i);
 		
 		if( k>4 )
-			k=4;
+		k=4;
 		
 		switch(k)
 		{
 			case 4:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
 			case 3:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
 			case 2:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
 			case 1:
-				printf("[%d]:=(%c)\t", j, j);
-				++j;
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
 			case 0:
-				printf("[%d]:=(%c)", j, j);
+			printf("[%d]:=(%c)", j, j);
 			default:
-				NL;
+			NL;
 			break;
 		}
 		
 		if(i==end)
-			return;
+		return;
 	}
+	
+	return;
 }
 
 

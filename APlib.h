@@ -19,6 +19,26 @@
 #define part toggle
 #define PART part
 
+
+char MUL_SYM = '*';
+char ADD_SYM = '+';
+char SUB_SYM = '-';
+char DIV_SYM = '/';
+char EXP_SYM = 'e';
+char AND_SYM = '&';
+char NOT_SYM = '~';
+char OR_SYM =  '|';
+char XOR_SYM = '^';
+char NAND_SYM = '@';
+char POSITIVE_SYM = '+';
+char NEGATIVE_SYM = '-';
+char DELIMETER_SYM = '.';
+char BASE10_SYM = '0';
+char BASE2_SYM = '2';
+char BASE16_SYM = 'H';
+char* ALL_DIGITAL_SYMBOLS = "0123456789abcdefABCDEF.hHxX";
+
+
 typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
 typedef struct
 AP {
@@ -50,13 +70,39 @@ typedef struct APExpC_2	{ // (APExpC OP APExpC)
 	
 } APExpC_2;
 
-// DEFAULT INTRINSICS
+
+// APLIB SYSTEM INTRINSICS
 AP AP0;
 AP AP1;
 AP DefaultPrecision;
 
+typedef struct __APLIB__{
 
-// APLIB FNC'S
+int ANSIVT;
+large Precision;
+} LL;
+
+
+struct __APLIB__ APLIB_;
+struct __APLIB__* APLIB = &APLIB_;
+
+
+//// --- APLIB FNC'S --- ////
+
+
+
+/**
+APLIB->DefaultPrecision, // 0 means the LHS/RHS operands determine the precision of a result value.
+APLIB->DefaultBase, // 2,10,16
+APLIB->PackedStrings, // if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
+*/
+
+ 
+statusCode InitAPLIB() {
+
+	return 0;
+}
+void init_();	
 
 // CREATE/RESET/GC AP VALUES.
 AP NewAP( large,large );
@@ -65,7 +111,7 @@ void ClearAP( AP* );
 void FreeAP( AP* A );
 
 // EQUALITY READ-OPERATOR
-signed short int cmpAP( AP*,AP* );
+signed short int CmpAP( AP*,AP* );
 
 // BOOLEAN BIT-WISE OPERATORS
 char * AND(char * LHS, char * RHS);
@@ -101,10 +147,13 @@ AP RECIPROCAL2( AP A, AP B );
 AP RECIPROCALP( AP A, large P );
 AP RECIPROCAL2P( AP A, AP B, large P );
 AP EXP(AP A, AP B);
-#define E EXP
+AP CROSS( AP A, AP B );
+AP CROSSP( AP A, AP B, AP P );
+AP DOT( AP A, AP B );
+AP DOTP( AP A, AP B, AP P );
 
 
-
+int maxLoopsSet;
 
 // SIGN ( +,- )
 void flipSign( AP* );

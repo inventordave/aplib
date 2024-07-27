@@ -154,8 +154,8 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 	NL;
 	
 	aP a, B, C;
-	a = NewaP( 10, 0 );
-	B = NewaP( 10, 0 );
+	a = NewAP( 10, 0 );
+	B = NewAP( 10, 0 );
 	
 	// arg a
 	parseaP(&a, argv[1]);
@@ -169,7 +169,7 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 	NL;
 	
 	// aD
-	C = aD(a, B);
+	C = ADD(a, B);
 	printf( "%c%s + %c%s = %c%s", a.sign, a.major, B.sign, B.major, C.sign, C.major );
 	
 	NL;
@@ -204,7 +204,7 @@ void dec_2_Bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_
 	
 	char * decimal = "543212362746234636432864963483264873264932649823649";
 	
-	aP a = NewaP( strlen(decimal), 0 );
+	aP a = NewAP( strlen(decimal), 0 );
 	a.major = strdup( decimal );
 	
 	char * binary = DEC_2_BIN(a, 1);

@@ -1,0 +1,6 @@
+gcc -Wall -g colour.c -c -o colour.o
+gcc -Wall -g io.c -c -o io.o
+gcc -Wall -g lib.c -c -o lib.o
+gcc -Wall -g i754.c -c -o i754.o
+gcc -Wall -g aplib.c -c -o aplib.o
+gcc -Wall -mconsole -g -O0 sandbox.c ap_io.c APlib.c io.o colour.o lib.o aplib.o -o test.exe

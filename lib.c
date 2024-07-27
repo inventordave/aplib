@@ -22,11 +22,14 @@ toggle fliptoggle( toggle* t )	{
 
 
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
-char* sanitizeStr( char* _ )	{
+char* sanitizeStr( char* A )	{
 	
-	while((*_) != '\0')	{
+	char * B = (char *)malloc( strlen(A)+1 );
+	char * _ = B;
+	
+	while((*A) != '\0')	{
 		
-		switch(*_)	{
+		switch(*A)	{
 
 			case 92: // \ backslash
 			case 34: // " double-quote
@@ -40,16 +43,22 @@ char* sanitizeStr( char* _ )	{
 
 				// printf( "Invalid char ('%c') (%d).\n", *_, *_ );
 				// Uncomment above line to see reporting to stdout of detected invalid chars in the input string.
-				*_ = '.'; // Arbitrary printable-char to replace invalid char with.
+				*B = '.'; // Arbitrary printable-char to replace invalid char with.
 				break;
 			
 			default:
+				*B = *A; 
 				//printf( "char ok: '%c'\n", (*str) );
 				break;	
 		}
 		
-		++_;
+		++A;
+		++B;
 	}
+	
+	*B = '\0';
+	
+	return _;
 }
 
 // SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
