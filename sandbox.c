@@ -58,7 +58,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", A.major, OPCODE, B.major, C.major );
+	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.major, OPCODE, B.major, C.major );
 	
 	return 0;
 }

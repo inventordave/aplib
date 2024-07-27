@@ -3,6 +3,32 @@
 #include "lib.h"
 #include "aplib.h"
 
+AP AP0;
+AP AP1;
+AP DefaultPrecision;
+
+struct __APLIB__ APLIB_;
+
+char MUL_SYM = '*';
+char ADD_SYM = '+';
+char SUB_SYM = '-';
+char DIV_SYM = '/';
+char EXP_SYM = 'e';
+char AND_SYM = '&';
+char NOT_SYM = '~';
+char OR_SYM =  '|';
+char XOR_SYM = '^';
+char NAND_SYM = '@';
+char POSITIVE_SYM = '+';
+char NEGATIVE_SYM = '-';
+char DELIMETER_SYM = '.';
+char BASE10_SYM = '0';
+char BASE2_SYM = '2';
+char BASE16_SYM = 'H';
+char* ALL_DIGITAL_SYMBOLS = "0123456789abcdefABCDEF.hHxX";
+
+int maxLoopsSet;
+
 statusCode setPartW( AP* A, char * _ )	{
 
 	return setPart( A, _, PartW );
@@ -24,7 +50,6 @@ statusCode setPart( AP* A, char * digits, int sign_maj_min )	{
 		return FAIL;
 	}
 
-	char * success;
 	char * _;
 	
 	if( sign_maj_min==1 )
@@ -33,9 +58,8 @@ statusCode setPart( AP* A, char * digits, int sign_maj_min )	{
 		_ = A->minor;
 	
 	if( strlen(_) < strlen(digits) )
-		success = (char *)realloc(_, strlen(digits)+1);
-	
-	_ = success;
+		_ = (char *)realloc(_, strlen(digits)+1);
+
 	
 	large i;
 	for( i=0; i<strlen(_); i++ )
@@ -453,7 +477,6 @@ AP DIVP( AP A, AP B, AP P )  {
 
 	int fractional = 0;
 	int L0 = 1;
-	int D = 0;
 	
 	//char * wp;
 	//char * fp;
@@ -487,9 +510,7 @@ AP DIVP( AP A, AP B, AP P )  {
 	
 	int LOOPS = 0;
 	
-	int MAX_LOOPS = 1000;
-	if( maxLoopsSet )
-		MAX_LOOPS = maxLoopsSet;
+	int MAX_LOOPS = 100;
 
 	//int count = 0;
 	loop:
@@ -544,9 +565,10 @@ AP DIVP( AP A, AP B, AP P )  {
 			}
 		
 		if( Remainder.major[0] > '0' )
-				CONCAT( Remainder,Dropdown );
-			else
-				Remainder.major[0] = Dropdown.major[0];
+			CONCAT( Remainder,Dropdown );
+		else	
+		if( offset != (strlen(B.major)-1) )
+			Remainder.major[0] = Dropdown.major[0];
 
 		if( fractional )	{
 			
@@ -557,6 +579,7 @@ AP DIVP( AP A, AP B, AP P )  {
 		else	{
 
 			if( (offset+1)<strlen_A )
+				
 				Dropdown.major[0] = A.major[offset+1];
 			else
 				Dropdown.major[0] = '0';
@@ -571,10 +594,9 @@ AP DIVP( AP A, AP B, AP P )  {
 	if( fractional==0 )	{
 		
 		fractional = 1;
+
 		if( CmpAP( &C,&AP0 )==0 )
 			--C.major;
-		
-		D = strlen(C.major);
 		
 		//wp = strdup( C.major );
 	}
@@ -590,7 +612,7 @@ AP DIVP( AP A, AP B, AP P )  {
 	
 	//printf( "The fixed-point for the Answer is positioned to the right of digit %d.\n", (int) strlen_A-1 );
 	
-	for( i=0; i<D; i++ )
+	for( i=0; i<(strlen_A-1); i++ )
 		printf( "%c", C.major[i] );
 	
 	printf( "." );
@@ -599,6 +621,9 @@ AP DIVP( AP A, AP B, AP P )  {
 		printf( "%c", C.major[i] );
 	
 	NL;
+	
+	printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
+	pause();
 	
 	return C;
 }
@@ -998,12 +1023,6 @@ char * ACCUMULATE( char * apstr )
 	return _;
 }
 
-int maxLoopsSet;
-
-
-
-
-
 
 AP DIVBY2(AP A)	{
 	
@@ -1067,7 +1086,8 @@ void init_()	{
 	AP0.major[0] = '0';
 	AP1 = NewAP( 1,0 );
 	AP1.major[0] = '1';
-	
+	DefaultPrecision = NewAP( 0, 0 ); // Sets default precision to indicate the length of the largest string between the 2 operands.
+		
 }
 
 
@@ -1077,22 +1097,25 @@ AP EXP(AP A, AP B)	{
 	
 	AP _;
 	
-	
+
 	// if B (exp) is negative
 	if( getSign(&B)=='-' )	{
 
+		B.sign = '+';
 		
-		AP C = DIVIDE( AP1, ( _ = EXP( A,B ) ) );
+		AP C = EXP( A,B );
 		
-		FreeAP( &_ );
+		AP D = DIVIDE( AP1, C );
 		
-		return C;
+		//FreeAP( &_ );
+		B.sign = '-';
+		return D;
 	}
 	
 	// PAST THE NEGATIVE_EXPONENT GATE.
 	
-	// if exponent B=0, Result of A^B := 1. (nexp0 == 1).
-	if( CmpAP(&B,&AP0) )
+	// if exponent B=0, Result of A^B := 1. (n exp 0 == 1).
+	if( CmpAP( &B,&AP0 )==0 )
 		return CopyAP( &AP1 );
 	
 	AP D = SUB( B,AP1 );
@@ -1102,7 +1125,12 @@ AP EXP(AP A, AP B)	{
 	while( CmpAP(&D, &AP0)==+1 )	{
 		
 		_ = MUL( _,A );
+		
+		//AP temp = CopyAP( &D );
+		//FreeAP( &D );
 		D = SUB( D,AP1 );
+		//FreeAP( &temp );
+
 	}
 	
 	if( getSign(&A)=='-' )
@@ -1188,7 +1216,7 @@ AP NewAP( large maj, large min )	{
 	
 	if( (result.major==NULL)||(result.minor==NULL) )	{
 		
-		printf("AP NewAP(...) fAiled 1 or 2 of 2 malloc() cAlls! Exiting...\n");
+		printf("AP NewAP(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
 		exit(0);
 	}
 	
@@ -1250,10 +1278,11 @@ void FreeAP( AP* A )	{
 
 
 // SIGN FNCS
-char sign( AP* A )	{
+char getSign( AP* A )	{
 
 	return A->sign;
 }
+
 
 void set_sign( AP* A, char sym )	{
 

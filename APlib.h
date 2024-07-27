@@ -3,6 +3,7 @@
 #ifndef APLIB_INTERFACE
 #define APLIB_INTERFACE
 
+
 // STD INC'S
 #include <string.h>
 #include <math.h>
@@ -20,23 +21,23 @@
 #define PART part
 
 
-char MUL_SYM = '*';
-char ADD_SYM = '+';
-char SUB_SYM = '-';
-char DIV_SYM = '/';
-char EXP_SYM = 'e';
-char AND_SYM = '&';
-char NOT_SYM = '~';
-char OR_SYM =  '|';
-char XOR_SYM = '^';
-char NAND_SYM = '@';
-char POSITIVE_SYM = '+';
-char NEGATIVE_SYM = '-';
-char DELIMETER_SYM = '.';
-char BASE10_SYM = '0';
-char BASE2_SYM = '2';
-char BASE16_SYM = 'H';
-char* ALL_DIGITAL_SYMBOLS = "0123456789abcdefABCDEF.hHxX";
+extern char MUL_SYM;
+extern char ADD_SYM;
+extern char SUB_SYM;
+extern char DIV_SYM;
+extern char EXP_SYM;
+extern char AND_SYM;
+extern char NOT_SYM;
+extern char OR_SYM;
+extern char XOR_SYM;
+extern char NAND_SYM;
+extern char POSITIVE_SYM;
+extern char NEGATIVE_SYM;
+extern char DELIMETER_SYM;
+extern char BASE10_SYM;
+extern char BASE2_SYM;
+extern char BASE16_SYM;
+extern char* ALL_DIGITAL_SYMBOLS;
 
 
 typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
@@ -72,9 +73,9 @@ typedef struct APExpC_2	{ // (APExpC OP APExpC)
 
 
 // APLIB SYSTEM INTRINSICS
-AP AP0;
-AP AP1;
-AP DefaultPrecision;
+extern AP AP0;
+extern AP AP1;
+extern AP DefaultPrecision;
 
 typedef struct __APLIB__{
 
@@ -82,9 +83,6 @@ int ANSIVT;
 large Precision;
 } LL;
 
-
-struct __APLIB__ APLIB_;
-struct __APLIB__* APLIB = &APLIB_;
 
 
 //// --- APLIB FNC'S --- ////
@@ -97,11 +95,6 @@ APLIB->DefaultBase, // 2,10,16
 APLIB->PackedStrings, // if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
 */
 
- 
-statusCode InitAPLIB() {
-
-	return 0;
-}
 void init_();	
 
 // CREATE/RESET/GC AP VALUES.
@@ -121,39 +114,39 @@ char * NOT(char * v);
 char * NAND(char * LHS, char *RHS);
 
 // CORE OPERATORS
-AP NOP( AP,AP );
-AP ADD( AP A, AP B );
-AP ADDP( AP A, AP B, AP P );
-AP SUB( AP A, AP B );
-AP SUBP( AP A, AP B, AP P );
+extern AP NOP( AP,AP );
+extern AP ADD( AP A, AP B );
+extern AP ADDP( AP A, AP B, AP P );
+extern AP SUB( AP A, AP B );
+extern AP SUBP( AP A, AP B, AP P );
 #define SUBTRACT SUB
 #define SUBTRACTP SUBP
-AP MUL( AP A, AP B );
-AP MULP( AP A, AP B, AP P );
+extern AP MUL( AP A, AP B );
+extern AP MULP( AP A, AP B, AP P );
 #define MULTIPLY MUL
 #define MULTIPLYP MULP
-AP DIV( AP A, AP B );
-AP DIVP( AP A, AP B, AP P );
-AP DIVBY2(AP A);
+extern AP DIV( AP A, AP B );
+extern AP DIVP( AP A, AP B, AP P );
+extern AP DIVBY2(AP A);
 #define DIVIDE DIV
 #define DIVIDEP DIVP
 #define SUBDIVIDE DIVIDE
 #define SUBDIVIDEP DIVIDEP
 #define D2 DIVBY2
-AP RECIPROCAL( AP A );
-AP RECIPROCAL2( AP A, AP B );
+extern AP RECIPROCAL( AP A );
+extern AP RECIPROCAL2( AP A, AP B );
 #define N1 RECIPROCAL
 #define NM RECIPROCAL2
-AP RECIPROCALP( AP A, large P );
-AP RECIPROCAL2P( AP A, AP B, large P );
-AP EXP(AP A, AP B);
-AP CROSS( AP A, AP B );
-AP CROSSP( AP A, AP B, AP P );
-AP DOT( AP A, AP B );
-AP DOTP( AP A, AP B, AP P );
+extern AP RECIPROCALP( AP A, large P );
+extern AP RECIPROCAL2P( AP A, AP B, large P );
+extern AP EXP(AP A, AP B);
+extern AP CROSS( AP A, AP B );
+extern AP CROSSP( AP A, AP B, AP P );
+extern AP DOT( AP A, AP B );
+extern AP DOTP( AP A, AP B, AP P );
 
 
-int maxLoopsSet;
+extern int maxLoopsSet;
 
 // SIGN ( +,- )
 void flipSign( AP* );
@@ -167,8 +160,8 @@ char peek( large,char* );
 
 
 // QUICK SIGN-IDENTIFICATION FOR NORMAL'D RESULT VALUES.
-char tt( AP*,AP* );
-char tt_mul( AP*,AP* );
+extern char tt( AP*,AP* );
+extern char tt_mul( AP*,AP* );
 
 
 
@@ -185,9 +178,9 @@ extern int DIVBY2_PRINT_ROWS;
 
 
 // MODIFYING AP VALUES
-statusCode setPart( AP* A, char * digits, int sign_maj_min );
-statusCode setPartW( AP* A, char * _ ); // "whole" part
-statusCode setPartF( AP* A, char * _ ); // "fractional" part
+extern statusCode setPart( AP* A, char * digits, int sign_maj_min );
+extern statusCode setPartW( AP* A, char * _ ); // "whole" part
+extern statusCode setPartF( AP* A, char * _ ); // "fractional" part
 #define PartW 1
 #define PartF 2
 #define SignPart 0
@@ -197,12 +190,12 @@ int lcm_test(int, int[], int[]);
 int LCM(int, int, int);
 int GCD(int a, int b, int lcm);
 
-char * DEC_2_BIN(AP input, int packed);
-char * BIN_2_DEC(char * bin);
+extern char * DEC_2_BIN(AP input, int packed);
+extern char * BIN_2_DEC(char * bin);
 
 // 2k-BOUNDARY
-large max2k(AP input);
-large min2k(AP input);
+extern large max2k(AP input);
+extern large min2k(AP input);
 
 
 int MSD(int num);

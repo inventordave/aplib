@@ -22,9 +22,7 @@ byte getbyte( char* );
 // MEMORY HELPER FNC'S
 char* mem( large numBytes );
 char* memp( large numParts, large numBytes );
-void* cmem( large nb )	{ return calloc( nb,1 ); }
+extern void* cmem( large nb );
 char* zmem( large nb );
-char* zmem( large nb );
-
 #endif
 
