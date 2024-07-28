@@ -47,24 +47,16 @@ char* sanitizeStr( char* A )	{
 }
 
 
-
-
-
+// INT -> CSTR
 char * itoad(int v)	{
 	
 	// snprintf (buff, sizeof(buf), "%d",n); // print int 'n' into the char[] buffer
-	char * s = allocs(16);
+	char * _ = allocs(16);
 	
-	snprintf (s, 16, "%d", v);
+	snprintf ( _, 16, "%d", v );
 	
-	return s;
-d
-
-
-
-
-
-
+	return _;
+}
 
 
 // CAT(INT NUM_STRINGS, ...)
@@ -91,7 +83,7 @@ char * cat(int c, char * s, ...)	{
 
 
 #define ERR_NP_CHAR 1
-char * safecat(char* s, char* rhs)	{
+char * safecat( char* s, char* rhs )	{
 	
 	// SAFETY
 	if( (s==NULL) || (rhs==NULL) )
