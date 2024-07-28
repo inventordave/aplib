@@ -7,7 +7,21 @@ sandbox: sandbox.c sandbox.h aplib.c aplib.h i754.c i754.h colour.c colour.h lib
 # For removing the detritus of the last compilation cycle that tried to'  mess wi' oos!!	
 clean:
 	rm -f *.o
-	rm -f *.exe
+	rm -f test.exe
 	rm -f *stackdump
 	rm -f *.gch
+
+# This is the Bison program from inventordave2/Calculator. This is the basis for the APLIB front-end.
+
+fpcalc:	
+	bison -d fpcalc.y
+	flex fpcalc.l
+	
+	gcc fpcalc.tab.c lex.yy.c -o fpcalc.exe
+	
+cleancalc:
+	rm -f fpcalc.exe 
+	rm -f fpcalc.tab.c 
+	rm -f fpcalc.tab.h 
+	rm -f lex.yy.c
 
