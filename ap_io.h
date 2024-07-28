@@ -19,9 +19,7 @@
 
 
 // FNC PROTOTYPES
-void setFGColor( int cc );
-void setBGColor( int cc );
-void setStyle( int sc ); // eg, +i, +b, -i, -b, and so on.
+
 char * truncateAP( AP A );
 
 char * generateSVG( APExp exp );

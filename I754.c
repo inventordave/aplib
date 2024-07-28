@@ -1,5 +1,105 @@
 #include "i754.h"
 
+
+// DAVELIB::i754::Interface
+struct i754 getInterface_i754()	{ return *(initi754()); }
+struct i754 * initi754()	{
+	
+	struct i754 * lib = malloc( sizeof(struct i754) );
+	
+	lib->readFloat = IEEE_readFloat;
+	lib->reaDouble = IEEE_reaDouble;
+	
+	lib->convertFloatString2BigEndian = IEEE_convertFloatString2BigEndian;
+	lib->convertDoubleString2BigEndian = IEEE_convertDoubleString2BigEndian;
+	
+	lib->getFloatBit = IEEE_getFloatBit;
+	lib->getDoubleBit = IEEE_getDoubleBit;
+	
+	lib->writeFloat = IEEE_writeFloat;
+	lib->writeDouble = IEEE_writeDouble;
+	
+	return lib;
+}
+
+
+// BITWISE FNCS //
+
+// THE FUNCTION BELOW ADDS 1 TO A BINARY STRING
+char* INCB( char* bstr ){
+
+	int i = strlen( bstr );
+	
+	char align = i % 8;
+	// if 0, the bit-string is byte-aligned.
+	// otherwise, align contains the 8-p misalignment.
+	// (8-align) leading 0's would need to be padded.
+	
+	char* _ = (char*)malloc( i+1 );
+	
+	for( int k=0; k<=i; k++ )
+	_[k] = bstr[k];
+	
+	
+	--i;
+	
+	// if odd (bit 0 = 0), flip bit to add 1.
+	if( _[i]=='0' )
+		_[i] = '1';
+	
+	// value is even, so need to shift the bit substring left.
+	else{
+		while( _[i]=='1' )	{
+			
+			_[i] = '0';
+			--i;
+			
+			if( i<0 )
+				break;
+		}
+		
+		if( i<0 ){
+		// bitsring needs to be extended
+		}
+		else
+		_[i] = '1';
+	}
+
+	return _;
+}
+
+// THE FUNCTION BELOW FLIPS (INVERTS) A BIT-STRING
+char* FLIPB( char* bstr ){
+
+	int dcount = strlen(bitstr);
+	char* _ = (char*)malloc( dcount+1 );
+	
+	int i;
+	
+	// invert inbound bitstring
+	for( i=0; i<dcount; i++ )
+		if( bitstr[i]=='1' )
+			_[i] = '0';
+		else
+			_[i] = '1';
+	
+	_[i] = '\0';
+	
+	return _;
+}
+
+// THIS FUNCTION CALCULATES THE 2'S COMPLEMENT OF A BIT-STRING.
+// DEP: FLIPB( char* ), INCB( char* )
+char* _2sComplement( char* bitstr )	{
+
+	char* _ = INCB( FLIPB( bstr ) );
+	//printf( "2's-Complement of %s is: %s\n", bstr, _ );
+
+	return _;
+}
+
+
+
 // CORE FNCS
 struct i754_Float * IEEE_writeFloatStruct( float * f )	{
 	
@@ -27,7 +127,6 @@ struct i754_Float * IEEE_writeFloatStruct( float * f )	{
 	
 	return a;
 }
-
 float IEEE_readFloatStruct( struct i754_Float* f )	{
 
 	float a;
@@ -47,7 +146,6 @@ float IEEE_readFloatStruct( struct i754_Float* f )	{
 	IEEE_writeFloat( &a, str );
 	return a;
 }		
-
 char * IEEE_convertDoubleString2BigEndian( char * str )	{
 	
 	char * be_string = malloc(64 + 1);
@@ -98,7 +196,6 @@ char * IEEE_convertDoubleString2BigEndian( char * str )	{
 	
 	return be_string;
 }
-
 char * IEEE_convertFloatString2BigEndian( char * str )	{
 	
 	char * be_string = malloc(32 + 1);
@@ -130,44 +227,6 @@ char * IEEE_convertFloatString2BigEndian( char * str )	{
 	return be_string;
 }
 
-char * IEEE_reaDouble( double f )	{
-
-	typedef struct container	{
-
-		double f;
-
-	} container;
-	
-	struct container * tc = malloc( sizeof(double) ); // 4 bytes for the float. Change to sizeof(double), which is 8, for a double.
-	
-	tc->f = f;
-	
-	char * offset = (char *) tc;
-	char * str = malloc(64 + 1); // 3 for the in-between spaces, 1 for the null-terminator of the string.
-	// double := 64 + 7 + 1
-	
-	int ptr = 0;
-
-	for(int i=0; i<8; i++)	{ // iterate through each of the 4 bytes of the float. (change to 8 when parsing a double.)
-		
-		for(int k=7; k>=0; k--)	{ // iterate from the MSB (bit 7), to the LSB (bit 0) of an individual byte of the memory.
-			
-			int r = (*offset) & (1 << k); // is bit 'k' of offset pointer set to 1, or not? In other words, is the &-exp TRUE, or FALSE?
-			if( r==0 )
-				str[ptr++] = '0';
-			else
-				str[ptr++] = '1';
-		}
-		
-		++offset; // move pointer "char * offset" along the struct 1 byte
-		
-		//str[ptr++] = ' ';
-	}
-		
-	str[ptr] = '\0';
-	
-	return str; // !string returned is little-endian on a little-endian system.
-}
 
 char * IEEE_readFloat( float f )	{
 
@@ -207,33 +266,43 @@ char * IEEE_readFloat( float f )	{
 	
 	return str; // !string returned is little-endian on a little-endian system.
 }
+char * IEEE_reaDouble( double f )	{
 
-unsigned short int IEEE_getFloatBit( char * str, unsigned int offset )	{
-	
-	if( offset>(31) )
-		return 2;
-	
-	//if( offset==8 offset==17 offset==26 )
-		//++offset;
-	
-	if( str[offset]=='1' )
-		return 1;
-	else
-		return 0;
-}
+	typedef struct container	{
 
-unsigned short int IEEE_getDoubleBit( char * str, unsigned int offset )	{
+		double f;
+
+	} container;
 	
-	if( offset>(63) )
-		return 2;
+	struct container * tc = malloc( sizeof(double) ); // 4 bytes for the float. Change to sizeof(double), which is 8, for a double.
 	
-	//if( offset==8 offset==17 offset==26 offset==35 offset==44 offset==53 offset==62 )
-		//++offset;
+	tc->f = f;
 	
-	if( str[offset]=='1' )
-		return 1;
-	else
-		return 0;
+	char * offset = (char *) tc;
+	char * str = malloc(64 + 1); // 3 for the in-between spaces, 1 for the null-terminator of the string.
+	// double := 64 + 7 + 1
+	
+	int ptr = 0;
+
+	for(int i=0; i<8; i++)	{ // iterate through each of the 4 bytes of the float. (change to 8 when parsing a double.)
+		
+		for(int k=7; k>=0; k--)	{ // iterate from the MSB (bit 7), to the LSB (bit 0) of an individual byte of the memory.
+			
+			int r = (*offset) & (1 << k); // is bit 'k' of offset pointer set to 1, or not? In other words, is the &-exp TRUE, or FALSE?
+			if( r==0 )
+				str[ptr++] = '0';
+			else
+				str[ptr++] = '1';
+		}
+		
+		++offset; // move pointer "char * offset" along the struct 1 byte
+		
+		//str[ptr++] = ' ';
+	}
+		
+	str[ptr] = '\0';
+	
+	return str; // !string returned is little-endian on a little-endian system.
 }
 
 void IEEE_writeFloat(float * dest, char * str)	{
@@ -254,7 +323,6 @@ void IEEE_writeFloat(float * dest, char * str)	{
 		(mem[i]) = bitmask;
 	}
 }
-
 void IEEE_writeDouble(double * dest, char * str)	{
 	
 	assert( strlen(str)==(64) );
@@ -274,22 +342,30 @@ void IEEE_writeDouble(double * dest, char * str)	{
 	}
 }
 
-struct i754 * initi754()	{
+unsigned short int IEEE_getFloatBit( char * str, unsigned int offset )	{
 	
-	struct i754 * lib = malloc( sizeof(struct i754) );
+	if( offset>(31) )
+		return 2;
 	
-	lib->readFloat = IEEE_readFloat;
-	lib->reaDouble = IEEE_reaDouble;
+	//if( offset==8 offset==17 offset==26 )
+		//++offset;
 	
-	lib->convertFloatString2BigEndian = IEEE_convertFloatString2BigEndian;
-	lib->convertDoubleString2BigEndian = IEEE_convertDoubleString2BigEndian;
+	if( str[offset]=='1' )
+		return 1;
+	else
+		return 0;
+}
+unsigned short int IEEE_getDoubleBit( char * str, unsigned int offset )	{
 	
-	lib->getFloatBit = IEEE_getFloatBit;
-	lib->getDoubleBit = IEEE_getDoubleBit;
+	if( offset>(63) )
+		return 2;
 	
-	lib->writeFloat = IEEE_writeFloat;
-	lib->writeDouble = IEEE_writeDouble;
+	//if( offset==8 offset==17 offset==26 offset==35 offset==44 offset==53 offset==62 )
+		//++offset;
 	
-	return lib;
+	if( str[offset]=='1' )
+		return 1;
+	else
+		return 0;
 }
 

@@ -17,7 +17,7 @@
 signed int getOptions(int * argc, char ** argv);
 void rotate(int * argc, char * argv[]); // ruddy useful, shifts the cmd-line arguments array left, removing the one at argv[0]
 void sanitizeStr(char * str);
-extern  int seq(char *a, char *b);
+int streq(char *a, char *b); // bool( str_a == str_b ), returns sensible 1 if strings match.
 
 // EXAMPLE USAGE
 int getopt_main(int argc, char **argv)	{
@@ -28,7 +28,7 @@ int getopt_main(int argc, char **argv)	{
 }
 
 // SUGAR
-int seq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
+int streq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
 
 	return (strcmp(a, b) == 0);
 }

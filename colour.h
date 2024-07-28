@@ -7,6 +7,9 @@
 extern char resetAnsiVtCodes(char);
 void SetVT( char *, char * );
 
+void setFGColor( int cc );
+void setBGColor( int cc );
+void setStyle( int sc ); // eg, +i, +b, -i, -b, and so on.
 
 extern char ansivt;
 
