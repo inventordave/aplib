@@ -5,7 +5,7 @@
 	#include <string.h>
 	#include <float.h>
 	
-	#include "toyf.tab.h"
+	#include "fpcalc.tab.h"
 	
     int yylex();
     int yyerror(const char*);
