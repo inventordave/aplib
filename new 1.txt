@@ -1,6 +1,0 @@
-
-
-#include "io.h"
-
-// general IO functions for my portable DAVELIB.
-

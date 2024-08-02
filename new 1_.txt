@@ -1,3 +1,0 @@
-EXP:
-
-len(RESULT_STRING) in the order of: value(exp) * len(base_string)

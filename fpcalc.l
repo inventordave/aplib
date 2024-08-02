@@ -5,7 +5,7 @@
 #include <math.h>
 #include "fpcalc.tab.h"
 
-#define NUM_STRING_LENGTH 325 // max length of fp (double) number, including decimal point. Obvs is way less than 325.
+#define NUM_STRING_LENGTH 325 // max length of fp (double) number, including decimal point.
 
 extern char* enum_str;
 

@@ -1,0 +1,7 @@
+EXP:
+
+len(RESULT_STRING) in the order of: value(exp) * len(base_string)
+
+pos(decimalpoint) of result (C) is to the right of offset of longest string of A and B.
+If either A or B is fractional, the fp must be shifted for both operands A nd B, until they are both multiplid by the same power of 10 to become integer (Whole-part only). Also, leading zero's need to be added for C, and only after the final calculated result, post-processing and after positioning the decimal-point in the correct offset (to the right of the LSD (original units column) of A, should the leading zero's be clipped.
+
