@@ -15,27 +15,6 @@
 
 
 // CORE DATA STRUCTURES
-typedef struct i754	{
-	
-	// CONSTRUCTOR
-	char* (*Init)( struct i754* );
-
-	// BINTOOLS
-	struct BINARYTOOLS BIN;
-	
-	// FLOAT/DOUBLE METHODS
-	char * (*readFloat)( float );
-	char * (*reaDouble)( double );	
-	void (*writeFloat)( float* dest, char* str );
-	void (*writeDouble)( double* dest, char* str );
-	char (*getFloatBit)( char* str, LARGE offset );
-	char (*getDoubleBit)( char* str, LARGE offset );
-	char * (*convertFloatString2BigEndian)( char* );
-	char * (*convertDoubleString2BigEndian)( char* );
-	char * (*convertFloatString2LittleEndian)( char* );
-	char * (*convertDoubleString2LittleEndian)( char* );
-
-} i754;
 
 typedef struct BINARYTOOLS{
 
@@ -43,8 +22,8 @@ typedef struct BINARYTOOLS{
 	char (*setBit)( LARGE offset, char* bstr, char v );
 
 	char * (*convertBinString2BigEndian)( char* );
-	char * (*convertBinString2BigEndian)( char* );
-	char * (*convertBinString2LittleEndian)( char* );
+	//char * (*convertBinString2BigEndian)( char* );
+	//char * (*convertBinString2LittleEndian)( char* );
 	char * (*convertBinString2LittleEndian)( char* );
 
 	char* (*DEC_2_BIN)( char* );
@@ -62,6 +41,27 @@ typedef struct BINARYTOOLS{
 
 } BINARYTOOLS;
 
+typedef struct i754	{
+	
+	// CONSTRUCTOR
+	char* (*Init)( struct i754* );
+
+	// BINTOOLS
+	struct BINARYTOOLS BIN;
+	
+	// FLOAT/DOUBLE METHODS
+	char* (*readFloat)( float );
+	char* (*reaDouble)( double );	
+	void (*writeFloat)( float* dest, char* str );
+	void (*writeDouble)( double* dest, char* str );
+	char* (*getFloatBit)( char* str, LARGE offset );
+	char* (*getDoubleBit)( char* str, LARGE offset );
+	char* (*convertFloatString2BigEndian)( char* );
+	char* (*convertDoubleString2BigEndian)( char* );
+	char* (*convertFloatString2LittleEndian)( char* );
+	char* (*convertDoubleString2LittleEndian)( char* );
+
+} i754;
 typedef struct i754_Float	{
 
 	int sign;
@@ -76,7 +76,7 @@ typedef struct i754_Float	{
 
 // FNC PROTOTYPES //
 
-struct i754 * initi754();
+struct i754* initi754();
 
 // THE FUNCTION BELOW ADDS 1 TO A BINARY STRING
 char* INCB( char* );
@@ -87,20 +87,20 @@ char* FLIPB( char* );
 char* _2sComplement( char* );
 
 
-char * IEEE_readFloat( float f );
-char * IEEE_reaDouble( double f );
+char* IEEE_readFloat( float f );
+char* IEEE_reaDouble( double f );
 
 void IEEE_writeFloat(float * dest, char * str);
 void IEEE_writeDouble(double * dest, char * str);
 
-char * IEEE_convertFloatString2BigEndian( char * str );
-char * IEEE_convertDoubleString2BigEndian( char * str );
+char* IEEE_convertFloatString2BigEndian( char * str );
+char* IEEE_convertDoubleString2BigEndian( char * str );
 
 struct i754_Float * IEEE_writeFloatStruct( float * f );
 float IEEE_readFloatStruct( struct i754_Float* f );
 
-unsigned short int IEEE_getFloatBit( char * str, unsigned int offset );
-unsigned short int IEEE_getDoubleBit( char * str, unsigned int offset );
+char* IEEE_getFloatBit( char * str, LARGE offset );
+char* IEEE_getDoubleBit( char * str, LARGE offset );
 
 // NOT YET IMPLEMENTED
 void systemEndian()	{
@@ -118,7 +118,7 @@ void systemEndian()	{
 	signed int t = -256;
 	
 	char* p = (char*) &t;
-	char* _ = (char *)calloc( iwidth );
+	char* _ = (char *)mem( iwidth );
 	
 	for( int i=0; i<iwidth; i++ )	{
 		

@@ -45,6 +45,9 @@ typedef struct
 AP {
 char * major;
 char * minor;
+char* wp;
+char* fp;
+char* _;
 char sign;
 }
 AP;

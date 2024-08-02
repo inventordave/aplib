@@ -16,17 +16,17 @@
 #define OFF 0
 #define SUCCESS 1
 #define FAIL 0
-#define L 171
-#define R 79
+#define LEFT 171
+#define RIGHT 79
 
 // CUSTOM TYPES
 #define large unsigned long long int
 #define LARGE large
 #define bool int
 #define statusCode int
-#define ASCII signed char
+
 #define ascii ASCII
-#define E_ASCII unsigned char
+#define E_ASCII ascii
 #define e_ascii E_ASCII
 
 // 'TOGGLE'

@@ -3,8 +3,13 @@
 #ifndef aplib_DEV_SANDBOX
 #define aplib_DEV_SANDBOX
 
-char * formatString( char * fmt, ... );
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
 
+char * formatString( char* fmt, ... );
+char* getstring( char* );
+LARGE searcharray( char**, char*, LARGE ); 
 
 #endif
 

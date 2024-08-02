@@ -30,7 +30,7 @@ char* INCB( char* bstr ){
 
 	int i = strlen( bstr );
 	
-	char align = i % 8;
+	//char align = i % 8;
 	// if 0, the bit-string is byte-aligned.
 	// otherwise, align contains the 8-p misalignment.
 	// (8-align) leading 0's would need to be padded.
@@ -71,14 +71,14 @@ char* INCB( char* bstr ){
 // THE FUNCTION BELOW FLIPS (INVERTS) A BIT-STRING
 char* FLIPB( char* bstr ){
 
-	int dcount = strlen(bitstr);
+	int dcount = strlen(bstr);
 	char* _ = (char*)malloc( dcount+1 );
 	
 	int i;
 	
 	// invert inbound bitstring
 	for( i=0; i<dcount; i++ )
-		if( bitstr[i]=='1' )
+		if( bstr[i]=='1' )
 			_[i] = '0';
 		else
 			_[i] = '1';
@@ -90,7 +90,7 @@ char* FLIPB( char* bstr ){
 
 // THIS FUNCTION CALCULATES THE 2'S COMPLEMENT OF A BIT-STRING.
 // DEP: FLIPB( char* ), INCB( char* )
-char* _2sComplement( char* bitstr )	{
+char* _2sComplement( char* bstr )	{
 
 	char* _ = INCB( FLIPB( bstr ) );
 	//printf( "2's-Complement of %s is: %s\n", bstr, _ );
@@ -227,7 +227,6 @@ char * IEEE_convertFloatString2BigEndian( char * str )	{
 	return be_string;
 }
 
-
 char * IEEE_readFloat( float f )	{
 
 	typedef struct container	{
@@ -342,30 +341,30 @@ void IEEE_writeDouble(double * dest, char * str)	{
 	}
 }
 
-unsigned short int IEEE_getFloatBit( char * str, unsigned int offset )	{
+char* IEEE_getFloatBit( char * str, LARGE offset )	{
 	
 	if( offset>(31) )
-		return 2;
+		return ADD( AP1,AP1 ).wp;
 	
 	//if( offset==8 offset==17 offset==26 )
 		//++offset;
 	
 	if( str[offset]=='1' )
-		return 1;
+		return AP1.wp;
 	else
-		return 0;
+		return AP0.wp;
 }
-unsigned short int IEEE_getDoubleBit( char * str, unsigned int offset )	{
+char* IEEE_getDoubleBit( char * str, LARGE offset )	{
 	
 	if( offset>(63) )
-		return 2;
+		return ADD( AP1,AP1 ).wp;
 	
 	//if( offset==8 offset==17 offset==26 offset==35 offset==44 offset==53 offset==62 )
 		//++offset;
 	
 	if( str[offset]=='1' )
-		return 1;
+		return AP1.wp;
 	else
-		return 0;
+		return AP0.wp;
 }
 
