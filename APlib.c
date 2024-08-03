@@ -684,7 +684,7 @@ char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (dec
 
 		digit.major[0] = bin[i];
 		
-		sprintf(_j.major, "%d", j); // itoA()
+		sprintf(_j.major, "%d", j); // itoa()
 		mult = EXP( _2, _j );
 		dec = ADD( dec, MUL(digit, mult) );
 	}

@@ -10,10 +10,14 @@ double qdiv_i(int n, int d);
 char * cat(int c, char * s, ...);
 char * safecat(char * s, char * rhs);
 double expound(double base, int exp);
-int prime(unsigned int, unsigned, short unsigned int);
-int primedata(unsigned int min, unsigned int max, unsigned int step);
+ap* prime(ap*, ap*, short unsigned int);
+ap* primedata(ap* min, ap* max, ap* step);
 
-large isprime ( large i );
+#define LARGE unsigned long long int
+#define large LARGE
+
+
+ap* isprime ( ap* );
 
 #endif
 

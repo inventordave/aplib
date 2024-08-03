@@ -51,8 +51,8 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	#define digit char
 
 	int t = (strlen(B->wp)>strlen(A->wp)?strlen(B->wp):strlen(A->wp));
-	ap* C = &NewAP( +1, 0 );
-	ap* R = &NewAP( t, 0 );
+	ap* C = &(ap*)NewAP( +1, 0 );
+	ap* R = &(ap*)NewAP( t, 0 );
 	
 	
 	char* A_ = A->_;
@@ -242,33 +242,86 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	}
 	LARGE symbol = searcharray( symbols, opcode );
 	
-	{switch( symbol ){
+	signed short int equalityAB = cmp( A,B );
+	switch( symbol ){
 		
 		
 		case OP_MINUS:	b = -b;
 		case OP_PLUS:	c += a + b;
-					break;
+		break;
 				
-		case OP_FORWARDSLASH:	if( a < (c * b) ){--c;break;}
-					++c;
-	
-
-
-		coOP_PLUSEQUALSntinue;
+		case OP_FORWARDSLASH:
+		while(1)
+		if( a < (c * b) ){--c;break;}
+		else
+		++c;
+        printf( "This line of code should be unreachable.\nFile: %s\nLine: %d\n", __FILE__, __LINE__ );
+		break;
 	; // c+= is populated with a guess from 0 to 9 for a coefficient of b, which is the remainder from the 1st multiplication (MSD of C) * B <= A[1 to len(B)].
-		case OP_STAR:	c = a * b;
-					break;
+		case OP_STAR:
+		c = a * b;
+		break;
 
-		case OP_EQUALS:
-		case OP_LTORISEQUALTO:
 		case OP_PLUSEQUALS:
-		case OP_MINUSEQUALS:
-		case OP_ISEQUALTO:
-		case OP_NOTEQUALTO:
-		case OP_GTORISEQUALTO:
-		case OP_GT:
-		case OP_LT:
+		free( C );
+		C =	ADD( A,B );
+		free( A );
+		A = C;
+		return C;
 		
+		//ASSIGN
+		case OP_EQUALS:
+		free( A );
+		A = CopyAP( B );
+		return A;
+		
+		case OP_MINUSEQUALS:
+		free( C );
+		C = SUB( A,B );
+		free( A );
+		A = C;
+		return C;
+		
+		
+		case OP_NOTEQUALTO:
+		free( C );
+		if( equalityAB!=0 )
+		return CopyAP( &AP1 );
+		else
+		return CopyAP( &AP0 );
+		
+
+		
+		case OP_GTORISEQUALTO:		
+		case OP_GT:
+		if( equalityAB==+1 )
+		return CopyAP( &AP1 );
+		else
+		return CopyAP( &AP0 );
+	
+		case OP_ISEQUALTO:
+		if( equalityAB==0 )
+		return CopyAP( &AP1 );
+		else
+		return CopyAP( &AP0 );
+
+
+		case OP_LTORISEQUALTO:
+		if( equalityAB<+1 )
+		return CopyAP( &AP1 );
+		else
+		return CopyAP( &AP0 );
+		break;
+
+		case OP_LT:
+		if( equalityAB==-1 )
+		return CopyAP( &AP1 );
+		else
+		c=0;
+		break;
+		
+		c = value(
+	
 		case OP_CARAT:
 		case OP_RATIO:
 		case OP_RATIO_ASSIGN:
@@ -279,8 +332,8 @@ ap* OP( char* opcode, ap* A, ap* B ){
 		case OP_OR:
 		case OP_XOR:
 		case OP_NOT:
-		case OP_NAND: break;
-
+		case OP_NAND:
+		break;
 	}
 	
 	
@@ -306,7 +359,8 @@ int main(int argc, char **argv)	{
 
 	init_();
 	
-	resetAnsiVtCodes(0);
+	resetAnsiVtCodes(1);
+	colorMode();
 	
 	AP (*OP)( AP A, AP B );
 	int OPCODE = 0;
