@@ -45,12 +45,18 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
 }
 
+ap* NewAPr( large wholepart_range, large fp_range )	{
+
+	ap* _ = (ap*)malloc( sizeof(AP) );
+	*_ = NewAP( wholepart_range,fp_range );
+	return _;
+}
 
 ap* OP( char* opcode, ap* A, ap* B ){
 
 	#define digit char
 
-	int t = (strlen(B->wp)>strlen(A->wp)?strlen(B->wp):strlen(A->wp));
+	int t = (strlen(B->wholepart)>strlen(A->wholepart)?strlen(B->wholepart):strlen(A->wholepart));
 	ap* C = &(ap*)NewAP( +1, 0 );
 	ap* R = &(ap*)NewAP( t, 0 );
 	
@@ -99,11 +105,14 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	c[1] = '\0';
 
 	
-	ap* _ = &NewAP( strlen(B_)+1, 0 );
+	large strlen_b = strlen(B_);
+
+	
+	
 	//char* _ = __->_;
 	
-	ap* _b = &NewAP( 1, 0 );
-	ap* _c = &NewAP( 1, 0 );
+	ap* _b = NewAPr( 1, 0 );
+	ap* _c = NewAPr( 1, 0 );
 	
 	//case '/':
 	
@@ -115,7 +124,7 @@ ap* OP( char* opcode, ap* A, ap* B ){
 			b[0] = *(B_++);
 
 			//_ += b*c;
-			_b->wp=b, _c->wp=c;
+			_b->wholepart=b, _c->wholepart=c;
 			ap* temp2;
 			ap* temp=op( "+=", _, temp2=op( "*", _a, _b ) );
 			
@@ -124,10 +133,10 @@ ap* OP( char* opcode, ap* A, ap* B ){
 			free( temp );
 			free( temp2 ); }
 			
-		B_ = B->wp;
+		B_ = B->wholepart;
 		
 		ap* temp;
-		if( (temp=op( ">", _,R ))->wp[0]=='1' )
+		if( (temp=op( ">", _,R ))->wholepart[0]=='1' )
 			--c[0];
 		else{
 		free( temp );
@@ -260,7 +269,7 @@ ap* OP( char* opcode, ap* A, ap* B ){
 		*C_ = c + ASCII;
 
 		if( *B_=='\0' )
-		B_ = B->wp;
+		B_ = B->wholepart;
 		goto loop;
 	}
 	
@@ -278,13 +287,15 @@ int main(int argc, char **argv)	{
 
 	init_();
 	
-	resetAnsiVtCodes(1);
+	ResetAnsiVtCodes(1);
 	colorMode();
-	
+	SetVT( "black", "lightblue" ); //fg and bg colour.
+
 	AP (*OP)( AP A, AP B );
 	int OPCODE = 0;
 	
-	printf( "%s", FG_BRIGHT_WHITE );
+	// archaic.
+	//printf( "%s", FG_BRIGHT_WHITE );
 	
 	if( seq(argv[1], "*") || seq(argv[1],"MUL") || seq(argv[1],"MULTIPLY") )
 	{OP = MUL;
@@ -312,6 +323,8 @@ int main(int argc, char **argv)	{
 	AP A = NewAP( strlen(argv[2]), 0 );
 	setPartW( &A,argv[2] );
 	
+	
+	
 	AP B;
 	
 	if( argc < 4 )
@@ -323,7 +336,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.major, OPCODE, B.major, C.major );
+	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.wholepart, OPCODE, B.wholepart, C.wholepart );
 	
 	return 0;
 }
@@ -352,7 +365,7 @@ char* nextArg( char* type, va_list& args )	{
 	return _;}
 	if( eq( type,"AP" ) ||
 		!strcmp( type,"ap" ))
-	 return va_arg( args, AP ).wp;
+	 return va_arg( args, AP ).wholepart;
 	if( !strcmp( type,"void*" ) ||
 			 eq( type,"void *"))
 	 return va_arg( args, void* );
@@ -363,14 +376,17 @@ char* nextArg( char* type, va_list& args )	{
 	return calloc( 2, 1 );
 }
 
-
+//sprintf( str, ... )
 char* formatString( char* fmt, ... )	{
 
 	va_list args;
 	int escape = 0;
-
-	char* str = (char *)malloc( );
+	int mode = 0;
+	char* _ = getstring( "" );
 	
+	LARGE i;
+
+	loop:
 	for( i=0; i<fmtstr_length; i++ ) {
 		if( fmt[i]=='\' ){
 			if( escape )
@@ -378,26 +394,47 @@ char* formatString( char* fmt, ... )	{
 			else
 				escape = 1;}
 			
-			
 		else if( fmt[i]=='%' ){
 			if( !escape )
-				continue;
-			if( fmt[++i]=='s' )
-			safecat( _,(char*)nextArg( "char*",&args ) );
-			else if( fmt[i]=='d' )
-			safecat( _,nextArg( "int",&args ) );
-			else if( fmt[i]=='f' )
-			safecat( _,nextArg( "float",&args ) );
-			else if( fmt[i]=='b' )
-			safecat( _,nextArg( "b",&args) );
+			continue;
+			
+			if( fmt[++i]=='s' ){
+				if( mode==0 )
+					++refCount;
+				else
+					safecat( _,nextArg( "char*",&args ) );}
+			else if( fmt[i]=='d' ){
+				if( mode==0 )
+					++refCount;
+				else
+				safecat( _,nextArg( "int",&args ) );}
+			else if( fmt[i]=='f' ){
+				if( mode==0 )
+				++refCount;
+				else
+				safecat( _,nextArg( "float",&args ) );}
+			else if( fmt[i]=='b' ){
+				if( mode==0 )
+				++refCount;
+				else
+				safecat( _,nextArg( "b",&args) );}
+			else
+			continue;
 		}
 	}
 	
+	if( mode==0 ){
+		mode=1;
+		va_start( args, refCount+1 );
+		free( _ );
+		_ = mem( i*10 );
+		goto loop;}
+	// loop()
 	
+	
+	_[i] = '\0';
+	realloc( (void*)_,i );
 
-	str[0] = '\0';
-	return str;
-
-	//sprintf( str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
+	return _;
 }
 

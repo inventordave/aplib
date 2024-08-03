@@ -8,7 +8,7 @@
 
 typedef struct ap	{
 
-	char* wp;
+	char* wholepart;
 	char *fp;
 	large decimalp;
 	char sign;

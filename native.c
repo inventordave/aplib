@@ -46,13 +46,13 @@ ap* isprime ( ap* IN )	{
 		if( CMP( (T=(ap*)MODULO(IN,K)), &AP0) ){
 			
 			if( report==ON )
-			printf("%s is NOT prime. It was divisable at  %s.\n", IN->wp, K.wp);
+			printf("%s is NOT prime. It was divisable at  %s.\n", IN->wholepart, K.wholepart);
 			
 			return CopyAP( &AP0 );
 , NORMAL 		}
 	
 		if( report==ON )
-		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->wp, FG_BRIGHT_GREEN, NORMAL );
+		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->wholepart, FG_BRIGHT_GREEN, NORMAL );
 		
 		return i;
 	}

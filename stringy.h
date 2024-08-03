@@ -78,41 +78,40 @@ char* ANSIVT( char* str, char cc[], LARGE offsets[], int _frees )	{
 
 	LARGE str_width = strlen(str);
 	LARGE width = str_width + (strlen(cc)*VTCODEWIDTH);
-	char* _ = (char*)mem( width );
-	char* bucket = (char*)mem( width );
+	char* _ = mem( width );
+	char* bucket = mem( width );
 	char* vtcodestr;
 	
 	LARGE q=0;
 	LARGE t=0;
-	
-	while( t<str_width )	{
+	while( t<str_width ){
 
 		for( LARGE p=0; p<offsets[q]; p++ ) // offsets are relative.
 			bucket[p] = str[t++];
 		bucket[p] = '\0';
 		
-		cat( _,bucket );
+		safecat( _,bucket );
 		vtcodestr = getVTCodeString( *cc );
-		cat( _,vtcodestr );
+		safecat( _,vtcodestr );
 		
 		free( vtcodestr );
 		
 		++cc;
 		++q;
 		
-		if( *cc == '\0' )	{
+		if( *cc == '\0' ){
 			
 			LARGE y = strlen(_);
-			for( int x=t;x<str_width; x++ )
+			for( LARGE x=t;x<str_width; x++ )
 				_[y++]=str[x];
-			_[y] = '\0';
-			
-			break;
-		}
-	}
+			_[y] = '\0';			
+			break;}}
 	
 	return _;
 }
+
+// ADD NULL-TERMINATOR TO CHAR*, REQUIRES INDEX
+#define addnullt( _,i ) _[i]='\0';
 
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A );

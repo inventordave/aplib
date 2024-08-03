@@ -74,7 +74,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	print( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", A.major, OPCODE, B.major, C.major );
+	print( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", A.wholepart, OPCODE, B.wholepart, C.wholepart );
 	
 	return 0;
 	
@@ -84,8 +84,8 @@ int main(int argc, char **argv)	{
 	AP _1 = NewAP( 1024, 0 );
 	AP _2 = NewAP( 1024, 0 );
 	
-	strcpy( _1.major, argv[1] );
-	strcpy( _2.major, argv[2] );
+	strcpy( _1.wholepart, argv[1] );
+	strcpy( _2.wholepart, argv[2] );
 	
 	AP _3 = DIV( _1, _2 );
 	
@@ -94,7 +94,7 @@ int main(int argc, char **argv)	{
 	else
 		maxLoopsSet = 100;
 	
-	printf( "Result of %s / %s = %s\n", _1.major, _2.major, _3.major );
+	printf( "Result of %s / %s = %s\n", _1.wholepart, _2.wholepart, _3.wholepart );
 	
 	return 0;
 	
@@ -117,7 +117,7 @@ int main(int argc, char **argv)	{
 
 	AP ca;
 	ca.sign = '-';
-	ca.major = strdup( "1701" );
+	ca.wholepart = strdup( "1701" );
 	printf( "Color test: %s\n", formatAP(ca) );
 	
 	NL;
@@ -245,18 +245,18 @@ int main(int argc, char **argv)	{
 		++test_num;
 	}
 	
-	input.major = strdup( test_num );
+	input.wholepart = strdup( test_num );
 	
 	int packed = 1;
 	char * str = DEC_2_BIN(input, packed);
-	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.major, str );
+	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.wholepart, str );
 	NL;
 	PRINT_LINE;
 	pause();
 	
 	// TEST 3
 	test2kMax(argc, argv);
-	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.major, dummy_int );
+	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.wholepart, dummy_int );
 	NL;
 	PRINT_LINE;
 	pause();
@@ -323,10 +323,10 @@ void colorMode()	{
 	if(color == 0)	{
 		
 		printf( "ANSI/VT Support Not Available.\n" );
-		resetAnsiVtCodes(0);
+		ResetAnsiVtCodes(0);
 	}
 	else
-		resetAnsiVtCodes(1);
+		ResetAnsiVtCodes(1);
 
 	return;
 }

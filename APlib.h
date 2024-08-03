@@ -3,7 +3,6 @@
 #ifndef APLIB_INTERFACE
 #define APLIB_INTERFACE
 
-
 // STD INC'S
 #include <string.h>
 #include <math.h>
@@ -13,44 +12,53 @@
 #include "lib.h"
 #include "colour.h"
 
-// STATIC DEFS
+// STATIC DEF'S
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
+#define L LARGE
 
 // CORE DATA STRUCTURES/TYPES
-#define part toggle
-#define PART part
-
-
-extern char MUL_SYM;
-extern char ADD_SYM;
-extern char SUB_SYM;
-extern char DIV_SYM;
-extern char EXP_SYM;
-extern char AND_SYM;
-extern char NOT_SYM;
-extern char OR_SYM;
-extern char XOR_SYM;
-extern char NAND_SYM;
-extern char POSITIVE_SYM;
-extern char NEGATIVE_SYM;
-extern char DELIMETER_SYM;
-extern char BASE10_SYM;
-extern char BASE2_SYM;
-extern char BASE16_SYM;
+extern char* MUL_SYM;
+extern char* ADD_SYM;
+extern char* SUB_SYM;
+extern char* DIV_SYM;
+extern char* EXP_SYM;
+extern char* AND_SYM;
+extern char* NOT_SYM;
+extern char* OR_SYM;
+extern char* XOR_SYM;
+extern char* NAND_SYM;
+extern char* POSITIVE_SYM;
+extern char* NEGATIVE_SYM;
+extern char* DELIMETER_SYM;
+extern char* BASE10_SYM;
+extern char* BASE2_SYM;
+extern char* BASE16_SYM;
 extern char* ALL_DIGITAL_SYMBOLS;
 
+typedef char*
+OPCODE; // +, -, *, /, ^ (exp), and, or, not...
 
-typedef char OPCODE; // +, -, *, /, ^ (exp), and, or, not...
+typedef struct
+lens_	{
+
+	L p;
+	L x;
+}
+lens_;
+
+#define wp wholepart
 typedef struct
 AP {
-char * major;
-char * minor;
-char* wp;
-char* fp;
-char* _;
-char sign;
+	char* wholepart;
+	char* fp;
+	char sign;
+	lens_ lens;
+	
+	char base;
 }
 AP;
+#define ap AP
+
 typedef struct
 APExp { // AP OP AP
 AP A;
@@ -58,203 +66,248 @@ AP B;
 OPCODE OP;
 }
 APExp;
-typedef struct APExpC	{ // (AP OP AP) [OP] (AP OP AP)
+
+typedef struct
+APExpC	{ // (AP OP AP) [OP] (AP OP AP)
 	
 	APExp A;
 	APExp B;	
 	OPCODE OP;
 
-} APExpC;
-typedef struct APExpC_2	{ // (APExpC OP APExpC)
+}
+APExpC;
+	
+typedef struct
+APExpC_2	{ // (APExpC OP APExpC)
 
 	APExpC A;
 	APExpC B;
 	
 	OPCODE OP;
 	
-} APExpC_2;
+}
+APExpC_2;
 
+typedef struct
+_APLIB	{
+	
+	AP* (*NOP)( AP*,AP* );
+	AP* (*ADD)( AP*,AP* );
+	AP* (*ADDP)( AP*,AP*, L );
+	AP* (*SUB)( AP*,AP* );
+	AP* (*SUBP)( AP*,AP*, L );
+	AP* (*MUL)( AP*,AP* );
+	AP* (*MULP)( AP*,AP*, L );
+	AP* (*DIV)( AP*,AP* );
+	AP* (*DIVP)( AP*,AP*, L );
+	AP* (*DIVBY2)( AP* );
+	AP* (*RECIPROCAL)( AP* );
+	AP* (*RECIPROCAL2)( AP*,AP* );
+	AP* (*RECIPROCALP)( AP*, L );
+	AP* (*RECIPROCAL2P)( AP*,AP*, L );
+	AP* (*EXP)( AP*,AP* );	
+	AP* (*CROSS)( AP*,AP* );
+	AP* (*CROSSP)( AP*,AP*, L );	
+	AP* (*DOT)( AP*,AP* );
+	AP* (*DOTP)( AP*,AP*, L );	
+
+	AP* (*AND)( AP*,AP* );
+	AP* (*OR)( AP*,AP* );
+	AP* (*XOR)( AP*,AP* );
+	AP* (*NAND)( AP*,AP* );
+	AP* (*NOT)( AP* );	
+	
+	void (*flipSign)( AP* );
+	char (*getSign)( AP* );
+	void (*setSign)( AP* );
+	
+	L (*DSTRING2LARGE)( AP* );
+	
+	L p;
+	
+	struct _ANSI* ANSIVT;
+}
+_APLIB;	
 
 // APLIB SYSTEM INTRINSICS
 extern AP AP0;
 extern AP AP1;
-extern AP DefaultPrecision;
+extern LARGE DefaultPrecision;
+extern large MAX_LENGTH;
 
-typedef struct __APLIB__{
+//// --- APLIB SETTINGS --- ////
+// APLIB->p
+// 0 means the LHS/RHS operands determine the precision of a result value.
+//APLIB->DefaultBase
+// 2,8,10,16
+//APLIB->packed
+// if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
 
-int ANSIVT;
-large Precision;
-} LL;
+// INIT()
+extern struct _APLIB* Init_APLIB();
 
+// GRANULAR (DIGIT-WISE) TOOLS //
+// DIGIT::GET(INDEX)
+extern char d( ap*,L );
+// DIGIT::SET( DIGIT,INDEX )
+#define sd setDigit
+extern void setDigit( ap*,L,char );
 
-
-//// --- APLIB FNC'S --- ////
-
-
-
-/**
-APLIB->DefaultPrecision, // 0 means the LHS/RHS operands determine the precision of a result value.
-APLIB->DefaultBase, // 2,10,16
-APLIB->PackedStrings, // if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
-*/
-
-void init_();	
-
-// CREATE/RESET/GC AP VALUES.
-AP NewAP( large,large );
-AP CopyAP( AP* );
-void ClearAP( AP* );
-void FreeAP( AP* A );
+// CREATE/RESET/GC AP VALUES //
+extern AP NewAP( L,L );
+extern AP* NewAPr( L,L );
+extern AP CopyAP( AP* );
+extern void ClearAP( AP* );
+extern void FreeAP( AP* );
 
 // EQUALITY READ-OPERATOR
-signed short int CmpAP( AP*,AP* );
-
-// BOOLEAN BIT-WISE OPERATORS
-char * AND(char * LHS, char * RHS);
-char * OR (char * LHS, char * RHS);
-char * XOR(char * LHS, char * RHS);
-char * NOT(char * v);
-char * NAND(char * LHS, char *RHS);
+extern signed short CmpAP( AP*,AP* );
 
 // CORE OPERATORS
-extern AP NOP( AP,AP );
-extern AP ADD( AP A, AP B );
-extern AP ADDP( AP A, AP B, AP P );
-extern AP SUB( AP A, AP B );
-extern AP SUBP( AP A, AP B, AP P );
+extern AP* NOP( AP*,AP* );
+extern AP* ADD( AP* A, AP* B );
+extern AP* ADDP( AP* A, AP* B, AP* P );
+extern AP* SUB( AP* A, AP* B );
+extern AP* SUBP( AP* A, AP* B, AP* P );
 #define SUBTRACT SUB
 #define SUBTRACTP SUBP
-extern AP MUL( AP A, AP B );
-extern AP MULP( AP A, AP B, AP P );
+extern AP* MUL( AP* A, AP* B );
+extern AP* MULP( AP* A, AP* B, AP* P );
 #define MULTIPLY MUL
 #define MULTIPLYP MULP
-extern AP DIV( AP A, AP B );
-extern AP DIVP( AP A, AP B, AP P );
-extern AP DIVBY2(AP A);
+extern AP* DIV( AP* A, AP* B );
+extern AP* DIVP( AP* A, AP* B, AP* P );
+extern AP* DIVBY2(AP* A);
 #define DIVIDE DIV
 #define DIVIDEP DIVP
 #define SUBDIVIDE DIVIDE
 #define SUBDIVIDEP DIVIDEP
 #define D2 DIVBY2
-extern AP RECIPROCAL( AP A );
-extern AP RECIPROCAL2( AP A, AP B );
+extern AP* RECIPROCAL( AP* A );
+extern AP* RECIPROCAL2( AP* A, AP* B );
 #define N1 RECIPROCAL
 #define NM RECIPROCAL2
-extern AP RECIPROCALP( AP A, large P );
-extern AP RECIPROCAL2P( AP A, AP B, large P );
-extern AP EXP(AP A, AP B);
-extern AP CROSS( AP A, AP B );
-extern AP CROSSP( AP A, AP B, AP P );
-extern AP DOT( AP A, AP B );
-extern AP DOTP( AP A, AP B, AP P );
-
-
-extern int maxLoopsSet;
+extern AP* RECIPROCALP( AP* A, L P );
+extern AP* RECIPROCAL2P( AP* A, AP* B, L P );
+extern AP* EXP(AP* A, AP* B);
+extern AP* CROSS( AP* A, AP* B );
+extern AP* CROSSP( AP* A, AP* B, L P );
+extern AP* DOT( AP* A, AP* B );
+extern AP* DOTP( AP* A, AP* B, L P );
+// BOOLEAN BIT-WISE OPERATORS
+extern ap* AND( ap* LHS, ap* RHS );
+extern ap* OR (ap* LHS, ap* RHS);
+extern ap* XOR(ap* LHS, ap* RHS);
+extern ap* NOT(ap* v);
+extern ap* NAND(ap* LHS, ap*RHS);
 
 // SIGN ( +,- )
-void flipSign( AP* );
-void setSign( AP*,char );
-char getSign( AP* );
+extern void flipSign( AP* );
+extern void setSign( AP*,char );
+extern char getSign( AP* );
 
 // 1-based peek at [large]-th digit.
-char peek( large,char* );
-
-
-
+extern char peek( L,char* );
 
 // QUICK SIGN-IDENTIFICATION FOR NORMAL'D RESULT VALUES.
-extern char tt( AP*,AP* );
+extern char tt_add( AP*,AP* );
 extern char tt_mul( AP*,AP* );
 
-
-
-typedef struct __lens	{
-
-	large precision;
-	large offset;
-} lens;
-
-
-
 // FOR DIAGNOSTICS, OR JUST FOR THE PRETTY-PRINTER.
-extern int DIVBY2_PRINT_ROWS;
-
+extern large DIVBY2_PRINT_ROWS;
 
 // MODIFYING AP VALUES
-extern statusCode setPart( AP* A, char * digits, int sign_maj_min );
-extern statusCode setPartW( AP* A, char * _ ); // "whole" part
-extern statusCode setPartF( AP* A, char * _ ); // "fractional" part
+extern L setPart( AP*, char*, large part );
+extern L setPartW( AP*, char* ); // "whole" part
+extern L setPartF( AP*, char* ); // "fractional" part
+#define SignPart 0
 #define PartW 1
 #define PartF 2
-#define SignPart 0
+extern AP* RESET0( AP* );
+extern AP* RESET1( AP* );
+
+// USEFUL FEATURES
+#define APTR AP*
+extern AP* GCD( AP*,AP*, AP* lcm );
+extern AP* LCM( AP*,AP* );
+extern AP* LCMTESTSR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (AP**).
+extern L DSTRING2LARGE( AP* );
+
+// BASE CONVERSION
+typedef char* String;
+extern APTR DEC_2_BIN( APTR,L packed );
+extern APTR BIN_2_DEC( APTR );
+extern APTR DEC_2_HEX( APTR,L packed );
+extern APTR HEX_2_DEC( APTR );
+extern APTR DEC_2_OCTAL( APTR,L );
+extern OCTAL_2_DEC( APTR );
+extern APTR BIN_2_HEX( APTR );
+extern APTR HEX_2_BIN( APTR );
+
+extern OCTAL_2_HEX( APTR );
+extern HEX_2_OCTAL( APTR );
+extern OCTAL_2_BIN( APTR );
+extern BIN_2_OCTAL( APTR );
+
+extern LARGE lenp( AP* );
 
 
-int lcm_test(int, int[], int[]);
-int LCM(int, int, int);
-int GCD(int a, int b, int lcm);
 
-extern char * DEC_2_BIN(AP input, int packed);
-extern char * BIN_2_DEC(char * bin);
+#define aplibstdreturn(b) APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; return _;
+APTR DEC_2_HEX( APTR A,L packed ){
+
+	aplibstdreturn(2);
+}
+APTR HEX_2_DEC( APTR A ){
+
+	aplibstdreturn(10);
+}
+APTR DEC_2_OCTAL( APTR A, L precisiom ){
+
+	aplibstdreturn(8);
+}
+APTR OCTAL_2_DEC( APTR A ){
+
+	aplibstdreturn(10);
+}
+APTR DEC_2_HEX( APTR A ){
+
+	aplibstdreturn(16);
+}
+APTR BIN_2_OCTAL( APTR A ){
+
+	aplibstdreturn(8);
+}
+APTR OCTAL_2_BIN( APTR A ){
+
+	aplibstdreturn(2);
+}
+
+
+
+
 
 // 2k-BOUNDARY
-extern large max2k(AP input);
-extern large min2k(AP input);
+extern L Max2K(AP*);
+extern L Min2K(AP*);
+
+extern L MSD( AP* A );
 
 
-int MSD(int num);
-void pack_trailing_zeroes( char * curr_row, int Array_length, int num_zeroes );
-char * fill_leading_zeroes( char * str, large num_zeroes );
+// ALIGNMENT TOOLS
+extern L PackTrailingZeroes( char* cr, L alength#/=/, L n0 );
+extern string PackLeadingZeroes( char* str, L n0 );
 
-signed int overflow( AP*, int result, signed int k );
+extern signed OverFlow( AP*, int result, signed k );
 
-int str2int(char *input);
-char * int2str(int v);
+// ENCODE/DECODE
+extern L charp2L(char* input);
+extern char* L2charp( L v );
 
-char** getaplibsymbols();
-// 	getaplibsymbols() DEFS. 
-
-//char* delimiters = strdup( "([{}])" );
-#define DELIMITERS 999
-
-#define UNKNOWN 0
-#define OP_AND 1
-#define OP_OR 2
-#define OP_XOR 3
-#define OP_NOT 4
-#define OP_NAND 5
-
-#define OP_PLUS 17
-#define OP_MINUS 18
-#define OP_STAR 19
-#define OP_FORWARDSLASH 20
-
-#define OP_EQUALS 21
-#define OP_LTORISEQUALTO 22
-#define OP_PLUSEQUALS 23
-#define OP_MINUSEQUALS 24
-#define OP_ISEQUALTO 25
-#define OP_NOTEQUALTO 26
-#define OP_GTORISEQUALTO 27
-#define OP_GT 28
-#define OP_LT 29	
-
-#define OP_CARAT 30
-#define OP_RATIO 31
-#define OP_RATIO_ASSIGN 32
-#define OP_RATIO_ISEQUALTO 33
-
-#define OP_INCREMENT 34
-#define OP_DECREMENT 35
-#define OP_ISDEFINEDAS 36
-#define OP_CONDITIONAL 37
-#define OP_BITWISE_AND 38
-#define OP_BITWISE_NOT 39
-#define OP_BITWISE_OR 40
-#define OP_PERIOD 41
-#define OP_LOGICAL_AND 42
-#define OP_LOGICAL_OR 43
-#define OP_LOGICAL_ISNOT 44
-
+// APLIB API SUPPORT FUNCTIONS
+extern char** GetAPSymbols();
+// 	GetAPSymbols DEFS.
+#include "aplib_sym.h"
 
 #endif
 
