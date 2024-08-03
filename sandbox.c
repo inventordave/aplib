@@ -109,245 +109,164 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	
 	while (1) {
 
-		++c[0];
-		
-		while( B_!='\0' ){
+		++c[0];	
+			while( B_!='\0' ){
 			
 			b[0] = *(B_++);
 
 			//_ += b*c;
-			
-			_b->_=b, _c->_=c;
+			_b->wp=b, _c->wp=c;
 			ap* temp2;
 			ap* temp=op( "+=", _, temp2=op( "*", _a, _b ) );
 			
 			free( _ );
 			_ = temp;
 			free( temp );
-			free( temp2 );
-
-		}		
-		B_ = B->_;
+			free( temp2 ); }
+			
+		B_ = B->wp;
 		
 		ap* temp;
-		if( (temp=op( ">", _,R ))->_[0]=='1' )
+		if( (temp=op( ">", _,R ))->wp[0]=='1' )
 			--c[0];
 		else{
-			free( temp );
-			continue;}
+		free( temp );
+		continue;}
 
 		free( temp );
 		break;	
+		}
+		
+		*(C_++) = c[0];
+
+		ap* temp2;
+		ap* temp = op( "=", R, temp2=op( "-", R,_ ) );
+
+		loop:
+		
+		digit b = *(B_++);
+		;c += overflow;overflow = 0;
+		
+		char** symbols = getaplibsymbols();
+
+		LARGE symbol = searcharray( symbols, opcode );
+		
+		signed short int equalityAB = cmp( A,B );
+		switch( symbol ){
+			
+			
+			case OP_MINUS:	b = -b;
+			case OP_PLUS:	c += a + b;
+			break;
+					
+			case OP_FORWARDSLASH:
+			while(1)
+			if( a < (c * b) ){--c;break;}
+			else
+			++c;
+			printf( "This line of code should be unreachable.\nFile: %s\nLine: %d\n", __FILE__, __LINE__ );
+			break;
+		; // c+= is populated with a guess from 0 to 9 for a coefficient of b, which is the remainder from the 1st multiplication (MSD of C) * B <= A[1 to len(B)].
+			case OP_STAR:
+			c = a * b;
+			break;
+
+			case OP_PLUSEQUALS:
+			free( C );
+			C =	ADD( A,B );
+			free( A );
+			A = C;
+			return C;
+			
+			//ASSIGN
+			case OP_EQUALS:
+			free( A );
+			A = CopyAP( B );
+			return A;
+			
+			case OP_MINUSEQUALS:
+			free( C );
+			C = SUB( A,B );
+			free( A );
+			A = C;
+			return C;
+			
+			
+			case OP_NOTEQUALTO:
+			free( C );
+			if( equalityAB!=0 )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+			
+
+			
+			case OP_GTORISEQUALTO:		
+			case OP_GT:
+			if( equalityAB==+1 )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+		
+			case OP_ISEQUALTO:
+			if( equalityAB==0 )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+
+
+			case OP_LTORISEQUALTO:
+			if( equalityAB<+1 )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+			break;
+
+			case OP_LT:
+			if( equalityAB==-1 )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+
+			case OP_CARAT:
+			case OP_RATIO:
+			case OP_RATIO_ASSIGN:
+			case OP_RATIO_ISEQUALTO:
+
+			case OP_ISNOT:
+			free( C );
+			if( cmp(A,&AP0) )
+			return CopyAP( &AP1 );
+			else
+			return CopyAP( &AP0 );
+
+			case OP_AND:
+			return AND( A,B );
+			case OP_OR:
+			return OR( A,B );
+			case OP_XOR:
+			case OP_NOT:
+			return NOT( A );
+			case OP_NAND:
+			return NAND( A,B );
+			break;
+		}
+		
+		if( c > 9 )
+		while( c > 9 ){
+		++overflow;
+		c -= 10;
+		}
+		*C_ = c + ASCII;
+
+		if( *B_=='\0' )
+		B_ = B->wp;
+		goto loop;
 	}
 	
-	*(C_++) = c[0];
-
-	ap* temp2;
-	ap* temp = op( "=", R, temp2=op( "-", R,_ ) );
-
-	{loop:
-	digit b = B++;
-	;c += overflow;overflow = 0;
-	
-	char** symbols = getaplibsymbols();
-
-	char** getaplibsymbols(){
-		
-		char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
-		
-		#define UNKNOWN 0
-		#define OP_AND 1
-		#define OP_OR 2
-		#define OP_XOR 3
-		#define OP_NOT 4
-		#define OP_NAND 5
-		
-		#define OP_PLUS 17
-		#define OP_MINUS 18
-		#define OP_STAR 19
-		#define OP_FORWARDSLASH 20
-		
-		#define OP_EQUALS 21
-		#define OP_LTORISEQUALTO 22
-		#define OP_PLUSEQUALS 23
-		#define OP_MINUSEQUALS 24
-		#define OP_ISEQUALTO 25
-		#define OP_NOTEQUALTO 26
-		#define OP_GTORISEQUALTO 27
-		#define OP_GT 28
-		#define OP_LT 29
-		
-		#define OP_CARAT 30
-		#define OP_RATIO 31
-		#define OP_RATIO_ASSIGN 32
-		#define OP_RATIO_ISEQUALTO 33
-		
-		
-		symbols[UNKOWN] = getstring("UNKNOWN");
-		symbols[OP_AND] = getstring("AND");
-		symbols[OP_OR] = getstring("OR");
-		symbols[OP_XOR] = getstring("XOR");
-		symbols[OP_NOT] = getstring("NOT");
-		symbols[OP_PLUS] = getstring("+");
-		symbols[OP_MINUS] = getstring("-");
-		symbols[OP_STAR] = getstring("*");
-		symbols[OP_FORWARDSLASH] = getstring("/");
-	
-
-		//symbols[OP_] = getstring("");	
-		symbols[OP_GT] = getstring( ">" );
-		symbols[OP_LT] = getstring("<");
-	
-		#define OP_INCREMENT 34
-		#define OP_DECREMENT 35
-		#define OP_ISDEFINEDAS 36
-		#define OP_CONDITIONAL 37
-		#define OP_BITWISE_AND 38
-		#define OP_BITWISE_NOT 39
-		#define OP_BITWISE_OR 40
-		#define OP_PERIOD 41
-		#define OP_LOGICAL_AND 42
-		#define OP_LOGICAL_OR 43
-		#define OP_LOGICAL_ISNOT 44
-		
-		
-		
-		symbols[OP_PLUSEQUALS] = getstring("+=");
-		symbols[OP_ISEQUALTO] = getstring("==");
-		symbols[OP_RATIO] = getstring("%");
-		symbols[OP_RATIO_ASSIGN] = getstring("%=");
-		symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
-		symbols[OP_CARAT] = getstring("^");
-		symbols[OP_LTORISEQUALTO] = getstring("<=");
-		symbols[OP_GTORISEQUALTO] = getstring(">=");
-		symbols[OP_MINUSEQUALS] = getstring("-=");
-		symbols[OP_PLUSEQUALS] = getstring("+=");
-		symbols[OP_FORWARDSLASHEQUALS] = getstring("/=");
-		symbols[OP_DOUBLESTAR] = getstring("**");
-		symbols[OP_CARATEQUALS] = getstring("^=");
-		symbols[OP_ISEQUALTO] = getstring("==");
-		symbols[OP_INCREMENT] = getstring("++");
-		symbols[OP_DECREMENT] = getstring("--");
-		symbols[OP_ISDEFINEDAS] = getstring(":=");
-		symbols[OP_CONDITIONAL] = getstring("?");
-		symbols[OP_BITWISE_AND] = getstring("&");
-		symbols[OP_BITWISE_NOT] = getstring("~");
-		symbols[OP_PERIOD] = getstring(".");
-		symbols[OP_BITWISE_OR] = getstring("|");
-		symbols[OP_LOGICAL_OR] = getstring("||");
-		symbols[OP_LOGICAL_AND] = getstring("&&");
-		symbols[OP_LOGICAL_ISNOT] = getstring("!!");
-		
-		return symbols;
-	}
-	LARGE symbol = searcharray( symbols, opcode );
-	
-	signed short int equalityAB = cmp( A,B );
-	switch( symbol ){
-		
-		
-		case OP_MINUS:	b = -b;
-		case OP_PLUS:	c += a + b;
-		break;
-				
-		case OP_FORWARDSLASH:
-		while(1)
-		if( a < (c * b) ){--c;break;}
-		else
-		++c;
-        printf( "This line of code should be unreachable.\nFile: %s\nLine: %d\n", __FILE__, __LINE__ );
-		break;
-	; // c+= is populated with a guess from 0 to 9 for a coefficient of b, which is the remainder from the 1st multiplication (MSD of C) * B <= A[1 to len(B)].
-		case OP_STAR:
-		c = a * b;
-		break;
-
-		case OP_PLUSEQUALS:
-		free( C );
-		C =	ADD( A,B );
-		free( A );
-		A = C;
-		return C;
-		
-		//ASSIGN
-		case OP_EQUALS:
-		free( A );
-		A = CopyAP( B );
-		return A;
-		
-		case OP_MINUSEQUALS:
-		free( C );
-		C = SUB( A,B );
-		free( A );
-		A = C;
-		return C;
-		
-		
-		case OP_NOTEQUALTO:
-		free( C );
-		if( equalityAB!=0 )
-		return CopyAP( &AP1 );
-		else
-		return CopyAP( &AP0 );
-		
-
-		
-		case OP_GTORISEQUALTO:		
-		case OP_GT:
-		if( equalityAB==+1 )
-		return CopyAP( &AP1 );
-		else
-		return CopyAP( &AP0 );
-	
-		case OP_ISEQUALTO:
-		if( equalityAB==0 )
-		return CopyAP( &AP1 );
-		else
-		return CopyAP( &AP0 );
-
-
-		case OP_LTORISEQUALTO:
-		if( equalityAB<+1 )
-		return CopyAP( &AP1 );
-		else
-		return CopyAP( &AP0 );
-		break;
-
-		case OP_LT:
-		if( equalityAB==-1 )
-		return CopyAP( &AP1 );
-		else
-		c=0;
-		break;
-		
-		c = value(
-	
-		case OP_CARAT:
-		case OP_RATIO:
-		case OP_RATIO_ASSIGN:
-		case OP_RATIO_ISEQUALTO:
-		
-		case OP_ISNOT:
-		case OP_AND:
-		case OP_OR:
-		case OP_XOR:
-		case OP_NOT:
-		case OP_NAND:
-		break;
-	}
-	
-	
-	if( c > 9 )
-	while( c > 9 ){
-	++overflow;
-	c -= 10;
-	}
-	*C_ = c + ASCII;
-
-	if( *B_=='\0' )
-		;//B -= 	
 	//case 'e': a * a; // does this 'exp' times, unless 'exp' is 0 or 1. if exp is 0, just returns 1 once. if exp is 1, just return a once.
-	
+	}
+
 	return C;
 }
 	

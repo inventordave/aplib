@@ -210,6 +210,7 @@ signed int overflow( AP*, int result, signed int k );
 int str2int(char *input);
 char * int2str(int v);
 
+char** getaplibsymbols();
 
 #endif
 
