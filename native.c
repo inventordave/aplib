@@ -8,7 +8,7 @@
 
 
 // i = ith prime number, if n is set, i is ignored. n will test for a prime number. f is a flag, set to TRUE if you want the ith prime number, or if you want to test if the arg u pass is literally prime.
-large isprime ( large i )	{
+ap* isprime ( ap* IN )	{
 	
 	toggle report;
 	
@@ -16,37 +16,43 @@ large isprime ( large i )	{
 		// trial division algorithm, divide n by every integer between 2 and sqrt(n), as at n = a . b, either a
 		// or b will not be bigger than sqrt(n), which means all tests have been performed
 		
-		if( i==1 )	{
+		if( cmp( IN,AP1 )==0 ){
 			// base case: 1, the smallest prime number is 2...
 			
 			if( report==ON )
 				printf("1 is too small to be a prime number! The smallest prime number is 2.");
 			
-			return 0;
+			return CopyAP( &AP1 );
 		}
 		
-		if( i==2 )	{
+		ap* AP2 = ADD( AP1,AP1 );
+		if( cmp( IN,AP2 )==0 ){
 			// base case 2, it interferes with the test conditional, as 2 % 2 == 0, which fails the value 2 for the test. 
 			// Subsequent n % k tests don't have to check if n == k, as k will never be more than sqrt(n)
 			
 			if( report==ON )
 				printf("2 is the 1st Prime, you know that!");
 			
-			return 2;
+			return AP2;
 		}
 		
-		large sqrt_ = ceil(sqrt(n)) + 1;
-		for (large k = 2; k < sqrt_; k++)
-			if( (i % k) == 0 )	{
-				
-				if( report==ON )
-					printf("%d is NOT prime. It was divisable at %d.\n", i, k);
-				
-				return 0;
-			}
+		ap* SQRT = SQROOT(IN)) + 1;
+	
+//-------------------------------
+
+	for (AP K=CopyAP(&AP0); cmp( K,SQRT )==-1; INC(&K) ){
 		
+		AP* T;
+		if( CMP( (T=(ap*)MODULO(IN,K)), &AP0) ){
+			
+			if( report==ON )
+			printf("%s is NOT prime. It was divisable at  %s.\n", IN->wp, K.wp);
+			
+			return CopyAP( &AP0 );
+, NORMAL 		}
+	
 		if( report==ON )
-			printf("%d IS A PRIME NUMBER!\n", n);
+		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->wp, FG_BRIGHT_GREEN, NORMAL );
 		
 		return i;
 	}
@@ -54,25 +60,19 @@ large isprime ( large i )	{
 
 	large j = 3;
 	large k = 0;
-	large p = 0;
+	ap* P = CopyAP( &AP0 );
 	
-	#ifndef TRUE
-	#define TRUE 1
-	while( TRUE )	{
+	while( 1 )	{
+	
+	P = isprime(j, R);
+	if(	) {
 		
-		if(
-		
-		p = isprime(j, R)// 
-		
-		){
-			
-			++k;
-			if( k==i )
-				break;
-			
-		}
-		
-		++j;
+		INC(K);
+		if( cmp( K,i )==0 )
+			break;
+	}
+	
+	++j;
 
 	}
 	// p <--- i-th prime number
