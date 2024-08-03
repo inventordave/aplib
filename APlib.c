@@ -720,6 +720,7 @@ struct _APLIB* Init_APLIB(){
 	
 	APLIB->DSTRING2LARGE = DSTRING2LARGE;
 
+	APLIB->c = (AVTC)malloc( sizeof(AVTC) );
 	return *APLIB;
 }
 

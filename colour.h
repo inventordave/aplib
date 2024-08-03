@@ -10,27 +10,12 @@ extern char* ANSIVT_BG;
 #define FG_COLORS 16
 #define BG_COLORS 16
 
-typedef struct AVTC{	
 
-	char ansivt;
-	char* ANSIVT_FG;
-	char* ANSIVT_BG;
-	
-	char (*ResetAnsiVtCodes)(char);
-	char* (*SetVT)( char*, char* ); //fg and bg colour.
-
-	char* (*fg)( char* );
-	char* (*bg)( char* );
-	char* (*f)( char* ); // eg, +i, +b, -i, -b, and so on.
-
-	char* ANSIVT_CTABLE[FG_COLORS+BG_COLORS+1][2];
-
-} AVTC;
 
 typedef struct _ANSI{
 
 	int (*is)();
-	AVTC c;
+	struct AVTC c;
 	
 	char* ANSIVT_FG;
 	char* ANSIVT_BG;
@@ -40,15 +25,8 @@ struct _ANSI* ANSI;
 
 extern int ANSI_IS();
 
-void ANSI_init(){
-	
-	ANSI = (_ANSI*)malloc( sizeof(struct _ANSI) );
-	ANSI->ANSIVT_FG = "default";
-	ANSI->ANSIVT_BG = "default";
-	
-	ANSI->is = ANSI_IS;
-	ANSI->c = (AVTC)0;
-}
+extern void ANSI_init();
+
 
 
 extern char (*ResetAnsiVtCodes)(char);
@@ -99,7 +77,24 @@ extern char BG_BRIGHT_WHITE[8];
 
 extern char NORMAL[8];
 
+typedef struct AVTC{	
 
+	char ansivt;
+	char* ANSIVT_FG;
+	char* ANSIVT_BG;
+	
+	char (*ResetAnsiVtCodes)(char);
+	char* (*SetVT)( char*, char* ); //fg and bg colour.
+
+	char* (*fg)( char* );
+	char* (*bg)( char* );
+	char* (*f)( char* ); // eg, +i, +b, -i, -b, and so on.
+
+	char* ANSIVT_CTABLE[FG_COLORS+BG_COLORS+1][2];
+
+} AVTC;
+
+extern void Init_AVTC( AVTC* );
 
 #endif
 

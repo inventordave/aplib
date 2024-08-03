@@ -302,4 +302,29 @@ void Init_ANSIVT_CTABLE(){
 	return;
 }
 
+AVTC Init_AVTC(){
+	
+	AVTC _ = (AVTC*)malloc( sizeof(AVTC) );
+	
+	_->ResetAnsiVtCodes = ResetAnsiVtCodes;
+	_->SetVT = SetVT;
+	_->fg = fg;
+	_->bg = bg;
+	_->f;
+	
+	_->ANSIVT_FG = "default";
+	
+	return ( _ );
+}
+
+void ANSI_init(){
+	
+	ANSI = (_ANSI*)malloc( sizeof(struct _ANSI) );
+	ANSI->ANSIVT_FG = "default";
+	ANSI->ANSIVT_BG = "default";
+	
+	ANSI->is = ANSI_IS;
+	ANSI->c = Init_AVTC();
+	
+}
 
