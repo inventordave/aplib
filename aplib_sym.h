@@ -34,3 +34,4 @@
 #define OP_LOGICAL_AND 42
 #define OP_LOGICAL_OR 43
 #define OP_LOGICAL_ISNOT 44
+

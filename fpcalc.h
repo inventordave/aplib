@@ -8,8 +8,8 @@
 
 typedef struct ap	{
 
-	char* wholepart;
-	char *fp;
+	char* whole;
+	char *fractional;
 	large decimalp;
 	char sign;
 } ap;

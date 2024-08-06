@@ -17,9 +17,9 @@ char* opcode;
 // in an ADD op, C will be len( longest digit-string between A and B ) + 1.
 
 #define ap AP
-ap* A;
-ap* B;
-ap* C;
+APL A;
+APL B;
+APL C;
 
 char* getstring( char* in ){
 	
@@ -45,32 +45,28 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
 }
 
-ap* NewAPr( large wholepart_range, large fp_range )	{
+APL NewAPr( large whole_range, large fractional_range )	{
 
-	ap* _ = (ap*)malloc( sizeof(AP) );
-	*_ = NewAP( wholepart_range,fp_range );
+	APL _ = (APL)malloc( sizeof(AP) );
+	*_ = NewAP( whole_range,fractional_range );
 	return _;
 }
 
-ap* OP( char* opcode, ap* A, ap* B ){
+APL OP( char* opcode, APL A, APL B ){
 
 	#define digit char
 
-	int t = (strlen(B->wholepart)>strlen(A->wholepart)?strlen(B->wholepart):strlen(A->wholepart));
-	ap* C = &(ap*)NewAP( +1, 0 );
-	ap* R = &(ap*)NewAP( t, 0 );
+	int t = (strlen(B->whole)>strlen(A->whole)?strlen(B->whole):strlen(A->whole));
+	APL C = &(APL)NewAP( +1, 0 );
+	APL R = &(APL)NewAP( t, 0 );
 	
 	
 	char* A_ = A->_;
 	char* B_ = B->_;
 	char* C_ = C->_; // C->_ should be digit-zeroed (char '0', approx. ascii value 68).
 	char* R_ = R->_;
-
-
 	
 	R_[strlen(B_)-1] = A_[0];
-	
-	
 	
 	digit ASCII = '0';
 	digit overflow = ASCII - 0;
@@ -78,11 +74,10 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	char* _A_ = A_;
 	char* _B_ = B_;
 	char* _C_ = C_;
-	
 	char* _R_ = R_;
-	
-	
-	
+
+
+
 	digit a = *(A_++) - ASCII;
 	digit b = *(B_++) - ASCII;
 	digit c = *(C_++) - ASCII;
@@ -104,39 +99,36 @@ ap* OP( char* opcode, ap* A, ap* B ){
 	c[0] = overflow-1;
 	c[1] = '\0';
 
-	
 	large strlen_b = strlen(B_);
 
-	
-	
 	//char* _ = __->_;
 	
-	ap* _b = NewAPr( 1, 0 );
-	ap* _c = NewAPr( 1, 0 );
+	APL _b = NewAPr( 1, 0 );
+	APL _c = NewAPr( 1, 0 );
 	
 	//case '/':
 	
 	while (1) {
 
 		++c[0];	
-			while( B_!='\0' ){
+			while( *B_!='\0' ){
 			
 			b[0] = *(B_++);
 
 			//_ += b*c;
-			_b->wholepart=b, _c->wholepart=c;
-			ap* temp2;
-			ap* temp=op( "+=", _, temp2=op( "*", _a, _b ) );
+			_b->whole=b, _c->whole=c;
+			APL temp2;
+			APL temp=op( "+=", _, temp2=op( "*", _a, _b ) );
 			
 			free( _ );
 			_ = temp;
 			free( temp );
 			free( temp2 ); }
 			
-		B_ = B->wholepart;
+		B_ = B->whole;
 		
-		ap* temp;
-		if( (temp=op( ">", _,R ))->wholepart[0]=='1' )
+		APL temp;
+		if( (temp=op( ">", _,R ))->whole[0]=='1' )
 			--c[0];
 		else{
 		free( temp );
@@ -148,8 +140,8 @@ ap* OP( char* opcode, ap* A, ap* B ){
 		
 		*(C_++) = c[0];
 
-		ap* temp2;
-		ap* temp = op( "=", R, temp2=op( "-", R,_ ) );
+		APL temp2;
+		APL temp = op( "=", R, temp2=op( "-", R,_ ) );
 
 		loop:
 		
@@ -269,7 +261,7 @@ ap* OP( char* opcode, ap* A, ap* B ){
 		*C_ = c + ASCII;
 
 		if( *B_=='\0' )
-		B_ = B->wholepart;
+		B_ = B->whole;
 		goto loop;
 	}
 	
@@ -287,11 +279,13 @@ int main(int argc, char **argv)	{
 
 	init_();
 	
+	ANSI_init();
+	Init_ANSIVT_CTABLE();
 	ResetAnsiVtCodes(1);
 	colorMode();
-	SetVT( "black", "lightblue" ); //fg and bg colour.
+	ANSI->SetVT( "black", "lightblue" ); //fg and bg colour.
 
-	AP (*OP)( AP A, AP B );
+	APL (*OP)( APL A, APL B );
 	int OPCODE = 0;
 	
 	// archaic.
@@ -322,9 +316,7 @@ int main(int argc, char **argv)	{
 	
 	AP A = NewAP( strlen(argv[2]), 0 );
 	setPartW( &A,argv[2] );
-	
-	
-	
+
 	AP B;
 	
 	if( argc < 4 )
@@ -336,7 +328,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.wholepart, OPCODE, B.wholepart, C.wholepart );
+	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.whole, OPCODE, B.whole, C.whole );
 	
 	return 0;
 }
@@ -344,7 +336,7 @@ int main(int argc, char **argv)	{
 #define string char*
 #define eq !strcmp
 
-char* nextArg( char* type, va_list& args )	{
+char* nextArg( char* type, va_list args )	{
 
 	char _[2];
 	_[0] = '\0';
@@ -365,13 +357,11 @@ char* nextArg( char* type, va_list& args )	{
 	return _;}
 	if( eq( type,"AP" ) ||
 		!strcmp( type,"ap" ))
-	 return va_arg( args, AP ).wholepart;
+	 return va_arg( args, AP ).whole;
 	if( !strcmp( type,"void*" ) ||
 			 eq( type,"void *"))
 	 return va_arg( args, void* );
-	
-	
-	
+
 	// ELSE
 	return calloc( 2, 1 );
 }
@@ -384,45 +374,45 @@ char* formatString( char* fmt, ... )	{
 	int mode = 0;
 	char* _ = getstring( "" );
 	
-	LARGE i;
-
-	loop:
-	for( i=0; i<fmtstr_length; i++ ) {
-		if( fmt[i]=='\' ){
-			if( escape )
-				escape = 0;
-			else
-				escape = 1;}
-			
-		else if( fmt[i]=='%' ){
-			if( !escape )
-			continue;
-			
-			if( fmt[++i]=='s' ){
-				if( mode==0 )
-					++refCount;
-				else
-					safecat( _,nextArg( "char*",&args ) );}
-			else if( fmt[i]=='d' ){
-				if( mode==0 )
-					++refCount;
-				else
-				safecat( _,nextArg( "int",&args ) );}
-			else if( fmt[i]=='f' ){
-				if( mode==0 )
-				++refCount;
-				else
-				safecat( _,nextArg( "float",&args ) );}
-			else if( fmt[i]=='b' ){
-				if( mode==0 )
-				++refCount;
-				else
-				safecat( _,nextArg( "b",&args) );}
-			else
-			continue;
-		}
-	}
+	L fmtstr_length = strlen( fmt );
+	L refCount=0;
 	
+	LARGE i;
+	loop:
+	for( i=0; i<fmtstr_length; i++ ){
+
+	if( fmt[i]=='\\' ){
+		if( escape )
+		escape = 0;
+		else
+		escape = 1;}
+		
+	else if( fmt[i]=='%' ){
+		if( !escape )
+		continue;
+		if( fmt[++i]=='s' ){
+			if( mode==0 )
+				++refCount;
+			else
+				safecat( _,nextArg( "char*",args ) );}
+		else if( fmt[i]=='d' ){
+			if( mode==0 )
+				++refCount;
+			else
+			safecat( _,nextArg( "int",args ) );}
+		else if( fmt[i]=='f' ){
+			if( mode==0 )
+			++refCount;
+			else
+			safecat( _,nextArg( "float",args ) );}
+		else if( fmt[i]=='b' ){
+			if( mode==0 )
+			++refCount;
+			else
+			safecat( _,nextArg( "b",&args) );}
+		else
+		continue;}}
+
 	if( mode==0 ){
 		mode=1;
 		va_start( args, refCount+1 );
@@ -430,11 +420,9 @@ char* formatString( char* fmt, ... )	{
 		_ = mem( i*10 );
 		goto loop;}
 	// loop()
-	
-	
-	_[i] = '\0';
-	realloc( (void*)_,i );
 
-	return _;
-}
+	_[i] = '\0';
+	_ = (char*)realloc( (void*)_,i );
+
+	return _; }
 

@@ -1,3 +1,4 @@
+#include <stdlib.h>
 #include <string.h>
 #include "colour.h"
 #include "c_static.h"
@@ -185,7 +186,7 @@ void Init_ANSIVT_CTABLE(){
 	if( ANSI->is != ANSI_IS )	{
 	
 		printf( "ANSI VT System not Initialised! Initialising...\n" );
-		
+		ANSI_init();
 	}
 	
 	
@@ -255,7 +256,7 @@ void Init_ANSIVT_CTABLE(){
 	ANSIVT_CTABLE[i++][1]= BG_YELLOW;
 	
 	ANSIVT_CTABLE[i][0]= "blue";
-	ANSIVT_CTABLE[i++][1]= BG_BLUE
+	ANSIVT_CTABLE[i++][1]= BG_BLUE;
 
 	ANSIVT_CTABLE[i][0]= "magenta";
 	ANSIVT_CTABLE[i++][1]= BG_MAGENTA;
@@ -304,7 +305,7 @@ void Init_ANSIVT_CTABLE(){
 
 AVTC Init_AVTC(){
 	
-	AVTC _ = (AVTC*)malloc( sizeof(AVTC) );
+	AVTC _ = (AVTC)malloc( sizeof(AVTC) );
 	
 	_->ResetAnsiVtCodes = ResetAnsiVtCodes;
 	_->SetVT = SetVT;

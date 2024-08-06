@@ -130,7 +130,7 @@ void test2kMax(int argc, char **argv)	{
 	aP input;
 	parseaP(&input, argv[1]);
 	
-	char * _ = input.wholepart;
+	char * _ = input.whole;
 	
 	int a = Max2K(input);
 	DIVBY2_PRINT_ROWS = temp;
@@ -164,25 +164,25 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 	parseaP(&B, argv[2]);
 	
 	
-	printf( "values Entered:\na = %c%s\nb = %c%s\n", a.sign, a.wholepart, B.sign, B.wholepart );
+	printf( "values Entered:\na = %c%s\nb = %c%s\n", a.sign, a.whole, B.sign, B.whole );
 	
 	NL;
 	
 	// aD
 	C = ADD(a, B);
-	printf( "%c%s + %c%s = %c%s", a.sign, a.wholepart, B.sign, B.wholepart, C.sign, C.wholepart );
+	printf( "%c%s + %c%s = %c%s", a.sign, a.whole, B.sign, B.whole, C.sign, C.whole );
 	
 	NL;
 	
 	// SUB
 	C = SUB(a, B);
-	printf( "%c%s %s-%s %c%s = %c%s", a.sign, a.wholepart, FG_BRIGHT_GREEN, NORMaL, B.sign, B.wholepart, C.sign, C.wholepart );
+	printf( "%c%s %s-%s %c%s = %c%s", a.sign, a.whole, FG_BRIGHT_GREEN, NORMaL, B.sign, B.whole, C.sign, C.whole );
 	
 	NL;
 
 	// MUL
 	C = MUL(a, B);
-	printf( "%c%s MUL %c%s = %c%s", a.sign, a.wholepart, B.sign, B.wholepart, C.sign, C.wholepart );
+	printf( "%c%s MUL %c%s = %c%s", a.sign, a.whole, B.sign, B.whole, C.sign, C.whole );
 	
 	NL;
 	
@@ -193,7 +193,7 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 		B.sign='+';
 	
 	
-	printf( "%c%s EXP %c%s = %c%s\n", a.sign, a.wholepart, B.sign, B.wholepart, C.sign, C.wholepart );
+	printf( "%c%s EXP %c%s = %c%s\n", a.sign, a.whole, B.sign, B.whole, C.sign, C.whole );
 	
 	printf( "\nCompleted." );
 	
@@ -205,7 +205,7 @@ void dec_2_Bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_
 	char * decimal = "543212362746234636432864963483264873264932649823649";
 	
 	AP a = NewAP( strlen(decimal), 0 );
-	a.wholepart = strdup( decimal );
+	a.whole = strdup( decimal );
 	
 	char * binary = DEC_2_BIN(a, 1);
 	

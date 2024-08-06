@@ -46,17 +46,22 @@ lens_	{
 }
 lens_;
 
-#define wp wholepart
+#define wp whole
+typedef char small;
 typedef struct
-AP {
-	char* wholepart;
-	char* fp;
+APP {
+	char* whole;
+	char* fractional;
 	char sign;
+	small base;
+	L fp;
+	L p;
+
 	lens_ lens;
-	
-	char base;
 }
-AP;
+APP;
+typedef APP* APL;
+#define AP APP*
 #define ap AP
 
 typedef struct
@@ -66,6 +71,11 @@ AP B;
 OPCODE OP;
 }
 APExp;
+typedef APExp* APE;
+#define ape APE
+#define apex APE
+#define apexp APE
+#define apexpression APE
 
 typedef struct
 APExpC	{ // (AP OP AP) [OP] (AP OP AP)
@@ -73,10 +83,15 @@ APExpC	{ // (AP OP AP) [OP] (AP OP AP)
 	APExp A;
 	APExp B;	
 	OPCODE OP;
-
 }
 APExpC;
-	
+typedef APExpC* CEX;
+#define cex CEX
+#define complex CEX
+#define complexexpression CEX
+#define cexp CEX
+#define complexexp CEX
+	#
 typedef struct
 APExpC_2	{ // (APExpC OP APExpC)
 
@@ -91,39 +106,41 @@ APExpC_2;
 typedef struct
 _APLIB	{
 	
-	AP* (*NOP)( AP*,AP* );
-	AP* (*ADD)( AP*,AP* );
-	AP* (*ADDP)( AP*,AP*, L );
-	AP* (*SUB)( AP*,AP* );
-	AP* (*SUBP)( AP*,AP*, L );
-	AP* (*MUL)( AP*,AP* );
-	AP* (*MULP)( AP*,AP*, L );
-	AP* (*DIV)( AP*,AP* );
-	AP* (*DIVP)( AP*,AP*, L );
-	AP* (*DIVBY2)( AP* );
-	AP* (*RECIPROCAL)( AP* );
-	AP* (*RECIPROCAL2)( AP*,AP* );
-	AP* (*RECIPROCALP)( AP*, L );
-	AP* (*RECIPROCAL2P)( AP*,AP*, L );
-	AP* (*EXP)( AP*,AP* );	
-	AP* (*CROSS)( AP*,AP* );
-	AP* (*CROSSP)( AP*,AP*, L );	
-	AP* (*DOT)( AP*,AP* );
-	AP* (*DOTP)( AP*,AP*, L );	
+	APL (*NOP)( APL,APL );
+	APL (*ADD)( APL,APL );
+	APL (*ADDP)( APL,APL, L );
+	APL (*SUB)( APL,APL );
+	APL (*SUBP)( APL,APL, L );
+	APL (*MUL)( APL,APL );
+	APL (*MULP)( APL,APL, L );
+	APL (*DIV)( APL,APL );
+	APL (*DIVP)( APL,APL, L );
+	APL (*DIVBY2)( APL );
+	APL (*RECIPROCAL)( APL );
+	APL (*RECIPROCAL2)( APL,APL );
+	APL (*RECIPROCALP)( APL, L );
+	APL (*RECIPROCAL2P)( APL,APL, L );
+	APL (*EXP)( APL,APL );	
+	APL (*CROSS)( APL,APL );
+	APL (*CROSSP)( APL,APL, L );	
+	APL (*DOT)( APL,APL );
+	APL (*DOTP)( APL,APL, L );	
 
-	AP* (*AND)( AP*,AP* );
-	AP* (*OR)( AP*,AP* );
-	AP* (*XOR)( AP*,AP* );
-	AP* (*NAND)( AP*,AP* );
-	AP* (*NOT)( AP* );	
+	APL (*AND)( APL,APL );
+	APL (*OR)( APL,APL );
+	APL (*XOR)( APL,APL );
+	APL (*NAND)( APL,APL );
+	APL (*NOT)( APL );	
 	
-	void (*flipSign)( AP* );
-	char (*getSign)( AP* );
-	void (*setSign)( AP* );
+	void (*flipSign)( APL );
+	char (*getSign)( APL );
+	void (*setSign)( APL );
 	
-	L (*DSTRING2LARGE)( AP* );
+	L (*DSTRING2LARGE)( APL );
 	
 	L p;
+	small packed;
+	small defaultBase;
 	
 	struct _ANSI* ANSIVT;
 }
@@ -148,90 +165,95 @@ extern struct _APLIB* Init_APLIB();
 
 // GRANULAR (DIGIT-WISE) TOOLS //
 // DIGIT::GET(INDEX)
-extern char d( ap*,L );
+extern char d( APL,L );
 // DIGIT::SET( DIGIT,INDEX )
 #define sd setDigit
-extern void setDigit( ap*,L,char );
+extern void setDigit( APL,L,char );
 
 // CREATE/RESET/GC AP VALUES //
-extern AP NewAP( L,L );
-extern AP* NewAPr( L,L );
-extern AP CopyAP( AP* );
-extern void ClearAP( AP* );
-extern void FreeAP( AP* );
+extern APL NewAP( L,L );
+extern APL NewAPr( L,L );
+extern APL CopyAP( APL );
+extern void ClearAP( APL );
+extern void FreeAP( APL );
 
 // EQUALITY READ-OPERATOR
-extern signed short CmpAP( AP*,AP* );
+extern signed short CmpAP( APL,APL );
 
 // CORE OPERATORS
-extern AP* NOP( AP*,AP* );
-extern AP* ADD( AP* A, AP* B );
-extern AP* ADDP( AP* A, AP* B, AP* P );
-extern AP* SUB( AP* A, AP* B );
-extern AP* SUBP( AP* A, AP* B, AP* P );
+extern APL NOP( APL,APL );
+extern APL ADD( APL A, APL B );
+extern APL ADDP( APL A, APL B, APL P );
+extern APL SUB( APL A, APL B );
+extern APL SUBP( APL A, APL B, APL P );
 #define SUBTRACT SUB
 #define SUBTRACTP SUBP
-extern AP* MUL( AP* A, AP* B );
-extern AP* MULP( AP* A, AP* B, AP* P );
+extern APL MUL( APL A, APL B );
+extern APL MULP( APL A, APL B, APL P );
 #define MULTIPLY MUL
 #define MULTIPLYP MULP
-extern AP* DIV( AP* A, AP* B );
-extern AP* DIVP( AP* A, AP* B, AP* P );
-extern AP* DIVBY2(AP* A);
+extern APL DIV( APL A, APL B );
+extern APL DIVP( APL A, APL B, APL P );
+extern APL DIVBY2(APL A);
 #define DIVIDE DIV
 #define DIVIDEP DIVP
 #define SUBDIVIDE DIVIDE
 #define SUBDIVIDEP DIVIDEP
 #define D2 DIVBY2
-extern AP* RECIPROCAL( AP* A );
-extern AP* RECIPROCAL2( AP* A, AP* B );
+extern APL RECIPROCAL( APL A );
+extern APL RECIPROCAL2( APL A, APL B );
 #define N1 RECIPROCAL
 #define NM RECIPROCAL2
-extern AP* RECIPROCALP( AP* A, L P );
-extern AP* RECIPROCAL2P( AP* A, AP* B, L P );
-extern AP* EXP(AP* A, AP* B);
-extern AP* CROSS( AP* A, AP* B );
-extern AP* CROSSP( AP* A, AP* B, L P );
-extern AP* DOT( AP* A, AP* B );
-extern AP* DOTP( AP* A, AP* B, L P );
+extern APL RECIPROCALP( APL A, L P );
+extern APL RECIPROCAL2P( APL A, APL B, L P );
+extern APL EXP(APL A, APL B);
+extern APL CROSS( APL A, APL B );
+extern APL CROSSP( APL A, APL B, L P );
+extern APL DOT( APL A, APL B );
+extern APL DOTP( APL A, APL B, L P );
 // BOOLEAN BIT-WISE OPERATORS
-extern ap* AND( ap* LHS, ap* RHS );
-extern ap* OR (ap* LHS, ap* RHS);
-extern ap* XOR(ap* LHS, ap* RHS);
-extern ap* NOT(ap* v);
-extern ap* NAND(ap* LHS, ap*RHS);
+extern APL AND( APL LHS, APL RHS );
+extern APL OR (APL LHS, APL RHS);
+extern APL XOR(APL LHS, APL RHS);
+extern APL NOT(APL v);
+extern APL NAND(APL LHS, APLRHS);
 
 // SIGN ( +,- )
-extern void flipSign( AP* );
-extern void setSign( AP*,char );
-extern char getSign( AP* );
+extern void flipSign( APL );
+extern void setSign( APL,char );
+extern char getSign( APL );
 
 // 1-based peek at [large]-th digit.
 extern char peek( L,char* );
+#define PEEK peek
+
+extern char poke( char*, char*, L offset );
+
+
 
 // QUICK SIGN-IDENTIFICATION FOR NORMAL'D RESULT VALUES.
-extern char tt_add( AP*,AP* );
-extern char tt_mul( AP*,AP* );
+extern char TT_ADD( APL,APL );
+extern char TT_MUL( APL,APL );
 
 // FOR DIAGNOSTICS, OR JUST FOR THE PRETTY-PRINTER.
 extern large DIVBY2_PRINT_ROWS;
 
 // MODIFYING AP VALUES
-extern L setPart( AP*, char*, large part );
-extern L setPartW( AP*, char* ); // "whole" part
-extern L setPartF( AP*, char* ); // "fractional" part
+extern L setPart( APL, char*, large part );
+extern L setPartW( APL, char* ); // "whole" part
+extern L setPartF( APL, char* ); // "fractional" part
 #define SignPart 0
 #define PartW 1
 #define PartF 2
-extern AP* RESET0( AP* );
-extern AP* RESET1( AP* );
+extern APL RESET0( APL );
+extern APL RESET1( APL );
 
 // USEFUL FEATURES
-#define APTR AP*
-extern AP* GCD( AP*,AP*, AP* lcm );
-extern AP* LCM( AP*,AP* );
-extern AP* LCMTESTSR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (AP**).
-extern L DSTRING2LARGE( AP* );
+#define APTR APL
+extern APL GCD( APL,APL, APL lcm );
+extern APL LCM( APL,APL );
+extern APL LCMTESTSR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
+extern L DSTRING2LARGE( APL );
 
 // BASE CONVERSION
 typedef char* String;
@@ -240,16 +262,16 @@ extern APTR BIN_2_DEC( APTR );
 extern APTR DEC_2_HEX( APTR,L packed );
 extern APTR HEX_2_DEC( APTR );
 extern APTR DEC_2_OCTAL( APTR,L );
-extern OCTAL_2_DEC( APTR );
+extern APTR OCTAL_2_DEC( APTR );
 extern APTR BIN_2_HEX( APTR );
 extern APTR HEX_2_BIN( APTR );
 
-extern OCTAL_2_HEX( APTR );
-extern HEX_2_OCTAL( APTR );
-extern OCTAL_2_BIN( APTR );
-extern BIN_2_OCTAL( APTR );
+extern APTR OCTAL_2_HEX( APTR );
+extern APTR HEX_2_OCTAL( APTR );
+extern APTR OCTAL_2_BIN( APTR );
+extern APTR BIN_2_OCTAL( APTR );
 
-extern LARGE lenp( AP* );
+extern LARGE lenp( APL );
 
 
 
@@ -270,10 +292,7 @@ APTR OCTAL_2_DEC( APTR A ){
 
 	aplibstdreturn(10);
 }
-APTR DEC_2_HEX( APTR A ){
 
-	aplibstdreturn(16);
-}
 APTR BIN_2_OCTAL( APTR A ){
 
 	aplibstdreturn(8);
@@ -283,22 +302,17 @@ APTR OCTAL_2_BIN( APTR A ){
 	aplibstdreturn(2);
 }
 
-
-
-
-
 // 2k-BOUNDARY
-extern L Max2K(AP*);
-extern L Min2K(AP*);
+extern L Max2K(APL);
+extern L Min2K(APL);
 
-extern L MSD( AP* A );
-
+extern L MSD( APL A );
 
 // ALIGNMENT TOOLS
-extern L PackTrailingZeroes( char* cr, L alength#/=/, L n0 );
+extern L PackTrailingZeroes( char* cr, L alength, L n0 );
 extern string PackLeadingZeroes( char* str, L n0 );
 
-extern signed OverFlow( AP*, int result, signed k );
+extern signed OverFlow( APL, int result, signed k );
 
 // ENCODE/DECODE
 extern L charp2L(char* input);
@@ -311,3 +325,4 @@ extern char** GetAPSymbols();
 
 #endif
 
+	

@@ -4,7 +4,7 @@
 	#include <string.h>
 	#include <float.h>
 	
-	#include "fpcalc.tab.h"
+	#include "fractionalcalc.tab.h"
 	
     int yylex();
     int yyerror(const char*);
@@ -29,4 +29,5 @@
 	char* enum_str;
 	extern double generateExpValue(char *);
 	
-	#define NUM_STRING_LENGTH 325 // max length of fp (double) number, including decimal point. Obvs is way less than 100.
+	#define NUM_STRING_LENGTH 325 // max length of fractional (double) number, including decimal point. Obvs is way less than 100.
+
