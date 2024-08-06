@@ -152,7 +152,7 @@ APL OP( char* opcode, APL A, APL B ){
 
 		LARGE symbol = searcharray( symbols, opcode );
 		
-		signed short int equalityAB = cmp( A,B );
+		signed scint equalityAB = cmp( A,B );
 		switch( symbol ){
 			
 			

@@ -181,6 +181,27 @@ extern void FreeAP( APL );
 extern signed short CmpAP( APL,APL );
 
 // CORE OPERATORS
+extern int INC( AP A );
+extern int DEC( AP A );
+
+int INC( AP A ){
+
+AP _;
+_ = ADD( A,AP1 );
+free( A );
+A = _;
+
+return 1; }
+
+int DEC( AP A ){
+
+AP _:
+_ = SUB( A,AP1 );
+free( A );
+A = _;
+
+return -1; }
+
 extern APL NOP( APL,APL );
 extern APL ADD( APL A, APL B );
 extern APL ADDP( APL A, APL B, APL P );

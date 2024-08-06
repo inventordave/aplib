@@ -5,15 +5,16 @@
 #define DAVE_GETOPTIONS
 
 // INFORMATIVE SECTION
-/** A straightforward skeletal subsystem for processing a variable number of args passed on the cmd-line. Look in core function "getOptions".
-	Essentially, the idea is that the getOptions function would return A status code of -1 if any of the cmd-line were unrecognized as they passed through the scan loop in the "for(;;)" block of the function. It is in this block that an individual (unordered) cmd-line arg/switch (contained in an argv[i] indice) is detected, and if identified, you simply implement how your program reacts to that cmd-line arg. Very simple, just browse through the getOptions(...) function, and remember to pass &argc as a pointer, and argv to the function. Internally, the function modifies the value of argc, until it is finally reduced to 0 (indicating that all cmd-line invocation parts - args - have been scanned). This means that unless you store a copy before invoking the function, the initial value of argc will be lost.
+/*
+A straightforward skeletal subsystem for processing a variable number of args passed on the cmd-line. Look in core function "getOptions".
+Essentially, the idea is that the getOptions function would return A status code of -1 if any of the cmd-line were unrecognized as they passed through the scan loop in the "for(;;)" block of the function. It is in this block that an individual (unordered) cmd-line arg/switch (contained in an argv[i] indice) is detected, and if identified, you simply implement how your program reacts to that cmd-line arg. Very simple, just browse through the getOptions(...) function, and remember to pass &argc as a pointer, and argv to the function. Internally, the function modifies the value of argc, until it is finally reduced to 0 (indicating that all cmd-line invocation parts - args - have been scanned). This means that unless you store a copy before invoking the function, the initial value of argc will be lost.
 */
-
 
 // STDLIB INC'S
 #include <stdio.h>
 #include <string.h>
 #include <assert.h>
+#include "stringy.h"
 
 // FNC PROTOTYPES
 signed int getOptions(int * argc, char ** argv);
@@ -22,18 +23,10 @@ void sanitizeStr(char * str);
 int streq(char *a, char *b); // bool( str_a == str_b ), returns sensible 1 if strings match.
 
 // EXAMPLE USAGE
-int getopt_main(int argc, char **argv)	{
-	
-	int status = getOptions( &argc, argv );
-	
-	return status;
-}
+int getopt_main(int argc, char **argv){
+int status = getOptions( &argc, argv );
+return status;}
 
-// SUGAR
-int streq(char *a, char *b) { // returns true (1) if the 2 c-strings match, as it should...
-
-	return (strcmp(a, b) == 0);
-}
 
 // CORE FNCS
 void rotate(int * argc, char * argv[])	{

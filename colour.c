@@ -183,140 +183,135 @@ char* SetVT( char* fg, char* bg )	{
 
 void Init_ANSIVT_CTABLE(){
 
-	if( ANSI->is != ANSI_IS )	{
-	
-		printf( "ANSI VT System not Initialised! Initialising...\n" );
-		ANSI_init();
-	}
-	
-	
-	char* ANSIVT_CTABLE[64][2] = { 0,0 };
-	unsigned int i=0;
-	
-	//FG
-	ANSIVT_CTABLE[i][0]= "black";
-	ANSIVT_CTABLE[i++][1]= FG_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "red";
-	ANSIVT_CTABLE[i++][1]= FG_RED;
+if( ANSI->is != ANSI_IS ){
+printf( "ANSI VT System not Initialised! Initialising...\n" );
+ANSI.c = ANSI_init();}
 
-	ANSIVT_CTABLE[i][0]= "green";
-	ANSIVT_CTABLE[i++][1]= FG_GREEN;
+char* ANSIVT_CTABLE[64][2] = { {0},{0} };
 
-	ANSIVT_CTABLE[i][0]= "yellow";
-	ANSIVT_CTABLE[i++][1]= FG_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "blue";
-	ANSIVT_CTABLE[i++][1]= FG_BLUE
+uint32_t i=0;
+//FG
+ANSIVT_CTABLE[i][0]= "black";
+ANSIVT_CTABLE[i++][1]= FG_BLACK;
 
-	ANSIVT_CTABLE[i][0]= "magenta";
-	ANSIVT_CTABLE[i++][1]= FG_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "cyan";
-	ANSIVT_CTABLE[i++][1]= FG_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "white";
-	ANSIVT_CTABLE[i++][1]= FG_WHITE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_black";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "bright_red";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_RED;
-	
-	ANSIVT_CTABLE[i][0]= "bright_green";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_GREEN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_yellow";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "bright_blue";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLUE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_magenta";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "bright_cyan";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_white";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_WHITE;
-	
-	// BG
-	ANSIVT_CTABLE[i][0]= "black";
-	ANSIVT_CTABLE[i++][1]= BG_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "red";
-	ANSIVT_CTABLE[i++][1]= BG_RED;
+ANSIVT_CTABLE[i][0]= "red";
+ANSIVT_CTABLE[i++][1]= FG_RED;
 
-	ANSIVT_CTABLE[i][0]= "green";
-	ANSIVT_CTABLE[i++][1]= BG_GREEN;
+ANSIVT_CTABLE[i][0]= "green";
+ANSIVT_CTABLE[i++][1]= FG_GREEN;
 
-	ANSIVT_CTABLE[i][0]= "yellow";
-	ANSIVT_CTABLE[i++][1]= BG_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "blue";
-	ANSIVT_CTABLE[i++][1]= BG_BLUE;
+ANSIVT_CTABLE[i][0]= "yellow";
+ANSIVT_CTABLE[i++][1]= FG_YELLOW;
 
-	ANSIVT_CTABLE[i][0]= "magenta";
-	ANSIVT_CTABLE[i++][1]= BG_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "cyan";
-	ANSIVT_CTABLE[i++][1]= BG_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "white";
-	ANSIVT_CTABLE[i++][1]= BG_WHITE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_black";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "bright_red";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_RED;
-	
-	ANSIVT_CTABLE[i][0]= "bright_green";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_GREEN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_yellow";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "bright_blue";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLUE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_magenta";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "bright_cyan";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_white";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_WHITE;
+ANSIVT_CTABLE[i][0]= "blue";
+ANSIVT_CTABLE[i++][1]= FG_BLUE;
 
-	// RESET
-	ANSIVT_CTABLE[i][0] = "default";
-	ANSIVT_CTABLE[i++][1] = NORMAL;
-	
-	// i contains a count of all the colour codes. Should be 33.
-	ANSI->c->ANSIVT_CTABLE = ANSIVT_CTABLE;
-	ANSI->c->fg( "white" );
-	ANSI->c->bg( "black" );
-	
-	return;
-}
+ANSIVT_CTABLE[i][0]= "magenta";
+ANSIVT_CTABLE[i++][1]= FG_MAGENTA;
+
+ANSIVT_CTABLE[i][0]= "cyan";
+ANSIVT_CTABLE[i++][1]= FG_CYAN;
+
+ANSIVT_CTABLE[i][0]= "white";
+ANSIVT_CTABLE[i++][1]= FG_WHITE;
+
+ANSIVT_CTABLE[i][0]= "bright_black";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLACK;
+
+ANSIVT_CTABLE[i][0]= "bright_red";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_RED;
+
+ANSIVT_CTABLE[i][0]= "bright_green";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_GREEN;
+
+ANSIVT_CTABLE[i][0]= "bright_yellow";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_YELLOW;
+
+ANSIVT_CTABLE[i][0]= "bright_blue";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLUE;
+
+ANSIVT_CTABLE[i][0]= "bright_magenta";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_MAGENTA;
+
+ANSIVT_CTABLE[i][0]= "bright_cyan";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_CYAN;
+
+ANSIVT_CTABLE[i][0]= "bright_white";
+ANSIVT_CTABLE[i++][1]= FG_BRIGHT_WHITE;
+
+// BG
+ANSIVT_CTABLE[i][0]= "black";
+ANSIVT_CTABLE[i++][1]= BG_BLACK;
+
+ANSIVT_CTABLE[i][0]= "red";
+ANSIVT_CTABLE[i++][1]= BG_RED;
+
+ANSIVT_CTABLE[i][0]= "green";
+ANSIVT_CTABLE[i++][1]= BG_GREEN;
+
+ANSIVT_CTABLE[i][0]= "yellow";
+ANSIVT_CTABLE[i++][1]= BG_YELLOW;
+
+ANSIVT_CTABLE[i][0]= "blue";
+ANSIVT_CTABLE[i++][1]= BG_BLUE;
+
+ANSIVT_CTABLE[i][0]= "magenta";
+ANSIVT_CTABLE[i++][1]= BG_MAGENTA;
+
+ANSIVT_CTABLE[i][0]= "cyan";
+ANSIVT_CTABLE[i++][1]= BG_CYAN;
+
+ANSIVT_CTABLE[i][0]= "white";
+ANSIVT_CTABLE[i++][1]= BG_WHITE;
+
+ANSIVT_CTABLE[i][0]= "bright_black";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLACK;
+
+ANSIVT_CTABLE[i][0]= "bright_red";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_RED;
+
+ANSIVT_CTABLE[i][0]= "bright_green";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_GREEN;
+
+ANSIVT_CTABLE[i][0]= "bright_yellow";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_YELLOW;
+
+ANSIVT_CTABLE[i][0]= "bright_blue";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLUE;
+
+ANSIVT_CTABLE[i][0]= "bright_magenta";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_MAGENTA;
+
+ANSIVT_CTABLE[i][0]= "bright_cyan";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_CYAN;
+
+ANSIVT_CTABLE[i][0]= "bright_white";
+ANSIVT_CTABLE[i++][1]= BG_BRIGHT_WHITE;
+
+// RESET
+ANSIVT_CTABLE[i][0] = "default";
+ANSIVT_CTABLE[i++][1] = NORMAL;
+
+// i contains a count of all the colour codes. Should be 33.
+ANSI->c.ANSIVT_CTABLE = ANSIVT_CTABLE;
+ANSI->c.fg( "white" );
+ANSI->c.bg( "black" );
+
+return;  }
+
 
 AVTC Init_AVTC(){
-	
-	AVTC _ = (AVTC)malloc( sizeof(AVTC) );
-	
-	_->ResetAnsiVtCodes = ResetAnsiVtCodes;
-	_->SetVT = SetVT;
-	_->fg = fg;
-	_->bg = bg;
-	_->f;
-	
-	_->ANSIVT_FG = "default";
-	
-	return ( _ );
-}
+		
+AVTC _ = (AVTC)malloc( sizeof(AVTC) );
+
+&_->ResetAnsiVtCodes = ResetAnsiVtCodes;
+&_->SetVT = SetVT;
+&_->fg = fg;
+&_->bg = bg;
+&_->f;
+&_->ANSIVT_FG = "default";
+
+	return ( _ ); }
 
 void ANSI_init(){
 	

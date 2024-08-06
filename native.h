@@ -10,7 +10,7 @@ double qdiv_i(int n, int d);
 char * cat(int c, char * s, ...);
 char * safecat(char * s, char * rhs);
 double expound(double base, int exp);
-APL prime(APL, APL, short unsigned int);
+APL prime(APL, APL, cint);
 APL primedata(APL min, APL max, APL step);
 
 #define LARGE unsigned long long int

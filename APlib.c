@@ -125,7 +125,7 @@ APL NOT(APL v)	{
 	
 	APLS _v = v.wholepart;
 	L strlen_v = strlen( _v );
-	char* _ = (char*)malloc( strlen_v+1 );
+	register char* _ = (char*)malloc( strlen_v+1 );
 	LARGE i;
 	for( i=0; i<strlen_v; i++ )
 		if( _v[i]=='0' )
@@ -264,8 +264,8 @@ APL ADDP( APL A, APL B, AP P )	{
 	large size = ( strlen_b > strlen_a ? strlen_b : strlen_a );
 	APL C = NewAPr( size+1,0 );
 
-	signed short int value;
-	signed short int valA, valB, valC;
+	signed scint value;
+	signed scint valA, valB, valC;
 	
 	signed int i, j, k;
 	
@@ -330,7 +330,7 @@ APL ADDP( APL A, APL B, AP P )	{
 		C.sign = '-';
 
 	
-	char * _ = (char *)malloc(strlen(C.whole)+1);
+	register char * _ = (char *)malloc(strlen(C.whole)+1);
 	strcpy(_, C.whole);
 	for( i=0; i<(int)strlen(_); i++ )
 		if( _[i] == '0' )
@@ -1483,54 +1483,67 @@ AP RECIPROCAL( AP A )	{
 // GENERAL HELPER FNCS
 char** getaplibsymbols(){
 	
-	char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
-	
-	symbols[DELIMITERS] = getstring( "([{}])" );
-	symbols[UNKOWN] = getstring("UNKNOWN");
-	symbols[OP_AND] = getstring("AND");
-	symbols[OP_OR] = getstring("OR");
-	symbols[OP_XOR] = getstring("XOR");
-	symbols[OP_NOT] = getstring("NOT");
-	symbols[OP_PLUS] = getstring("+");
-	symbols[OP_MINUS] = getstring("-");
-	symbols[OP_STAR] = getstring("*");
-	symbols[OP_FORWARDSLASH] = getstring("/");
+char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
 
+symbols[DELIMITERS] = getstring( "([{}])" );
+symbols[UNKOWN] = getstring("UNKNOWN");
+//symbols[OP_] = getstring("");	
+symbols[OP_AND] = getstring("AND");
+symbols[OP_OR] = getstring("OR");
+symbols[OP_XOR] = getstring("XOR");
+symbols[OP_NOT] = getstring("NOT");
+symbols[OP_PLUS] = getstring("+");
+symbols[OP_MINUS] = getstring("-");
+symbols[OP_STAR] = getstring("*");
+symbols[OP_FORWARDSLASH] = getstring("/");
 
-	//symbols[OP_] = getstring("");	
-	symbols[OP_GT] = getstring( ">" );
-	symbols[OP_LT] = getstring("<");
-	
-	
-	
-	symbols[OP_PLUSEQUALS] = getstring("+=");
-	symbols[OP_ISEQUALTO] = getstring("==");
-	symbols[OP_RATIO] = getstring("%");
-	symbols[OP_RATIO_ASSIGN] = getstring("%=");
-	symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
-	symbols[OP_CARAT] = getstring("^");
-	symbols[OP_LTORISEQUALTO] = getstring("<=");
-	symbols[OP_GTORISEQUALTO] = getstring(">=");
-	symbols[OP_MINUSEQUALS] = getstring("-=");
-	symbols[OP_PLUSEQUALS] = getstring("+=");
-	symbols[OP_FORWARDSLASHEQUALS] = getstring("/=");
-	symbols[OP_DOUBLESTAR] = getstring("**");
-	symbols[OP_CARATEQUALS] = getstring("^=");
-	symbols[OP_ISEQUALTO] = getstring("==");
-	symbols[OP_INCREMENT] = getstring("++");
-	symbols[OP_DECREMENT] = getstring("--");
-	symbols[OP_ISDEFINEDAS] = getstring(":=");
-	symbols[OP_CONDITIONAL] = getstring("?");
-	symbols[OP_BITWISE_AND] = getstring("&");
-	symbols[OP_BITWISE_NOT] = getstring("~");
-	symbols[OP_PERIOD] = getstring(".");
-	symbols[OP_BITWISE_OR] = getstring("|");
-	symbols[OP_LOGICAL_OR] = getstring("||");
-	symbols[OP_LOGICAL_AND] = getstring("&&");
-	symbols[OP_LOGICAL_ISNOT] = getstring("!!");
-	
-	return symbols;
-}
+symbols[OP_GT] = getstring( ">" );
+symbols[OP_LT] = getstring("<");
+
+symbols[OP_PLUSEQUALS] = getstring("+=");
+symbols[OP_ISEQUALTO] = getstring("==");
+symbols[OP_RATIO] = getstring("%");
+symbols[OP_RATIO_ASSIGN] = getstring("%=");
+symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
+symbols[OP_CARAT] = getstring("^");
+symbols[OP_LTORISEQUALTO] = getstring("<=");
+symbols[OP_GTORISEQUALTO] = getstring(">=");
+symbols[OP_MINUSEQUALS] = getstring("-=");
+symbols[OP_PLUSEQUALS] = getstring("+=");
+symbols[OP_FORWARDSLASHEQUALS] = getstring("/=");
+symbols[OP_DOUBLESTAR] = getstring("**");
+symbols[OP_CARATEQUALS] = getstring("^=");
+symbols[OP_ISEQUALTO] = getstring("==");
+symbols[OP_INCREMENT] = getstring("++");
+symbols[OP_DECREMENT] = getstring("--");
+symbols[OP_ISDEFINEDAS] = getstring(":=");
+symbols[OP_CONDITIONAL] = getstring("?");
+symbols[OP_BITWISE_AND] = getstring("&");
+symbols[OP_BITWISE_NOT] = getstring("~");
+symbols[OP_PERIOD] = getstring(".");
+symbols[OP_BITWISE_OR] = getstring("|");
+symbols[OP_LOGICAL_OR] = getstring("||");
+symbols[OP_LOGICAL_AND] = getstring("&&");
+symbols[OP_LOGICAL_ISNOT] = getstring("!!");
+
+return symbols; }
+
+int INC( AP A ){
+
+AP _;
+_ = ADD( A,AP1 );
+free( A );
+A = _;
+
+return 1; }
+int DEC( AP A ){
+
+AP _:
+_ = SUB( A,AP1 );
+free( A );
+A = _;
+
+return -1; }
 
 
 char peek( large c, char* _ )``````{
@@ -1546,7 +1559,7 @@ out[offset++] = in[c++];
 
 return in[--c];}
 
-signed short int CmpAP( APL A, APL B )	{
+signed scint CmpAP( APL A, APL B )	{
 	
 	
 	while( *(A->major)=='0' )
@@ -1596,9 +1609,9 @@ signed int overflow( AP * C, int result, signed k ) {
     
   // 1. get lmost digit of result (1-8)
   
-  short int rd = result % 10;
-  short int td = (result - rd);
-  short int ld = 0;
+  scint rd = result % 10;
+  scint td = (result - rd);
+  scint ld = 0;
   
 	  while(td>0){
 		++ld;
@@ -1607,7 +1620,7 @@ signed int overflow( AP * C, int result, signed k ) {
 	  
 	  C->major[k] = '0' + rd;
 	 
-	  short int iresult;
+	  scint iresult;
 	  iresult = ld+(C->major[k-1] - '0');
 	  if( iresult <= 9 )
 	  C->major[k-1] = '0' + iresult;
@@ -1624,8 +1637,8 @@ signed int overflow( AP * C, int result, signed k ) {
 
 int MSD(int num)	{
 	
-  short int rd = num % 10;
-  short int td = (num - rd);
+  scint rd = num % 10;
+  scint td = (num - rd);
   int ld = 0;
   
 	while( td>0 ){

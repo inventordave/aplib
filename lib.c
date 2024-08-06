@@ -62,29 +62,22 @@ char* sanitizeStr( char* A )	{
 }
 
 // SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
-int seq(char *a, char *b) {
-
-	return (strcmp(a, b) == 0);
-}
+int seq(char *a, char *b)
+return (strcmp(a, b) == 0); }
 
 // STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
 #define strcmp strcmp_
 int strcmp_( char* LHS, char* RHS ){
 
-	if( strlen(LHS)==strlen(RHS) ){
-		for( large i=0; i<strlen(LHS); i++ )
-		{
-		if( LHS[i]==RHS[i] )
-		continue;
-		else
-		return LHS[i]-RHS[i];
-		}
-	}
-	else
-		return strlen(LHS)-strlen(RHS);
-	
-	return 0;
-}
+if( strlen(LHS)==strlen(RHS) ){
+for( large i=0; i<strlen(LHS); i++ ){
+if( LHS[i]==RHS[i] )
+	continue;
+	else return LHS[i]-RHS[i];}}
+else
+return strlen(LHS)-strlen(RHS);
+
+return 0; }
 
 // PAUSE: Simply pauses interactivity in console-mode until a key is pressed.
 void pause()	{
@@ -95,12 +88,10 @@ void pause()	{
 
 // ARG_ASSERT: Custom assert() for the cmd-line args count. Pass the "argc" Env variable to it, with the min number of cmd-line args needed to continue
 // Does not include argv[0], which by system default holds the executable name ,so just the min-count for actual args passed.)
-void arg_assert( int argc, int min )	{
-	
-	if( (argc-1)<min ){
-	//printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
-	exit(1);}
+void arg_assert( int argc, int min ){
+if( (argc-1)<min ){
+//printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
+exit(1);}
 
-	return;
-}
+return; }
 

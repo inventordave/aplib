@@ -14,17 +14,17 @@
 	char *trim(double x);
 	char *(*function)(); 
 	
-	short int truthy(double);
+	scint truthy(double);
 	
 	double _FALSE;
 	double _TRUE;
 	double _Null;
-	short int truthyFlag;
+	scint truthyFlag;
 	
 	double vars[256] = { -10000 };
 	char*  evars[256] = { '\0' };
 	
-	short int optionsFlag = 0;
+	scint optionsFlag = 0;
 	
 	char* enum_str;
 	extern double generateExpValue(char *);

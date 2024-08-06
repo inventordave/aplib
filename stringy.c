@@ -71,7 +71,7 @@ char * cat(int c, char * s, ...)	{
 	strcpy(_, s);
 
 	va_start(ap, c);
-	for(short int i=0; i<c; i++)	{
+	for(scint i=0; i<c; i++)	{
 	
 		_ = safecat(_, (char *)va_arg(ap, char*));
 	}
