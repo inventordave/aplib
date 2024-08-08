@@ -76,7 +76,10 @@ let lfc = 'no lex file';
 
 let stack = 0;
 
-function runlexer( )	{
+function runlexer( t )	{
+	
+	if( t==undefined )
+		t = 17;
 	
 	//const { fs } = require('node:fs');
 	//let scFileName = "aplib.c"
@@ -87,8 +90,8 @@ function runlexer( )	{
 	
 	stack = lexer.lex()	
 	
-	console.log('\x1b[36m%s\x1b[0m', "String: '" + stack[17].str + "'");
-	console.log('\x1b[35m%s\x1b[0m', "TOKEN:  '" + stack[17].pattern + "'");
+	console.log('\x1b[36m%s\x1b[0m', "String: '" + stack[ t ].str + "'");
+	console.log('\x1b[35m%s\x1b[0m', "TOKEN:  '" + stack[ t ].pattern + "'");
 	
 	let U = new Utils();
 	
