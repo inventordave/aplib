@@ -49,12 +49,11 @@ APL isprime ( APL IN )	{
 			printf("%s is NOT prime. It was divisable at  %s.\n", IN->whole, K.whole);
 			
 			return CopyAP( &AP0 );
-, NORMAL 		}
+		}
 	
-		if( report==ON )
+		if( report==ON ){
 		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->whole, FG_BRIGHT_GREEN, NORMAL );
-		
-		return i;
+		return i;}
 	}
 	
 
