@@ -1,11 +1,9 @@
 // LIB_C
 // DAVE'S DAVELIB.
 
-
 // INC'S
 #include "io.h"
 #include "lib.h"
-
 
 // 'TOGGLE'
 toggle fliptoggle( toggle* t )	{
@@ -19,7 +17,6 @@ toggle fliptoggle( toggle* t )	{
 }
 
 // DAVELIB FNC'S
-
 
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A )	{
@@ -41,14 +38,14 @@ char* sanitizeStr( char* A )	{
 			case 63: // ? question-mark
 			case 124:// | pipe
 
-				// printf( "Invalid char ('%c') (%d).\n", *_, *_ );
+				// printf( "Invalid char ('%c') (%d).\n", *A, *A );
 				// Uncomment above line to see reporting to stdout of detected invalid chars in the input string.
 				*B = '.'; // Arbitrary printable-char to replace invalid char with.
 				break;
 			
 			default:
 				*B = *A; 
-				//printf( "char ok: '%c'\n", (*str) );
+				//printf( "char ok: '%c'\n", (*A) );
 				break;	
 		}
 		
@@ -62,7 +59,7 @@ char* sanitizeStr( char* A )	{
 }
 
 // SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
-int seq(char *a, char *b)
+int seq(char *a, char *b){
 return (strcmp(a, b) == 0); }
 
 // STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
@@ -75,7 +72,7 @@ if( LHS[i]==RHS[i] )
 	continue;
 	else return LHS[i]-RHS[i];}}
 else
-return strlen(LHS)-strlen(RHS);
+	return strlen(LHS)-strlen(RHS);
 
 return 0; }
 

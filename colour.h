@@ -4,11 +4,24 @@
 #define colouriser colorMode
 #define colourizer colouriser
 
+void colorMode();
+
 extern char* ANSIVT_FG;
 extern char* ANSIVT_BG;
 
 #define FG_COLORS 16
 #define BG_COLORS 16
+
+
+char* getVTCodeString( char );
+
+
+extern char ResetAnsiVtCodes(char);
+extern char* SetVT( char*, char* ); //fg and bg colour.
+extern char* f( int sc ); // eg, +i, +b, -i, -b, and so on.
+extern char* fg( char* );
+extern char* bg( char* );
+
 
 typedef struct AVTC{	
 
@@ -16,27 +29,29 @@ typedef struct AVTC{
 	char* ANSIVT_FG;
 	char* ANSIVT_BG;
 	
-	char (*ResetAnsiVtCodes)(char);
-	char* (*SetVT)( char*, char* ); //fg and bg colour.
+	char (*RVC)(char);
+	char* (*SVT)( char*, char* ); //fg and bg colour.
 
 	char* (*fg)( char* );
 	char* (*bg)( char* );
 	char* (*f)( char* ); // eg, +i, +b, -i, -b, and so on.
 
-	char* ANSIVT_CTABLE[FG_COLORS+BG_COLORS+1][2];
+	char** ANSIVT_CTABLE;
 
 } AVTC;
 
 typedef struct _ANSI{
 
 	int (*is)();
-	struct AVTC c;
-	
+	struct AVTC* c;
+
+	char* (*SetVT)( char*, char* );
 	char* ANSIVT_FG;
 	char* ANSIVT_BG;
 } _ANSI;
 
-struct _ANSI* ANSI;
+extern struct _ANSI* ANSI;
+
 
 extern int ANSI_IS();
 
@@ -44,11 +59,11 @@ extern void ANSI_init();
 
 
 
-extern char (*ResetAnsiVtCodes)(char);
-extern void (*SetVT)( char*, char* ); //fg and bg colour.
-extern char* (*f)( int sc ); // eg, +i, +b, -i, -b, and so on.
-extern char* fg( char* );
-extern char* fg( char* );
+// generates the ansivt-formatted output string.
+char* ANSIVT( char* str, char cc[], unsigned long long int offsets[], int _frees );
+
+
+
 
 
 extern struct AVTC* ActivateColorConsole();
@@ -92,9 +107,9 @@ extern char BG_BRIGHT_WHITE[8];
 
 extern char NORMAL[8];
 
+#define VTCODEWIDTH 8
 
-
-extern void Init_AVTC( AVTC* );
+extern AVTC* Init_AVTC( );
 
 #endif
 

@@ -21,19 +21,6 @@ APL A;
 APL B;
 APL C;
 
-char* getstring( char* in ){
-	
-	LARGE str_length = strlen( in );
-	char* _ = (char*)malloc( str_length+1 );
-	
-	LARGE i;
-	for( i=0; i<str_length; i++ )
-		_[i] = in[i];
-	
-	_[i] = '\0';
-	
-	return _;
-}
 
 LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
@@ -45,18 +32,13 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
 }
 
-APL NewAPr( large whole_range, large fractional_range )	{
 
-	APL _ = (APL)malloc( sizeof(AP) );
-	*_ = NewAP( whole_range,fractional_range );
-	return _;
-}
 
 APL OP( char* opcode, APL A, APL B ){
 
 	#define digit char
 
-	int t = (strlen(B->whole)>strlen(A->whole)?strlen(B->whole):strlen(A->whole));
+	int t = (strlen(B->integer)>strlen(A->integer)?strlen(B->integer):strlen(A->integer));
 	APL C = &(APL)NewAP( +1, 0 );
 	APL R = &(APL)NewAP( t, 0 );
 	
@@ -116,7 +98,7 @@ APL OP( char* opcode, APL A, APL B ){
 			b[0] = *(B_++);
 
 			//_ += b*c;
-			_b->whole=b, _c->whole=c;
+			_b->integer=b, _c->integer=c;
 			APL temp2;
 			APL temp=op( "+=", _, temp2=op( "*", _a, _b ) );
 			
@@ -125,10 +107,10 @@ APL OP( char* opcode, APL A, APL B ){
 			free( temp );
 			free( temp2 ); }
 			
-		B_ = B->whole;
+		B_ = B->integer;
 		
 		APL temp;
-		if( (temp=op( ">", _,R ))->whole[0]=='1' )
+		if( (temp=op( ">", _,R ))->integer[0]=='1' )
 			--c[0];
 		else{
 		free( temp );
@@ -261,7 +243,7 @@ APL OP( char* opcode, APL A, APL B ){
 		*C_ = c + ASCII;
 
 		if( *B_=='\0' )
-		B_ = B->whole;
+		B_ = B->integer;
 		goto loop;
 	}
 	
@@ -328,7 +310,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.whole, OPCODE, B.whole, C.whole );
+	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.integer, OPCODE, B.integer, C.integer );
 	
 	return 0;
 }
@@ -357,7 +339,7 @@ char* nextArg( char* type, va_list args )	{
 	return _;}
 	if( eq( type,"AP" ) ||
 		!strcmp( type,"ap" ))
-	 return va_arg( args, AP ).whole;
+	 return va_arg( args, AP ).integer;
 	if( !strcmp( type,"void*" ) ||
 			 eq( type,"void *"))
 	 return va_arg( args, void* );

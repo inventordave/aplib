@@ -5,8 +5,9 @@
 
 <body>
 <body>
-<input type="file" name="inputfile" id="inputfile">
-<input type="file" name="inputfile2" id="inputfile2">
+<input type="file" name="inputfile" id="inputfile" label="Select source code file.">
+
+<!-- <input type="file" name="inputfile2" id="inputfile2"> -->
 <br>
 
 <script src="main.js"></script>
@@ -21,7 +22,7 @@
 
 			fr.readAsText(this.files[0]);
 		})
-
+/*
 	document.getElementById('inputfile2')
 		.addEventListener('change', function () {
 
@@ -31,12 +32,12 @@
 			}
 
 			fr.readAsText(this.files[0]);
-		})
+		}) */
 </script>
 
 
 
-The main.js file is linked. Type runlexer() in the dev console.
+The main.js file is linked. Load a source code file, then type runlexer() in the dev console.
 
 
 </body>

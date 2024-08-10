@@ -51,7 +51,7 @@ signed int getOptions( int* argc, char** argv )	{
 	char * outputFile = (char *)malloc(262); outputFile[0] = '\0';
 	char * ignoreList = (char *)malloc(1024); ignoreList[0] = '\0';
 	
-	// EXAMPLE R-valueS. Again, at design-time, you would probably place these in static scope.
+	// EXAMPLE R-values. Again, at design-time, you would probably place these in static scope.
 	int RECURSE = 1;
 	int OTF = 2;
 	char * defaultIgnoreList = (char *)malloc(1024); defaultIgnoreList[0] = '\0';
@@ -66,7 +66,7 @@ signed int getOptions( int* argc, char** argv )	{
 		
 		if( seq(argv[0], "-r") )	{
 			
-			flagS |= RECURSE;
+			flags |= RECURSE;
 			continue;
 		}
 		
@@ -172,7 +172,6 @@ void PrintASCIITable(char start, char end)	{
 	
 	return;
 }
-
 
 #endif
 

@@ -1,5 +1,32 @@
 var YaccRules = new Array();
 
+/*
+
+ws: [\w]
+VARIABLE_NAME: [a-zA-Z_]+[a-zA-Z_0-9]*
+STATEMENT_LIST: STATEMENT | STATEMENT STATEMENT_LIST
+FNC_BLOCK: '{' [\w]* STATEMENT_LIST [\w]*  '}'
+FNC_DEF: ["function"|"FUNCTION"] [\w]+ VARIABLE_NAME [\w]* '(' [\w]* FNC_ARG_LIST [\w]* ')' [\w]* FNC_BLOCK
+
+FNC_ARG_LIST: VARIABLE_NAME | VARIABLE_NAME ',' FNC_ARG_LIST
+
+VARIABLE_DECL: "var"|"VAR"|"let" VARIABLE_NAME ('=' VALUE)? ';'* 
+
+FNC_VARIABLE: VARIABLE_NAME '(' FNC_ARG_LIST? ')'
+VALUE: LITERAL | VARIABLE_NAME | FNC_VARIABLE
+
+NUM: [0-9a-fA-F]+[\.]?[0-9a-fA_F]
+
+CHARSET_NSQ:
+CHARSET_NDQ:
+
+OBJ_NOTATION: VARIABLE_NAME ':' (VARIABLE_NAME|FNC_VARIABLE|LITERAL) ','?
+OBJ_LITERAL_INNER: STATEMENT_LIST? OBJ_NOTATION+ OBJ_LITERAL_INNER | OBJ_NOTATION+ STATEMENT_LIST? OBJ_LITERAL_INNER 
+OBJ_LITERAL: '{' OBJ_LITERAL_INNER '}'
+STRING: "'" CHARSET_NSQ "'" | "\"" CHARSET_NDQ "\""
+LITERAL: NUM | STRING | OBJ_LITERAL
+*/
+
 function initYR( yaccfile )	{
 
 	var YRFileContents = yaccfile.split( "\n" );
@@ -7,6 +34,8 @@ function initYR( yaccfile )	{
 	for( var i=0; i<YRFileContents.length; i++ ){
 	
 		let fline = YRFileContents[i];
+
+//		([a-zA-Z_]+[a-zA-Z_0-9]*)\:
 //		let ruleName = / ... /;
 //		let rules = / ... /;
 		
@@ -66,11 +95,6 @@ function Parse( NTT )	{
 }
 
 
-
-
-
-
-
 let FileContent = 'not loaded yet';
 let lfc = 'no lex file';
 
@@ -78,8 +102,14 @@ let stack = 0;
 
 function runlexer( t )	{
 	
-	if( t==undefined )
-		t = 17;
+	let U = new Utils();
+	
+	if( t==undefined ){
+	let s1 = U.c( "brightYellow", "gray" );
+	console.log(s1, "Please run runlexer(t) with a Token offset to display that Lex'd token. Invoking 'runlexer(17)'.");
+	t = 17;
+	runlexer(t);
+	return;}
 	
 	//const { fs } = require('node:fs');
 	//let scFileName = "aplib.c"
@@ -93,10 +123,10 @@ function runlexer( t )	{
 	console.log('\x1b[36m%s\x1b[0m', "String: '" + stack[ t ].str + "'");
 	console.log('\x1b[35m%s\x1b[0m', "TOKEN:  '" + stack[ t ].pattern + "'");
 	
-	let U = new Utils();
+	
 	
 	let s1 = U.c("brightYellow", "brightBlue", "rv")
-	console.log(s1, "Quick Test!");
+	//console.log(s1, "Quick Test!");
 	
 	//console.log("TEST1: ");
 	//console.log(U._colTest(), "Test!!!")

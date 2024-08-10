@@ -74,7 +74,7 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	print( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", A.whole, OPCODE, B.whole, C.whole );
+	print( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", A.integer, OPCODE, B.integer, C.integer );
 	
 	return 0;
 	
@@ -84,8 +84,8 @@ int main(int argc, char **argv)	{
 	AP _1 = NewAP( 1024, 0 );
 	AP _2 = NewAP( 1024, 0 );
 	
-	strcpy( _1.whole, argv[1] );
-	strcpy( _2.whole, argv[2] );
+	strcpy( _1.integer, argv[1] );
+	strcpy( _2.integer, argv[2] );
 	
 	AP _3 = DIV( _1, _2 );
 	
@@ -94,7 +94,7 @@ int main(int argc, char **argv)	{
 	else
 		maxLoopsSet = 100;
 	
-	printf( "Result of %s / %s = %s\n", _1.whole, _2.whole, _3.whole );
+	printf( "Result of %s / %s = %s\n", _1.integer, _2.integer, _3.integer );
 	
 	return 0;
 	
@@ -117,7 +117,7 @@ int main(int argc, char **argv)	{
 
 	AP ca;
 	ca.sign = '-';
-	ca.whole = strdup( "1701" );
+	ca.integer = strdup( "1701" );
 	printf( "Color test: %s\n", formatAP(ca) );
 	
 	NL;
@@ -245,18 +245,18 @@ int main(int argc, char **argv)	{
 		++test_num;
 	}
 	
-	input.whole = strdup( test_num );
+	input.integer = strdup( test_num );
 	
 	int packed = 1;
 	char * str = DEC_2_BIN(input, packed);
-	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.whole, str );
+	printf( "DEC_2_BIN(\"%c%s\") = %s\n", input.sign, input.integer, str );
 	NL;
 	PRINT_LINE;
 	pause();
 	
 	// TEST 3
 	test2kMax(argc, argv);
-	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.whole, dummy_int );
+	printf( "The minimum higher 2k exponent for %c%s is %d.\n", input.sign, input.integer, dummy_int );
 	NL;
 	PRINT_LINE;
 	pause();
@@ -305,31 +305,6 @@ void addTest( struct _TESTS * T, char * ref, void * fnc )	{
 		++T->length;
 }
 
-void colorMode()	{
-
-	#define STD_OUTPUT_HANDLE ((DWORD)-11)
-	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-
-	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
-	BOOL color = SetConsoleMode(
-		StdHandle,
-		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
-	);
-
-	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
-	//print( msg_str );
-	
-	if(color == 0)	{
-		
-		printf( "ANSI/VT Support Not Available.\n" );
-		ResetAnsiVtCodes(0);
-	}
-	else
-		ResetAnsiVtCodes(1);
-
-	return;
-}
 
 void ap_exit(int status)	{
 
@@ -352,18 +327,18 @@ void parseAP(AP * A, char * str)	{
 		A->sign = '-';
 		//str[0] = '0';
 		++str;
-		A->major = strdup(str);
+		A->integer = strdup(str);
 	}
 	else if( str[0] == '+' )	{
 
 		A->sign = '+';
 		//str[0] = '0';
 		++str;
-		A->major = strdup(str);
+		A->integer = strdup(str);
 	}
 	else	{
 
-		A->major = strdup(str);
+		A->integer = strdup(str);
 		A->sign = '+';
 	}
 

@@ -7,8 +7,8 @@
 #include <stdlib.h>
 
 #define string char *
-#define in getchar
-#define out putchar
+//#define in getchar
+//#define out putchar
 
 #define byte char
 #define octet unsigned char
