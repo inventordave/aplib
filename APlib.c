@@ -3,6 +3,8 @@
 #include "lib.h"
 #include "aplib.h"
 
+#include "stringy.h"
+
 AP AP0;
 AP AP1;
 L DefaultPrecision;
