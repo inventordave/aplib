@@ -39,3 +39,4 @@
 #define OP_FORWARDSLASHEQUALS 47
 
 #define OP_NORMAL 48
+#define OP_ISNOT 49

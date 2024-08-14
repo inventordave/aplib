@@ -9,7 +9,7 @@ double qdiv_i(int n, int d);
 
 
 double expound(double base, int exp);
-APL prime(APL, APL, cint);
+//APL prime(APL, APL, cint);
 APL primedata(APL min, APL max, APL step);
 
 #define LARGE unsigned long long int

@@ -83,6 +83,23 @@ int str2int(char* input)	{
 	return result;
 }
 
+
+// STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
+
+int strcmp_( char* LHS, char* RHS ){
+
+if( strlen(LHS)==strlen(RHS) ){
+for( unsigned long long int i=0; i<strlen(LHS); i++ ){
+if( LHS[i]==RHS[i] )
+	continue;
+	else return LHS[i]-RHS[i];}}
+else
+	return strlen(LHS)-strlen(RHS);
+
+return 0; }
+
+
+
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A )	{
 	
@@ -200,13 +217,13 @@ char * safecat( char* s, char* rhs )	{
 	
 	// check s, rhs, for nonprintable chars (0-31)
 	
-	unsigned int i = 0;
+	//unsigned int i = 0;
 	char ch = '\0', chr = '\0';
 	char * _s = s; char * _rhs = rhs;
 	
 	do	{
 		
-		if( ch = _s[0] )	{
+		if( (ch = _s[0]) )	{
 			
 			if( ch < (char)32 || ( (ch > 127) & (ch < 160) ) )
 				return (char *)ERR_NP_CHAR;
@@ -214,7 +231,7 @@ char * safecat( char* s, char* rhs )	{
 		else
 			--_s;
 
-		if( chr = _rhs[0] )	{
+		if( (chr = _rhs[0]) )	{
 		
 			if( chr < (char)32 || ( (ch > 127) & (ch < 160) ) )
 				return (char *)ERR_NP_CHAR;

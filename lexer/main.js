@@ -106,14 +106,15 @@ function runlexer( t )	{
 	
 	if( t==undefined ){
 	let s1 = U.c( "brightYellow", "gray" );
-	console.log(s1, "Please run runlexer(t) with a Token offset to display that Lex'd token. Invoking 'runlexer(17)'.");
-	t = 17;
+	var t = 45;
+	console.log(s1, `Please run runlexer(t) with a Token offset to display that Lex'd token. Invoking 'runlexer( {t} )'.`);
+	
 	runlexer(t);
 	return;}
 	
 	//const { fs } = require('node:fs');
 	//let scFileName = "aplib.c"
-	let scContents = FileContent.split("\n"); //loadSourceFile( scFileName, fs );
+	let scContents = FileContent; //loadSourceFile( scFileName, fs );
 	
 	let lexer = new Lexer(scContents)
 	lexer.init()
@@ -246,6 +247,7 @@ class Lexer	{
 			if(matches.length>0)	{
 
 				let k = matches.length - 1
+				
 				let curr_len = matches[k].str.length
 				let prev_len = curr_len
 
@@ -324,12 +326,16 @@ class installLexRules	{
 	constructor(lexer)	{
 		
 		this.lexer = lexer;
+
+		this.installToken("[\/]{2,}.[\\n]", "SL_COMMENT");
+		this.installToken("[\/]+[\*]+[\n\S\s]*[\*]+\/", "ML_COMMENT");
 		
-		this.installToken("[\\s]+", "WS")
+		this.installToken("[\\n\\r]", "NL")		
+		this.installToken("[\\s]", "WS")
 		this.installToken("[\\t]", "TAB")
-		this.installToken("[\\n]", "NL")
 		
-		this.installToken("[a-zA-Z_](([a-zA-Z_0-9])+)?", "VARIABLE")
+		
+		
 
 		this.installToken("var", "VAR_KWD")
 		this.installToken("continue", "CONT_KWD")
@@ -339,6 +345,10 @@ class installLexRules	{
 		this.installToken("for", "FOR_KWD")
 		this.installToken("if", "IF_KWD")
 		this.installToken("do", "DO_KWD")
+		this.installToken("return", "RETURN_KWD")
+		this.installToken("this", "THIS_KWD")
+
+		this.installToken("[a-zA-Z_](([a-zA-Z_0-9])+)?", "VARIABLE")
 
 		this.installToken("[0-9]+", "NUM")
 		this.installToken("[0-9]+([\\.][0-9+])", "FP")
@@ -346,11 +356,11 @@ class installLexRules	{
 		this.installToken("[\\+]", "PLUS")
 		this.installToken("[\\-]", "MINUS")
 		this.installToken("[\\*]", "MUL")
-		this.installToken("[/]", "DIV")
+		this.installToken("[\\/]", "DIV")
 		this.installToken("[\\^]", "EXP")
 
 		this.installToken("===", "STRICT_EQ")
-		this.installToken("==", "EQ")
+		this.installToken("[\\=][\\=]", "EQ")
 		this.installToken("[\\=]", "EQUALS")
 
 		this.installToken("[\\>]", "GT")
@@ -367,35 +377,31 @@ class installLexRules	{
 		this.installToken("[\\?]", "Q_MARK")
 		this.installToken("[\\$]", "DOLLAR")
 		this.installToken("[\\#]", "HASH")
-		this.installToken("[\%]", "PERCENT")
+		this.installToken("[\\%]", "MODULO")
 
 
-		this.installToken("[\\.]", "PERIOD")
-		this.installToken("[;]", "SCOLON")
+		this.installToken("[\\.]", "PERIOD")//
+		this.installToken("[\\;]", "SCOLON")
 		this.installToken("[\\:]", "COLON")
 		this.installToken("[\\,]", "COMMA")
 
-		this.installToken('"', "DBL_QUOTE")
-		this.installToken("[\']", "S_QUOTE")
-		this.installToken("[\`]", "BACK_TICK")
+		this.installToken('[\\"]', "DBL_QUOTE")
+		this.installToken("[\\']", "S_QUOTE")
+		this.installToken("[\\`]", "BACK_TICK")
 
 		this.installToken("[\\!]", "NOT")
-		this.installToken("\\&", "AMP")
-		this.installToken("\\|", "OR")
-		this.installToken("\\~", "BITWISE_NOT")
+		this.installToken("[\\&]", "AMP")
+		this.installToken("[\\|]", "OR")
+		this.installToken("[\\~]", "BITWISE_NOT")
 
-		this.installToken("//[\S\s]*[\n]+", "SL_COMMENT");
-		this.installToken("/[\*][\*]*[\n\S\s]*[\*][/]", "ML_COMMENT");
-		
 		return this.lexer;
 	}
 	
-	
 	installToken(pattern, tokenStr)	{
-		
+
 		//console.log("TEST2")
-		
-		let wrapped_pattern = new RegExp(`^${pattern}\$`)
+
+		let wrapped_pattern = new RegExp( `^${pattern}\$` )//
 		this.lexer.LexPatterns.push(wrapped_pattern)
 		this.lexer.LexTokens.push(tokenStr)
 		this.lexer.LexTokens_rev[tokenStr] = this.lexer.LexPatterns.length - 1

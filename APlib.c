@@ -59,12 +59,16 @@ L setPart( APL A, char * digits, L part )	{
 	else
 		_ = A->fractional;
 	
+	if( _==NULL )	{
+		_ = (char*)malloc(2);
+		_[0] = '0';
+	}
 	if( strlen(_) < strlen(digits) )
 		_ = (char *)realloc(_, strlen(digits)+1);
 
 	
 	large i;
-	for( i=0; i<strlen(_); i++ )
+	for( i=0; i<strlen(digits); i++ )
 		_[i] = digits[i];
 	
 	_[i] = '\0';
@@ -73,7 +77,7 @@ L setPart( APL A, char * digits, L part )	{
 }
 
 
-L DIVBY2_PRINT_ROWS = 0;
+L DIVBY2_PRINT_ROWS = 1;
 
 // CORE BOOLEAN OPERATORS
 APL AND( APL LHS, APL RHS )	{
@@ -254,12 +258,12 @@ APL NAND( APL LHS, APL RHS )	{
 	return _;
 }
 
-
 // NOP (No-Operation). It returns an AP, or AP0, value.
-APL NOP( APL A ){
+APL NOP( APL A, APL B ){
 
-	if( A==0 )
-		return CopyAP( AP0 );
+	if( CmpAP( A, AP0 )==0 )
+		return CopyAP( AP0
+	);
 	return A;
 }
 
@@ -480,12 +484,13 @@ AP MULP( APL A, APL B, APL P )  {
 		
 		D->integer = strdup(result_row);
 		
-		APL _ = NewAPr( 0,0 );
-		_ = C;
-		free( C );
+		APL _ = (APL)malloc( sizeof( APP ) );
+		*_ = *C;
+		free( C->fractional	);
+		free ( C );
 		
 		C = ADD( _,D );
-		free( _ );
+		FreeAP( _ );
 	}
 	
 	C->sign = TT_MUL( A,B );
@@ -817,7 +822,7 @@ PArAm "int packed" is A flag to determine if the returned binary string should b
 In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 meAns "do not round", A non-0 value meAns "round up string-length to multiple of 8".
 */
 
-	unsigned long long int length = 0;
+	L length = 0;
 	int flag = 1;
 
 	AP t = CopyAP( AP0 );
@@ -849,7 +854,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	AP stack[strlen(input)];
 	char binary_stack[length+1];
 
-	length = (unsigned long long int) strlen(input);
+	length = strlen(input);
 
 	int pointer;
 	int bs_pointer = 0;
@@ -862,7 +867,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 
 		pointer = 0;
 		
-		unsigned long long int i;
+		L i;
 		for( i=0; i<length; i++ )	{
 			
 			A->integer[i] = input[i];
@@ -1177,65 +1182,79 @@ char * ACCUMULATE( char * apstr )
 
 #define ASCII '0'
 APL DIVBY2( APL A )	{
+		
+	int overflow = 0;
+	int value;
+	L strlen_a = strlen( A->integer );
+	APL _ = (APL)malloc( sizeof(APP) );
+	_->integer = zmem( strlen_a );
+	_->fractional = getstring( "0" );
+	LARGE i;
+	_->integer[0] = A->integer[0];
+	for( i=0; i<strlen_a; i++ ) {
 	
-int overflow = 0;
-int value;
-L strlen_a = strlen( A->integer );
-APL _ = (APL)malloc( sizeof(AP) );
-_->integer = zmem( strlen_a );
+		if( i<strlen_a-1 )
+			_->integer[i+1] += (A->integer[i+1] - '0');
 
-LARGE i;
-_->integer[0] = A->integer[0];
-for( i=0; i<strlen_a; i++ )	{		
-_->integer[i+1] += A->integer[i+1] - '0';
+		loop:
 
-loop:
-
-value = _->integer[i] - ASCII;
-if( value>9	){
-// roll over the remainder
-char remainder = value % 10;
-char c = value - remainder;
-_->integer[i] = '0'+c;
-_->integer[i+1] += remainder;}
-
-value = A->integer[i] - '0';
-
-int result = floor( value/2 );
-result += overflow;
-_->integer[i] = result + '0';
-
-if(_->integer[i] - '0' >= 10 ){	
-goto loop;}
-
-if( value%2!= 0 )
-	overflow = 5;
-else
-	overflow = 0;}
-
-if( overflow==5 )
-setPartF( _, "5" );
-
-//_->integer[i] = '\0'; //NULL-TERMINCATOR
-addnult( _->integer,i );
-	
-	/*// ARCHAIC SUBSECTION FOR TRIMMING LEADING ZERO'S BY SHUNTING THE POINTER FROM THE FRONT.
-	int len = i;
-	for( i=0; i<len; i++ )
-		if( _.integer[i]=='0' )	{
+		value = _->integer[i] - '0';
+		
+		if( value>9	)	{
+		
+			// roll over the remainder
+			char remainder = value % 10;
+			char c = value - remainder;
+			_->integer[i] = '0'+c;
 			
-			++_.integer;
-			--len;
-			--i;
+			if( i<strlen_a-1 )
+				_->integer[i+1] += remainder;
 		}
-		else
-			break;
 
-	if( _->integer[0]=='\0' )
-		--_.integer;
-	*/
+		value = A->integer[i] - '0';
+
+		int result = floor( value/2 );
+		result += overflow;
+		_->integer[i] = result + '0';
+
+		if(_->integer[i] - '0' >= 10 )
+			goto loop;
+
+		if( value%2!= 0 )	{
+			
+			overflow = 5;
+		}
+		else{
+			
+			overflow = 0;
+		}
+
+	}
 	
-	return _;}
+	
+	_->sign = A->sign;
+
+	//_->integer[i] = '\0'; //NULL-TERMINCATOR
+	addnult( _->integer,i );
+		
+		/*// ARCHAIC SUBSECTION FOR TRIMMING LEADING ZERO'S BY SHUNTING THE POINTER FROM THE FRONT.
+		int len = i;
+		for( i=0; i<len; i++ )
+			if( _.integer[i]=='0' )	{
+				
+				++_.integer;
+				--len;
+				--i;
+			}
+			else
+				break;
+
+		if( _->integer[0]=='\0' )
+			--_.integer;
+		*/
+		
+	return _;
+}
 #undef ASCII
 
 APL EXP(APL A, APL B)	{
@@ -1304,6 +1323,7 @@ d[0] = _[i];
 value += atoi(d) * (10*(e-i)); }
 
 return value;}
+
 /*
 APL APLCM( APL A, APL B ){
 	
@@ -1404,6 +1424,7 @@ APL lcm_example(int argc, char **argv)	{
 		flagSet = 1;
 	}
 	*/
+
 	APL a;
 	APL b;
 	a = NewAPr( 0,0 );
@@ -1415,7 +1436,7 @@ APL lcm_example(int argc, char **argv)	{
 	b->integer = argv[2];
 	
 	APL lcm = LCM( a, b );
-	int gcd = 1; // = GCD(A, B, lcm);
+	//int gcd = 1; // = GCD(A, B, lcm);
 	
 	FreeAP( a );
 	FreeAP( b );
@@ -1474,7 +1495,10 @@ AP CopyAP(AP A)	{
 	strcpy(_->integer, A->integer);
 	strcpy(_->fractional, A->fractional);
 	
+	if( A->sign )
 	_->sign = A->sign;
+	else
+	_->sign = '+';
 	
 	return _;
 }
@@ -1707,7 +1731,7 @@ scint CmpAP( APL A, APL B )	{
 	return 0;
 }
 
-signed int overflow( AP C, int result, signed k ) {
+signed int OverFlow( AP C, int result, signed k ) {
   
   if( (k-1) < 0 ) {
     
@@ -1745,7 +1769,7 @@ signed int overflow( AP C, int result, signed k ) {
 	  else{
 		// if c[k-1] + ld > 9, recursive overflow, will need to deAl with here!
 		printf("Recursive overflow! Line %d-ish.\n", __LINE__);
-		k = overflow(C, iresult, k-1);
+		k = OverFlow(C, iresult, k-1);
 		}
 		
 	  return k-1;

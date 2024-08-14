@@ -67,7 +67,6 @@ extern scint CC_HIDDEN_MASKTYPE_COLOR; // if selected "colour_h" subsystem needs
 
 
 
-
 // SAFE-CONCATENATE
 extern char * safecat(char* s, char* rhs);
 
@@ -76,6 +75,8 @@ extern int str2int(char*);
 // SUGAR
 extern int streq( char*,char* ); // returns true (1) if the 2 c-strings match, as it should...
 
+#define strcmp strcmp_
+extern int strcmp_( char* LHS, char* RHS );
 
 // ADD NULL-TERMINATOR TO CHAR*, REQUIRES INDEX
 #define addnullt( _,i ) _[i]='\0';
@@ -92,12 +93,8 @@ extern char * cat(int c, char * s, ...);
 
 // STRING-SAFETY METHODS //
 
-
-
 extern char* getstring( char* in );
-
 extern char* int2str(int v);
-
 extern void addnult( char*, unsigned long long int );
 
 #endif

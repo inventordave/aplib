@@ -3,14 +3,16 @@
 #include "stringy.h"
 #include "colour.h"
 #include "aplib.h"
+#include "testFnc.h"
 
 int main( int argc, char** argv ){
 
-	char* test="192";
-	printf( "hmmm..." );
+	//INIT()
+	AP0 = NewAPr( 1,1 );
+	AP1 = CopyAP( AP0 );
+	INC( AP1 );
 	
-		AP0 = NewAP( 1,0 );
-		AP0->integer[0] = '0';
+	char* test= getstring( "192" );
 	
 	char* _ = DEC_2_BIN( test, 1 );
 	printf( "Input DEC = %s,\nOutput BIN= %s\n", test, _ );

@@ -51,7 +51,7 @@ typedef struct i754	{
 	
 	// FLOAT/DOUBLE METHODS
 	char* (*readFloat)( float );
-	char* (*reaDouble)( double );	
+	char* (*readDouble)( double );	
 	void (*writeFloat)( float* dest, char* str );
 	void (*writeDouble)( double* dest, char* str );
 	char* (*getFloatBit)( char* str, LARGE offset );
@@ -88,7 +88,7 @@ char* _2sComplement( char* );
 
 
 char* IEEE_readFloat( float f );
-char* IEEE_reaDouble( double f );
+char* IEEE_readDouble( double f );
 
 void IEEE_writeFloat(float * dest, char * str);
 void IEEE_writeDouble(double * dest, char * str);
@@ -105,9 +105,9 @@ char* IEEE_getDoubleBit( char * str, LARGE offset );
 // NOT YET IMPLEMENTED
 void systemEndian(){
 
-	char unknown = 0;
-	char le = 1;
-	char be = 2;
+	//char unknown = 0;
+	//char le = 1;
+	//char be = 2;
 	
 	// Here is the test using signed int.
 	int iwidth = sizeof( int );

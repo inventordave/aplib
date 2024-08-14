@@ -18,6 +18,7 @@ toggle fliptoggle( toggle* t )	{
 
 // DAVELIB FNC'S
 
+/*
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A )	{
 	
@@ -58,23 +59,12 @@ char* sanitizeStr( char* A )	{
 	return _;
 }
 
+*/
+
 // SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
 int seq(char *a, char *b){
 return (strcmp(a, b) == 0); }
 
-// STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
-#define strcmp strcmp_
-int strcmp_( char* LHS, char* RHS ){
-
-if( strlen(LHS)==strlen(RHS) ){
-for( large i=0; i<strlen(LHS); i++ ){
-if( LHS[i]==RHS[i] )
-	continue;
-	else return LHS[i]-RHS[i];}}
-else
-	return strlen(LHS)-strlen(RHS);
-
-return 0; }
 
 // PAUSE: Simply pauses interactivity in console-mode until a key is pressed.
 void pause()	{
