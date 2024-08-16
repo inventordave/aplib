@@ -8,7 +8,7 @@
 
 typedef struct ap	{
 
-	char* whole;
+	char* integer;
 	char *fractional;
 	large decimalp;
 	char sign;
@@ -16,16 +16,12 @@ typedef struct ap	{
 
 int main( int argc, char** argv )	{
 
-
-
 	return 0;
 }
 
 /**
 
-
 1. from [0] of pattern.
-
 
 l-r (range)
 
@@ -91,7 +87,5 @@ if( c=={ )
 +
 ?
 
-
-
-
 */
+

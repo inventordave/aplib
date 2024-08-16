@@ -3,10 +3,10 @@
 // INC'S
 #include "stdlib.h"
 #include "lib.h"
+#include "stringy.h"
+#include "i754.h"
 #include "aplib.h"
-#include "native.h"
 #include "sandbox.h"
-
 
 #define op OP
 
@@ -21,19 +21,6 @@ APL A;
 APL B;
 APL C;
 
-char* getstring( char* in ){
-	
-	LARGE str_length = strlen( in );
-	char* _ = (char*)malloc( str_length+1 );
-	
-	LARGE i;
-	for( i=0; i<str_length; i++ )
-		_[i] = in[i];
-	
-	_[i] = '\0';
-	
-	return _;
-}
 
 LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
@@ -45,230 +32,119 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
 }
 
-APL NewAPr( large whole_range, large fractional_range )	{
-
-	APL _ = (APL)malloc( sizeof(AP) );
-	*_ = NewAP( whole_range,fractional_range );
-	return _;
-}
 
 APL OP( char* opcode, APL A, APL B ){
 
 	#define digit char
 
-	int t = (strlen(B->whole)>strlen(A->whole)?strlen(B->whole):strlen(A->whole));
-	APL C = &(APL)NewAP( +1, 0 );
-	APL R = &(APL)NewAP( t, 0 );
+	LARGE symbol = searcharray( getaplibsymbols(), opcode );	
+	AP P = DefaultPrecision;
 	
-	
-	char* A_ = A->_;
-	char* B_ = B->_;
-	char* C_ = C->_; // C->_ should be digit-zeroed (char '0', approx. ascii value 68).
-	char* R_ = R->_;
-	
-	R_[strlen(B_)-1] = A_[0];
-	
-	digit ASCII = '0';
-	digit overflow = ASCII - 0;
-	
-	char* _A_ = A_;
-	char* _B_ = B_;
-	char* _C_ = C_;
-	char* _R_ = R_;
+	switch( symbol )	{
 
-
-
-	digit a = *(A_++) - ASCII;
-	digit b = *(B_++) - ASCII;
-	digit c = *(C_++) - ASCII;
-	c += overflow;
-	
-	// 88/24: if( A - (b*c) * (*B)*c   )) < B )continue;
-	// 2*4=8;4*4=16;8*16=128;
-	// 2*3=6;4*3=12;6*12=72;
-	
-	//B * 3 = 72;
-	
-	//( 88%24=88-(B*3) );
-	
-	char b[2];
-	b[0] = '0';
-	b[1] = '\0';
-	
-	char c[2];
-	c[0] = overflow-1;
-	c[1] = '\0';
-
-	large strlen_b = strlen(B_);
-
-	//char* _ = __->_;
-	
-	APL _b = NewAPr( 1, 0 );
-	APL _c = NewAPr( 1, 0 );
-	
-	//case '/':
-	
-	while (1) {
-
-		++c[0];	
-			while( *B_!='\0' ){
-			
-			b[0] = *(B_++);
-
-			//_ += b*c;
-			_b->whole=b, _c->whole=c;
-			APL temp2;
-			APL temp=op( "+=", _, temp2=op( "*", _a, _b ) );
-			
-			free( _ );
-			_ = temp;
-			free( temp );
-			free( temp2 ); }
-			
-		B_ = B->whole;
+		case OP_MINUS:
+			return SUBP( A,B,P );
 		
-		APL temp;
-		if( (temp=op( ">", _,R ))->whole[0]=='1' )
-			--c[0];
-		else{
-		free( temp );
-		continue;}
-
-		free( temp );
-		break;	
-		}
+		case OP_PLUS:
+			return ADDP( A,B,P );
+		break;
 		
-		*(C_++) = c[0];
-
-		APL temp2;
-		APL temp = op( "=", R, temp2=op( "-", R,_ ) );
-
-		loop:
-		
-		digit b = *(B_++);
-		;c += overflow;overflow = 0;
-		
-		char** symbols = getaplibsymbols();
-
-		LARGE symbol = searcharray( symbols, opcode );
-		
-		signed short int equalityAB = cmp( A,B );
-		switch( symbol ){
-			
-			
-			case OP_MINUS:	b = -b;
-			case OP_PLUS:	c += a + b;
+		case OP_DIV:
+			return DIVP( A,B,P );
 			break;
-					
-			case OP_FORWARDSLASH:
-			while(1)
-			if( a < (c * b) ){--c;break;}
-			else
-			++c;
-			printf( "This line of code should be unreachable.\nFile: %s\nLine: %d\n", __FILE__, __LINE__ );
-			break;
-		; // c+= is populated with a guess from 0 to 9 for a coefficient of b, which is the remainder from the 1st multiplication (MSD of C) * B <= A[1 to len(B)].
-			case OP_STAR:
-			c = a * b;
+			
+		case OP_MUL:
+			return MULP( A,B,P );
 			break;
 
-			case OP_PLUSEQUALS:
+		case OP_PLUSEQUALS:
 			free( C );
-			C =	ADD( A,B );
+			C =	ADDP( A,B,P );
 			free( A );
 			A = C;
-			return C;
-			
-			//ASSIGN
-			case OP_EQUALS:
+			return A;
+		
+		//ASSIGN
+		case OP_EQUALS:
 			free( A );
 			A = CopyAP( B );
 			return A;
-			
-			case OP_MINUSEQUALS:
+		
+		case OP_MINUSEQUALS:
 			free( C );
-			C = SUB( A,B );
+			C = SUBP( A,B,P );
 			free( A );
 			A = C;
 			return C;
-			
-			
-			case OP_NOTEQUALTO:
+		
+		case OP_NOTEQUALTO:
 			free( C );
 			if( equalityAB!=0 )
-			return CopyAP( &AP1 );
+			return CopyAP( AP1 );
 			else
-			return CopyAP( &AP0 );
-			
-
-			
-			case OP_GTORISEQUALTO:		
-			case OP_GT:
+			return CopyAP( AP0 );
+		
+		case OP_GTORISEQUALTO:		
+		case OP_GT:
 			if( equalityAB==+1 )
-			return CopyAP( &AP1 );
+			return CopyAP( AP1 );
 			else
-			return CopyAP( &AP0 );
-		
-			case OP_ISEQUALTO:
-			if( equalityAB==0 )
-			return CopyAP( &AP1 );
-			else
-			return CopyAP( &AP0 );
+			return CopyAP( AP0 );
+	
+		case OP_ISEQUALTO:
+		if( equalityAB==0 )
+		return CopyAP( AP1 );
+		else
+		return CopyAP( AP0 );
 
 
-			case OP_LTORISEQUALTO:
-			if( equalityAB<+1 )
-			return CopyAP( &AP1 );
-			else
-			return CopyAP( &AP0 );
+		case OP_LTORISEQUALTO:
+		if( equalityAB<+1 )
+		return CopyAP( AP1 );
+		else
+		return CopyAP( AP0 );
+		break;		
+
+		case OP_LT:
+		if( equalityAB==-1 )
+		return CopyAP( AP1 );
+		else
+		return CopyAP( AP0 );
+
+		case OP_MODULO:
+		case OP_MODULO_ASSIGN:
+		case OP_MODULO_ISEQUALTO:
 			break;
-
-			case OP_LT:
-			if( equalityAB==-1 )
-			return CopyAP( &AP1 );
-			else
-			return CopyAP( &AP0 );
-
-			case OP_CARAT:
-			case OP_RATIO:
-			case OP_RATIO_ASSIGN:
-			case OP_RATIO_ISEQUALTO:
-
-			case OP_ISNOT:
+			
+		case OP_ISNOT:
 			free( C );
-			if( cmp(A,&AP0) )
-			return CopyAP( &AP1 );
+			if( CmpAP( A,AP0 ) )
+			return CopyAP( AP1 );
 			else
-			return CopyAP( &AP0 );
+			return CopyAP( AP0 );
 
-			case OP_AND:
+		case OP_AND:
 			return AND( A,B );
-			case OP_OR:
+			
+		case OP_OR:
 			return OR( A,B );
-			case OP_XOR:
-			case OP_NOT:
-			return NOT( A );
-			case OP_NAND:
-			return NAND( A,B );
-			break;
-		}
-		
-		if( c > 9 )
-		while( c > 9 ){
-		++overflow;
-		c -= 10;
-		}
-		*C_ = c + ASCII;
 
-		if( *B_=='\0' )
-		B_ = B->whole;
-		goto loop;
+		case OP_XOR:
+			break;
+			
+		case OP_NOT:
+			return NOT( A,AP0) );
+		
+		case OP_NAND:
+			return NAND( A,B );
+			
+		default:
+			break;
 	}
 	
 	//case 'e': a * a; // does this 'exp' times, unless 'exp' is 0 or 1. if exp is 0, just returns 1 once. if exp is 1, just return a once.
-	}
 
-	return C;
+	return CopyAP( AP0 );
 }
 	
 // MAIN() ENTRYPOINT
@@ -315,20 +191,20 @@ int main(int argc, char **argv)	{
 	OPCODE = 0;}
 	
 	AP A = NewAP( strlen(argv[2]), 0 );
-	setPartW( &A,argv[2] );
+	setPartW( A,argv[2] );
 
 	AP B;
 	
 	if( argc < 4 )
-	B = CopyAP( &AP1 );
+	B = CopyAP( AP1 );
 	else{
 	B = NewAP( strlen(argv[3]), 0 );
-	setPartW( &B,argv[3] );
+	setPartW( B,argv[3] );
 	}
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A.whole, OPCODE, B.whole, C.whole );
+	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A->integer, OPCODE, B->integer, C->integer );
 	
 	return 0;
 }
@@ -338,7 +214,7 @@ int main(int argc, char **argv)	{
 
 char* nextArg( char* type, va_list args )	{
 
-	char _[2];
+	char* _ = (char*)malloc( 2 );
 	_[0] = '\0';
 	_[1] = '\0';
 	
@@ -348,22 +224,27 @@ char* nextArg( char* type, va_list args )	{
 	if( !strcmp( type,"int" ) )
 	 return itoad(va_arg( args, int ));
 	if( !strcmp( type,"float" ) )
-	 return IEEE_readFloat(va_arg( args, float ));
+	 return IEEE_readFloat((float)va_arg( args, double ));
 	if( !strcmp( type,"double" ) )
 	 return IEEE_readDouble(va_arg( args, double ));
 	
 	if( !strcmp( type,"char" ) ){
-	 _[0]=va_arg( args, char );
+	 _[0]=(char)va_arg( args, int );
 	return _;}
 	if( eq( type,"AP" ) ||
-		!strcmp( type,"ap" ))
-	 return va_arg( args, AP ).whole;
+		!strcmp( type,"ap" )){
+	
+	AP A = va_arg( args, AP );
+	char* _A = getstring( A->integer );
+	FreeAP( A );
+	return _A;
+	}
 	if( !strcmp( type,"void*" ) ||
 			 eq( type,"void *"))
 	 return va_arg( args, void* );
 
 	// ELSE
-	return calloc( 2, 1 );
+	return (char*)calloc( 2, 1 );
 }
 
 //sprintf( str, ... )
@@ -409,7 +290,7 @@ char* formatString( char* fmt, ... )	{
 			if( mode==0 )
 			++refCount;
 			else
-			safecat( _,nextArg( "b",&args) );}
+			safecat( _,nextArg( "b",args) );}
 		else
 		continue;}}
 

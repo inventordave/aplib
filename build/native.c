@@ -4,9 +4,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include "aplib.h"
 #include "native.h"
 
 
+// Ths function is broken in it's current state. Drunken, disorganised porting to APL interface. Needs reviewing.
 // i = ith prime number, if n is set, i is ignored. n will test for a prime number. f is a flag, set to TRUE if you want the ith prime number, or if you want to test if the arg u pass is literally prime.
 APL isprime ( APL IN )	{
 	
@@ -16,17 +18,17 @@ APL isprime ( APL IN )	{
 		// trial division algorithm, divide n by every integer between 2 and sqrt(n), as at n = a . b, either a
 		// or b will not be bigger than sqrt(n), which means all tests have been performed
 		
-		if( cmp( IN,AP1 )==0 ){
+		if( CmpAP( IN,AP1 )==0 ){
 			// base case: 1, the smallest prime number is 2...
 			
 			if( report==ON )
 				printf("1 is too small to be a prime number! The smallest prime number is 2.");
 			
-			return CopyAP( &AP1 );
+			return CopyAP( AP1 );
 		}
 		
 		APL AP2 = ADD( AP1,AP1 );
-		if( cmp( IN,AP2 )==0 ){
+		if( CmpAP`( IN,AP2 )==0 ){
 			// base case 2, it interferes with the test conditional, as 2 % 2 == 0, which fails the value 2 for the test. 
 			// Subsequent n % k tests don't have to check if n == k, as k will never be more than sqrt(n)
 			
@@ -36,31 +38,30 @@ APL isprime ( APL IN )	{
 			return AP2;
 		}
 		
-		APL SQRT = SQROOT(IN)) + 1;
+		APL SQRT = SQROOT(IN) + 1;
 	
 //-------------------------------
 
-	for (AP K=CopyAP(&AP0); cmp( K,SQRT )==-1; INC(&K) ){
+	for (AP K=CopyAP(AP0); CmpAP( K,SQRT )==-1; INC(K) ){
 		
 		APL T;
-		if( CMP( (T=(APL)MODULO(IN,K)), &AP0) ){
+		if( CmpAP( (T=(APL)MODULO(IN,K)), AP0) ){
 			
 			if( report==ON )
-			printf("%s is NOT prime. It was divisable at  %s.\n", IN->whole, K.whole);
+			printf("%s is NOT prime. It was divisable at  %s.\n", IN->integer, K->integer);
 			
-			return CopyAP( &AP0 );
-, NORMAL 		}
+			return CopyAP( AP0 );
+		}
 	
-		if( report==ON )
-		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->whole, FG_BRIGHT_GREEN, NORMAL );
-		
-		return i;
+		if( report==ON ){
+		printf( "%s %sIS A PRIME NUMBER!%s\n", IN->integer, FG_BRIGHT_GREEN, NORMAL );
+		return ;}
 	}
 	
 
 	large j = 3;
 	large k = 0;
-	APL P = CopyAP( &AP0 );
+	APL P = CopyAP( AP0 );
 	
 	while( 1 )	{
 	
@@ -83,8 +84,6 @@ APL isprime ( APL IN )	{
 	// RETURN VALUE
 	return p;
 }
-
-
 
 int primedata(unsigned int min, unsigned int max, unsigned int step)	{
 	// step: if set to 1, the step increment is to accumulate +1 for each prime number discovered.

@@ -1,9 +1,61 @@
 #include <stdlib.h>
+#include <stdint.h>
+#include <stdio.h>
 #include <string.h>
+#include <windows.h>
+#include "lib.h"
 #include "colour.h"
+#include "stringy.h"
 #include "c_static.h"
+#include "stringy.h"
 
-char ResetAnsiVtCodes(int f)	{
+char* ANSIVT_FG = (char*)0;
+char* ANSIVT_BG = (char*)0;
+
+struct _ANSI* ANSI = (_ANSI*)0;
+
+char* ANSIVT( char* str, char cc[], LARGE offsets[], int _frees ){
+LARGE str_width = strlen(str);
+LARGE width = str_width + (strlen(cc)*VTCODEWIDTH);
+char* _ = mem( width );
+char* bucket = mem( width );
+char* vtcodestr;
+
+
+
+
+
+LARGE q=0;
+LARGE t=0;
+while( t<str_width ){
+
+	LARGE p;
+	for( p=0; p<offsets[q]; p++ ) // offsets are relative.
+		bucket[p] = str[t++];
+	bucket[p] = '\0';
+	
+	safecat( _,bucket );
+	vtcodestr = getVTCodeString( *cc );
+	safecat( _,vtcodestr );
+	
+	free( vtcodestr );
+	
+	++cc;
+	++q;
+	
+	if( *cc == '\0' ){
+		
+		LARGE y = strlen(_);
+		for( LARGE x=t;x<str_width; x++ )
+			_[y++]=str[x];
+		_[y] = '\0';			
+		break;}}
+
+return _; }
+
+
+
+char ResetAnsiVtCodes(char f)	{
 	
 	if(f == 0)	{
 
@@ -105,9 +157,9 @@ struct AVTC* ActivateColorConsole(){
 	}
 	
 	struct AVTC* _ = (struct AVTC*)malloc( sizeof(struct AVTC) );
-	_->ResetAnsiVtCodes = ResetAnsiVtCodes;
-	_->SetVT = SetVT;
-	_->f = SetStyle;
+	_->RVC = ResetAnsiVtCodes;
+	_->SVT = SetVT;
+	//_->f = SetStyle;
 	
 	_->ANSIVT_FG = ANSI->ANSIVT_FG;
 	_->ANSIVT_BG = ANSI->ANSIVT_BG;
@@ -122,8 +174,18 @@ struct AVTC* ActivateColorConsole(){
 	return _;
 }
 
-char* fg( char* c ){ if(c!=0) ANSI->c->SetVT( c,0 ); return ANSI->c->ANSIVT_FG; }
-char* bg( char* c ){ if(c!=0) ANSI->c->SetVT( 0,c ); return ANSI->c->ANSIVT_BG; }
+char* fg( char* c ){
+	if(c!=0)
+		ANSI->c->SVT( c,(char*)0 );
+	return ANSI->ANSIVT_FG;
+
+}
+
+char* bg( char* c ){
+	if(c!=0)
+		ANSI->c->SVT( (char*)0,c );
+	return ANSI->ANSIVT_BG;
+}
 
 char* SetVT( char* fg, char* bg )	{
 	
@@ -132,17 +194,18 @@ char* SetVT( char* fg, char* bg )	{
 	
 	int i;
 	
-	FG:
+	//FG:
 	if( fg==0 || streq( fg,"0" ) )
 		goto BG;
 	
 	for( i=0; i<16; i++ ){
 
-		if( streq( fg, ANSIVT_CTABLE[i][0] ) ){
+		if( streq( fg, *(ANSI->c->ANSIVT_CTABLE + (i*4) + 0) ) ){
 			
-			fg_ = getstring( ANSIVT_CTABLE[i][1] );
+			fg_ = getstring( *(ANSI->c->ANSIVT_CTABLE + (i*4) + 4) );
 			printf( "%s", fg_ );
-			ANSI->c->ANSIVT_FG = fg;
+			ANSI->ANSIVT_FG = fg;
+			ANSI->c->fg( fg_ );
 			break;
 		}
 	}
@@ -153,11 +216,12 @@ char* SetVT( char* fg, char* bg )	{
 
 	for( i=16; i<(16*2); i++ ){
 
-		if( streq( bg, ANSIVT_CTABLE[i][0] ) ){
+		if( streq( bg, *(ANSI->c->ANSIVT_CTABLE + (i*4) + 0) ) ){
 			
-			bg_ = getstring( ANSIVT_CTABLE[i][1] );
+			bg_ = getstring( *(ANSI->c->ANSIVT_CTABLE + (i*4) + 4) );
 			printf( "%s", bg_ );
-			ANSI->c->ANSIVT_BG = bg;
+			ANSI->ANSIVT_BG = bg;
+			ANSI->c->bg( bg_ );
 			break;
 		}
 	}
@@ -166,15 +230,15 @@ char* SetVT( char* fg, char* bg )	{
 	char* _ = mem( strlen(ANSIVT_FG)+strlen(ANSIVT_BG) + strlen("//") );
 	_[0] = '\0';
 
-	if( strlen(ANSI->c->ANSIVT_FG) )	
-	safecat( _, ANSI->c->ANSIVT_FG );
+	if( strlen(ANSI->ANSIVT_FG) )	
+	safecat( _, ANSI->ANSIVT_FG );
 	else
 	safecat( _,"Default" );
 	
 	safecat(  _,"//" );	
 	
-	if( strlen(ANSI->c->ANSIVT_BG) ) 
-	safecat( _,ANSI->c->ANSIVT_BG );
+	if( strlen(ANSI->ANSIVT_BG) ) 
+	safecat( _,ANSI->ANSIVT_BG );
 	else
 	safecat( _,"Default" );	
 
@@ -183,149 +247,181 @@ char* SetVT( char* fg, char* bg )	{
 
 void Init_ANSIVT_CTABLE(){
 
-	if( ANSI->is != ANSI_IS )	{
+if( ANSI->is != ANSI_IS ){
+printf( "ANSI VT System not Initialised! Initialising...\n" );
+ANSI_init();}
+
+char** ANSIVT_CTABLE/*64*2*/ = (char**)malloc( (64*2) * sizeof(char*) );
+
+uint32_t i=0;
+//FG
+*(ANSIVT_CTABLE + (i*4) + 0)= "black"; // BASE + (i*4) + (0*4)
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLACK;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "red";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_RED;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "green";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_GREEN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "yellow";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_YELLOW;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "blue";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLUE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "magenta";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_MAGENTA;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "cyan";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_CYAN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "white";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_WHITE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_black";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLACK;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_red";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_RED;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_green";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_GREEN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_yellow";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_YELLOW;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_blue";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLUE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_magenta";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_MAGENTA;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_cyan";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_CYAN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_white";
+*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_WHITE;
+
+// BG
+*(ANSIVT_CTABLE + (i*4) + 0)= "black";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLACK;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "red";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_RED;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "green";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_GREEN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "yellow";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_YELLOW;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "blue";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLUE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "magenta";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_MAGENTA;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "cyan";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_CYAN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "white";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_WHITE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_black";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLACK;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_red";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_RED;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_green";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_GREEN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_yellow";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_YELLOW;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_blue";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLUE;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_magenta";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_MAGENTA;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_cyan";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_CYAN;
+
+*(ANSIVT_CTABLE + (i*4) + 0)= "bright_white";
+*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_WHITE;
+
+// RESET
+*(ANSIVT_CTABLE + (i*4) + 0) = "default";
+*(ANSIVT_CTABLE + (i*4) + 4) = NORMAL;
+
+// i contains a count of all the colour codes. Should be 33.
+ANSI->c->ANSIVT_CTABLE = ANSIVT_CTABLE;
+ANSI->c->fg( "white" );
+ANSI->c->bg( "black" );
+
+return;  }
+
+void colorMode()	{
+
+	#define STD_OUTPUT_HANDLE ((DWORD)-11)
+	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
+
+	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	
-		printf( "ANSI VT System not Initialised! Initialising...\n" );
-		ANSI_init();
+	BOOL color = SetConsoleMode(
+		StdHandle,
+		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
+	);
+
+	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
+	//print( msg_str );
+	
+	if(color == 0)	{
+		
+		printf( "ANSI/VT Support Not Available.\n" );
+		ResetAnsiVtCodes(0);
 	}
-	
-	
-	char* ANSIVT_CTABLE[64][2] = { 0,0 };
-	unsigned int i=0;
-	
-	//FG
-	ANSIVT_CTABLE[i][0]= "black";
-	ANSIVT_CTABLE[i++][1]= FG_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "red";
-	ANSIVT_CTABLE[i++][1]= FG_RED;
+	else
+		ResetAnsiVtCodes(1);
 
-	ANSIVT_CTABLE[i][0]= "green";
-	ANSIVT_CTABLE[i++][1]= FG_GREEN;
-
-	ANSIVT_CTABLE[i][0]= "yellow";
-	ANSIVT_CTABLE[i++][1]= FG_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "blue";
-	ANSIVT_CTABLE[i++][1]= FG_BLUE
-
-	ANSIVT_CTABLE[i][0]= "magenta";
-	ANSIVT_CTABLE[i++][1]= FG_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "cyan";
-	ANSIVT_CTABLE[i++][1]= FG_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "white";
-	ANSIVT_CTABLE[i++][1]= FG_WHITE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_black";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "bright_red";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_RED;
-	
-	ANSIVT_CTABLE[i][0]= "bright_green";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_GREEN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_yellow";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "bright_blue";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_BLUE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_magenta";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "bright_cyan";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_white";
-	ANSIVT_CTABLE[i++][1]= FG_BRIGHT_WHITE;
-	
-	// BG
-	ANSIVT_CTABLE[i][0]= "black";
-	ANSIVT_CTABLE[i++][1]= BG_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "red";
-	ANSIVT_CTABLE[i++][1]= BG_RED;
-
-	ANSIVT_CTABLE[i][0]= "green";
-	ANSIVT_CTABLE[i++][1]= BG_GREEN;
-
-	ANSIVT_CTABLE[i][0]= "yellow";
-	ANSIVT_CTABLE[i++][1]= BG_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "blue";
-	ANSIVT_CTABLE[i++][1]= BG_BLUE;
-
-	ANSIVT_CTABLE[i][0]= "magenta";
-	ANSIVT_CTABLE[i++][1]= BG_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "cyan";
-	ANSIVT_CTABLE[i++][1]= BG_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "white";
-	ANSIVT_CTABLE[i++][1]= BG_WHITE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_black";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLACK;
-	
-	ANSIVT_CTABLE[i][0]= "bright_red";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_RED;
-	
-	ANSIVT_CTABLE[i][0]= "bright_green";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_GREEN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_yellow";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_YELLOW;
-	
-	ANSIVT_CTABLE[i][0]= "bright_blue";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_BLUE;
-	
-	ANSIVT_CTABLE[i][0]= "bright_magenta";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_MAGENTA;
-	
-	ANSIVT_CTABLE[i][0]= "bright_cyan";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_CYAN;
-	
-	ANSIVT_CTABLE[i][0]= "bright_white";
-	ANSIVT_CTABLE[i++][1]= BG_BRIGHT_WHITE;
-
-	// RESET
-	ANSIVT_CTABLE[i][0] = "default";
-	ANSIVT_CTABLE[i++][1] = NORMAL;
-	
-	// i contains a count of all the colour codes. Should be 33.
-	ANSI->c->ANSIVT_CTABLE = ANSIVT_CTABLE;
-	ANSI->c->fg( "white" );
-	ANSI->c->bg( "black" );
-	
 	return;
 }
 
-AVTC Init_AVTC(){
-	
-	AVTC _ = (AVTC)malloc( sizeof(AVTC) );
-	
-	_->ResetAnsiVtCodes = ResetAnsiVtCodes;
-	_->SetVT = SetVT;
-	_->fg = fg;
-	_->bg = bg;
-	_->f;
-	
-	_->ANSIVT_FG = "default";
-	
-	return ( _ );
-}
+
+
+AVTC* Init_AVTC(){
+		
+AVTC* _ = (AVTC*)malloc( sizeof(AVTC) );
+
+_->RVC = ResetAnsiVtCodes;
+_->SVT = SetVT;
+_->fg = fg;	
+_->bg = bg;
+//_->f;
+_->ANSIVT_FG = "default";
+
+_-> ANSIVT_CTABLE = (char**)malloc( (FG_COLORS+BG_COLORS+1)*2 * sizeof(char*) );	
+
+	return ( _ ); }
 
 void ANSI_init(){
 	
 	ANSI = (_ANSI*)malloc( sizeof(struct _ANSI) );
-	ANSI->ANSIVT_FG = "default";
-	ANSI->ANSIVT_BG = "default";
+	ANSIVT_FG = "default";
+	ANSIVT_BG = "default";
+	ANSI->ANSIVT_FG = ANSIVT_FG;
+	ANSI->ANSIVT_BG = ANSIVT_BG;
 	
 	ANSI->is = ANSI_IS;
 	ANSI->c = Init_AVTC();
 	
+}
+
+
+char* getVTCodeString( char cc )	{
+
+	return *(ANSI->c->ANSIVT_CTABLE + (cc*4) + 4);
 }
 

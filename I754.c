@@ -1,5 +1,5 @@
 #include "i754.h"
-
+#include "stringy.h"
 
 // DAVELIB::i754::Interface
 struct i754 getInterface_i754()	{ return *(initi754()); }
@@ -8,7 +8,7 @@ struct i754 * initi754()	{
 	struct i754 * lib = malloc( sizeof(struct i754) );
 	
 	lib->readFloat = IEEE_readFloat;
-	lib->reaDouble = IEEE_reaDouble;
+	lib->readDouble = IEEE_readDouble;
 	
 	lib->convertFloatString2BigEndian = IEEE_convertFloatString2BigEndian;
 	lib->convertDoubleString2BigEndian = IEEE_convertDoubleString2BigEndian;
@@ -265,7 +265,7 @@ char * IEEE_readFloat( float f )	{
 	
 	return str; // !string returned is little-endian on a little-endian system.
 }
-char * IEEE_reaDouble( double f )	{
+char * IEEE_readDouble( double f )	{
 
 	typedef struct container	{
 
@@ -344,27 +344,27 @@ void IEEE_writeDouble(double * dest, char * str)	{
 char* IEEE_getFloatBit( char * str, LARGE offset )	{
 	
 	if( offset>(31) )
-		return ADD( AP1,AP1 ).wp;
+		return ADD( AP1,AP1 )->integer;
 	
 	//if( offset==8 offset==17 offset==26 )
 		//++offset;
 	
 	if( str[offset]=='1' )
-		return AP1.wp;
+		return AP1->integer;
 	else
-		return AP0.wp;
+		return AP0->integer;
 }
 char* IEEE_getDoubleBit( char * str, LARGE offset )	{
 	
 	if( offset>(63) )
-		return ADD( AP1,AP1 ).wp;
+		return ADD( AP1,AP1 )->integer;
 	
 	//if( offset==8 offset==17 offset==26 offset==35 offset==44 offset==53 offset==62 )
 		//++offset;
 	
 	if( str[offset]=='1' )
-		return AP1.wp;
+		return AP1->integer;
 	else
-		return AP0.wp;
+		return AP0->integer;
 }
 

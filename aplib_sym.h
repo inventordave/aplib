@@ -1,5 +1,5 @@
 #define DELIMITERS 999
-#define UNKNOWN 0
+#define OP_UNKNOWN 0
 #define OP_AND 1
 #define OP_OR 2
 #define OP_XOR 3
@@ -34,4 +34,9 @@
 #define OP_LOGICAL_AND 42
 #define OP_LOGICAL_OR 43
 #define OP_LOGICAL_ISNOT 44
+#define OP_CARATEQUALS 45
+#define OP_DOUBLESTAR 46
+#define OP_FORWARDSLASHEQUALS 47
 
+#define OP_NORMAL 48
+#define OP_ISNOT 49

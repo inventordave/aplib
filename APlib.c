@@ -1,15 +1,17 @@
 // APLIB_C
 
 #include "lib.h"
+#include "stringy.h"
+#include "colour.h"
 #include "aplib.h"
 
 #include "stringy.h"
 
 AP AP0;
 AP AP1;
-L DefaultPrecision;
+APL DefaultPrecision;
 
-struct APLIB_ APLIB;
+struct _APLIB APLIB;
 
 char* MUL_SYM = "*";
 char* ADD_SYM = "+";
@@ -20,7 +22,7 @@ char* AND_SYM = "&";
 char* NOT_SYM = "~";
 char* OR_SYM =  "|";
 char* XOR_SYM = "^";
-char* NAND_SYM = "@";
+
 char* POSITIVE_SYM = "+";
 char* NEGATIVE_SYM = "-";
 char* DELIMETER_SYM = ".";
@@ -55,16 +57,20 @@ L setPart( APL A, char * digits, L part )	{
 	char * _;
 	
 	if( part==1 )
-		_ = A->whole;
+		_ = A->integer;
 	else
 		_ = A->fractional;
 	
+	if( _==NULL )	{
+		_ = (char*)malloc(2);
+		_[0] = '0';
+	}
 	if( strlen(_) < strlen(digits) )
 		_ = (char *)realloc(_, strlen(digits)+1);
 
 	
 	large i;
-	for( i=0; i<strlen(_); i++ )
+	for( i=0; i<strlen(digits); i++ )
 		_[i] = digits[i];
 	
 	_[i] = '\0';
@@ -73,13 +79,13 @@ L setPart( APL A, char * digits, L part )	{
 }
 
 
-L DIVBY2_PRINT_ROWS = 0;
+L DIVBY2_PRINT_ROWS = 1;
 
 // CORE BOOLEAN OPERATORS
 APL AND( APL LHS, APL RHS )	{
 	
-	char* A = LHS->whole;
-	char* B = RHS->whole;
+	char* A = LHS->integer;
+	char* B = RHS->integer;
 	
 	L strlen_a = strlen( A );
 	L strlen_b = strlen( B );
@@ -120,14 +126,15 @@ APL AND( APL LHS, APL RHS )	{
 	}
 	
 	AP _ = NewAP( 0,0 );
-	setPartW( &_,bstr );
+	setPartW( _,bstr );
 	return _;
 }
 APL NOT(APL v)	{
 	
-	APLS _v = v.wholepart;
+	
+	APLS _v = v->integer;
 	L strlen_v = strlen( _v );
-	char* _ = (char*)malloc( strlen_v+1 );
+	register char* _ = (char*)malloc( strlen_v+1 );
 	LARGE i;
 	for( i=0; i<strlen_v; i++ )
 		if( _v[i]=='0' )
@@ -140,14 +147,16 @@ APL NOT(APL v)	{
 		
 	_[i] = '\0';
 	
-	return _;
+	APL _2 = (APL)malloc( sizeof( APP ) );
+	_2->integer = _;
+	return _2;
 }
-char * OR(char * LHS, char * RHS)	{
+APL OR( APL LHS, APL RHS)	{
 
 	char * A;
 	char * B;
 	
-	A = LHS; B = RHS;
+	A = LHS->integer; B = RHS->integer;
 	int len = ( strlen(A) >= strlen(B) ? strlen(A) : strlen(B) );
 	
 	char * b_str = (char *)malloc( len+1 );
@@ -186,12 +195,16 @@ char * OR(char * LHS, char * RHS)	{
 	
 	assert( k==-1 );
 	
-	return b_str;
+	APL _b = NewAPr( 0,0 );
+	
+	_b->integer = b_str;
+	
+	return _b;
 }
 APL XOR( APL LHS, APL RHS )	{
 
-	char* A = LHS->whole;
-	char* B = RHS->whole;
+	char* A = LHS->integer;
+	char* B = RHS->integer;
 	
 	L strlen_a = strlen( A );
 	L strlen_b = strlen( B );
@@ -234,8 +247,9 @@ APL XOR( APL LHS, APL RHS )	{
 
 	assert( k==-1 );
 	
-	
-	return bstr;
+	APL _ = (APL)malloc( sizeof(APP) );
+	_->integer = bstr;
+	return _;
 }
 APL NAND( APL LHS, APL RHS )	{
 	
@@ -246,12 +260,12 @@ APL NAND( APL LHS, APL RHS )	{
 	return _;
 }
 
-
 // NOP (No-Operation). It returns an AP, or AP0, value.
-APL NOP( APL A ){
+APL NOP( APL A, APL B ){
 
-	if( A==0 )
-		return CopyAP( &AP0 );
+	if( CmpAP( A, AP0 )==0 )
+		return CopyAP( AP0
+	);
 	return A;
 }
 
@@ -261,13 +275,13 @@ APL ADDP( APL A, APL B, AP P )	{
 	
 	int flag = 0;
 	
-	large strlen_a = strlen(A->whole);
-	large strlen_b = strlen(B->whole);
+	large strlen_a = strlen(A->integer);
+	large strlen_b = strlen(B->integer);
 	large size = ( strlen_b > strlen_a ? strlen_b : strlen_a );
 	APL C = NewAPr( size+1,0 );
 
-	signed short int value;
-	signed short int valA, valB, valC;
+	scint value;
+	scint valA, valB, valC;
 	
 	signed int i, j, k;
 	
@@ -276,16 +290,16 @@ APL ADDP( APL A, APL B, AP P )	{
 		for( i=strlen_a-1, j=strlen_b-1, k=size; k>0; i--, j--, k--)	{
 		
 			if(i>=0)
-				valA = A->whole[i] - '0';
+				valA = A->integer[i] - '0';
 			else
 				valA = 0;
 			
 			if(j>=0)
-				valB = B->whole[j] - '0';
+				valB = B->integer[j] - '0';
 			else
 				valB = 0;
 			
-			valC = (C->whole[k] - '0');	
+			valC = (C->integer[k] - '0');	
 			
 			valA += valC;
 
@@ -295,10 +309,10 @@ APL ADDP( APL A, APL B, AP P )	{
 			if( value>=10 )	{
 				
 				value -= 10;
-				C->whole[k-1] += 1;
+				C->integer[k-1] += 1;
 			}
 			
-			//C->whole[k] = '0' + value;
+			//C->integer[k] = '0' + value;
 			
 			setDigit( C,k,('0'+value) );
 
@@ -308,9 +322,9 @@ APL ADDP( APL A, APL B, AP P )	{
 		
 	//SubtrAct the smAller Absolute value from the lArger Absolute value And give the Answer the sAme sign As the number with the lArger Absolute value
 		char tsign;
-		if( CmpAP(&A,&B)==-1 )	{
+		if( CmpAP(A,B)==-1 )	{
 			
-			tsign = B.sign;
+			tsign = B->sign;
 			
 			AP temp;
 			temp = A;
@@ -318,116 +332,117 @@ APL ADDP( APL A, APL B, AP P )	{
 			B = temp;
 		}
 		else
-			tsign = A.sign;
+			tsign = A->sign;
 		
-		A.sign = '+';
-		C.sign = '+';
+		A->sign = '+';
+		C->sign = '+';
 		C = SUB( A,B );
-		C.sign = tsign;
+		C->sign = tsign;
 		flag = 1;
 	}
 	
 	
-	if( ( TT_ADD( &A,&B )=='-' ) && (flag==0) )
-		C.sign = '-';
+	if( ( TT_ADD( A,B )=='-' ) && (flag==0) )
+		C->sign = '-';
 
 	
-	char * _ = (char *)malloc(strlen(C.whole)+1);
-	strcpy(_, C.whole);
+	register char * _ = (char *)malloc(strlen(C->integer)+1);
+	strcpy(_, C->integer);
 	for( i=0; i<(int)strlen(_); i++ )
 		if( _[i] == '0' )
-			++C.whole;
+			++C->integer;
 		else
 			break;
 	
 	free( _ );
 	
-	if( *C.whole == '\0' )
-		--C.whole;
+	if( *C->integer == '\0' )
+		--C->integer;
 	
 	return C;
 }
 AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
 APL SUBP( APL A, APL B, AP P )	{
 	
-	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(&A,&B)>=1) ){
+
+	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(A,B)>=1) ){
 
 		int i, j, k, valA, valB, valC;
-		APL C = NewAPr(strlen(A->whole),0);
-		for( i=strlen(A->whole)-1, j=strlen(B->whole)-1, k=strlen(C->whole)-1; k>0; i--, j--, k--){
+		APL C = NewAPr(strlen(A->integer),0);
+		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>0; i--, j--, k--){
 		
 			if(i>=0)
-				valA = A->whole[i] - '0';
+				valA = A->integer[i] - '0';
 			else
 				valA = 0;
 			
 			if(j>=0)
-				valB = B->whole[j] - '0';
+				valB = B->integer[j] - '0';
 			else
 				valB = 0;
 			
-			valC = (C->whole[k] - '0');	
+			valC = (C->integer[k] - '0');	
 			
 			valA += valC;
 
 			if( valA<valB )	{
 				
-				C->whole[k-1] -= 1;
+				C->integer[k-1] -= 1;
 				valA += 10;
 			}
 
 			int value = valA - valB;
-			C->whole[k] = '0' + value; }
+			C->integer[k] = '0' + value; }
 		
-		int len = strlen(C->whole);
-		char* _ = getstring( C->whole );
+		int len = strlen(C->integer);
+		char* _ = getstring( C->integer );
 		for( i=0; i<len; i++ )
 			if( _[i] == '0' )
-				++C->whole;
+				++C->integer;
 			else
 				break;
 	
 		free( _ );
 	
-		if( *(C->whole) == '\0' )
-			--C->whole;
+		if( *(C->integer) == '\0' )
+			--C->integer;
 		
 		return C;
 	}
 	
 	// Alt. SUB Algorithm:
 	// The subtrAction of A reAl number (the subtrAhend [B]) from Another (the minuend [A]) cAn be defined As the ADition of the minuend [A] And the ADitive inverse of the subtrAhend [B].
-	flipSign(&B);
+	flipSign(B);
 	APL result = ADD(A, B);
-	flipSign(&B);
+	flipSign(B);
 
 	return result;
 }
 AP MUL( APL A, APL B )	{ return MULP( A, B, DefaultPrecision ); }
-AP MULP( APL A, APL B, LARGE P )  {
+AP MULP( APL A, APL B, APL P )  {
 
-	int MAX_NUM_MUL_ROWS = ( strlen(A.whole)>strlen(B.whole) ? strlen(A.whole) : strlen(B.whole) );
+	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
 	char ** ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
 	int q = 0;
 
-	for( int k = strlen(B.whole)-1; k>=0; k-- )	{
+	for( int k = strlen(B->integer)-1; k>=0; k-- )	{
+
+		int rev_offset_B = strlen(B->integer) - 1 - k;
 		
-		int rev_offset_B = strlen(B.whole) - 1 - k;
-		
-		int curr_row_length = strlen(A.whole) + 1 + rev_offset_B;
+		int curr_row_length = strlen(A->integer) + 1 + rev_offset_B;
 		char * curr_row = (char *)malloc( curr_row_length + 1 );
 		curr_row[ curr_row_length ] = '\0';
-		pack_trailing_zeroes( curr_row, curr_row_length, rev_offset_B );
+		PackTrailingZeroes( curr_row, curr_row_length, rev_offset_B );
 		
 		int prev_overflow = 0;
 		
 		int p = curr_row_length - 1 - rev_offset_B;
 		
-		for( int i = strlen(A.whole)-1; i>=0; i-- )	{
+		for( int i = strlen(A->integer)-1; i>=0; i-- )	{
 			
-			int _A = A.whole[i] - '0';
-			int _B = B.whole[k] - '0';
+			int _A = A->integer[i] - '0';
+			int _B = B->integer[k] - '0';
 			
 			int result = _A * _B;
 			result += prev_overflow;
@@ -467,53 +482,59 @@ AP MULP( APL A, APL B, LARGE P )  {
 		if(result_row==NULL)
 			assert(result_row);
 		
-		free( D.whole );
+		free( D->integer );
 		
-		D.whole = strdup(result_row);
+		D->integer = strdup(result_row);
 		
-		C = ADD( C,D );
+		APL _ = (APL)malloc( sizeof( APP ) );
+		*_ = *C;
+		free( C->fractional	);
+		free ( C );
+		
+		C = ADD( _,D );
+		FreeAP( _ );
 	}
 	
-	C.sign = TT_MUL( &A,&B );
+	C->sign = TT_MUL( A,B );
 	return C;
 }
 AP DIV( APL A, APL B )	{
 
 	return DIVP( A, B, DefaultPrecision );
 }
-AP DIVP( APL	 A, APL B, L P )  {
+AP DIVP( APL A, APL B, APL P )  {
 
 	int fractional = 0;
 	int L0 = 1;
 	
-	//char * whole;
+	//char * integer;
 	//char * fractional;
 	
 	AP C = NewAP(0, 0);
-	large offset = strlen(B.whole) - 1;
-	AP Remainder = NewAP( strlen(B.whole) , 0 );
+	large offset = strlen(B->integer) - 1;
+	AP Remainder = NewAP( strlen(B->integer) , 0 );
 	
 	large i;
-	for(i=0;i<strlen(B.whole);i++)
-		Remainder.whole[i] = A.whole[i];
+	for(i=0;i<strlen(B->integer);i++)
+		Remainder->integer[i] = A->integer[i];
 	
-	Remainder.whole[i] = '\0';
+	Remainder->integer[i] = '\0';
 	
 	AP Dropdown = NewAP(1, 0);
 	
-	AP v = NewAP(1, 0); v.whole[0] = '0';
-	AP inc = NewAP(1, 0); inc.whole[0] = '1';
+	AP v = NewAP(1, 0); v->integer[0] = '0';
+	AP inc = NewAP(1, 0); inc->integer[0] = '1';
 	
 	AP temp;
 	AP v2;
 	AP result;
-	large strlen_A = strlen(A.whole);
+	large strlen_A = strlen(A->integer);
 	//large strlen_minor_A = LSD_OFFSET(A.fractional);
 	
-	if( strlen(A.whole)>strlen(B.whole) )
-		Dropdown.whole[0] = A.whole[offset+1];
+	if( strlen(A->integer)>strlen(B->integer) )
+		Dropdown->integer[0] = A->integer[offset+1];
 	else
-		Dropdown.whole[0] = '0';
+		Dropdown->integer[0] = '0';
 	
 	
 	int LOOPS = 0;
@@ -528,59 +549,59 @@ AP DIVP( APL	 A, APL B, L P )  {
 		if( LOOPS>MAX_LOOPS )
 			goto maxiterations;
 		
-		v.whole[0] = '0';
+		v->integer[0] = '0';
 		
 		temp = MUL( B,v );
-		while( CmpAP( &temp,&Remainder ) < 1 )	{
+		while( CmpAP( temp,Remainder ) < 1 )	{
 			
 			v2 = ADD(v, inc);
-			free( v.whole );
-			v = CopyAP(&v2);
-			free( v2.whole );
+			free( v->integer );
+			v = CopyAP(v2);
+			free( v2->integer );
 			
-			free( temp.whole );
+			free( temp->integer );
 			temp = MUL( B,v );
 		}
 		
 		v2 = SUB(v, inc);
-		free( v.whole );
-		v = CopyAP(&v2);
-		free( v2.whole );
+		free( v->integer );
+		v = CopyAP(v2);
+		free( v2->integer );
 		
 		result = MUL( B,v );
 		v2 = SUB(Remainder, result);
-		free( result.whole );
-		free( Remainder.whole );
-		Remainder = CopyAP(&v2);
-		free( v2.whole );
+		free( result->integer );
+		free( Remainder->integer );
+		Remainder = CopyAP(v2);
+		free( v2->integer );
 
 		
-		#define CONCAT(__A,__B) strcat(__A.whole, __B.whole)
+		#define CONCAT(__A,__B) strcat(__A->integer, __B->integer)
 		
-		//printf( "Row %d:\t'%s' + '%s'\n", count, C.whole, v.whole );
+		//printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
 		//++count;
 		CONCAT( C,v );
 		
 		if( !fractional )
 			if( L0==1 )	{
 
-				if( v.whole[0]=='0' )	{
+				if( v->integer[0]=='0' )	{
 					
-						++C.whole;
+						++C->integer;
 				}
 				else
 					L0=0;
 			}
 		
-		if( Remainder.whole[0] > '0' )
+		if( Remainder->integer[0] > '0' )
 			CONCAT( Remainder,Dropdown );
 		else	
-		if( offset != (strlen(B.whole)-1) )
-			Remainder.whole[0] = Dropdown.whole[0];
+		if( offset != (strlen(B->integer)-1) )
+			Remainder->integer[0] = Dropdown->integer[0];
 
 		if( fractional )	{
 			
-			if( CmpAP( &Remainder,&AP0 ) == 0 )	{
+			if( CmpAP( Remainder,AP0 ) == 0 )	{
 				break;
 			}
 		}
@@ -588,9 +609,9 @@ AP DIVP( APL	 A, APL B, L P )  {
 
 			if( (offset+1)<strlen_A )
 				
-				Dropdown.whole[0] = A.whole[offset+1];
+				Dropdown->integer[0] = A->integer[offset+1];
 			else
-				Dropdown.whole[0] = '0';
+				Dropdown->integer[0] = '0';
 		}
 
 		++offset;
@@ -603,16 +624,16 @@ AP DIVP( APL	 A, APL B, L P )  {
 		
 		fractional = 1;
 
-		if( CmpAP( &C,&AP0 )==0 )
-			--C.whole;
+		if( CmpAP( C,AP0 )==0 )
+			--C->integer;
 		
-		//whole = strdup( C.whole );
+		//integer = strdup( C->integer );
 	}
 	
 	offset = 0;
-	Dropdown.whole[0] = '0';
+	Dropdown->integer[0] = '0';
 	
-	if( CmpAP( &Remainder,&AP0 ) == 1 )
+	if( CmpAP( Remainder,AP0 ) == 1 )
 		goto loop;
 	
 	maxiterations: // Upper-bound for precision of calculation reached.
@@ -621,12 +642,12 @@ AP DIVP( APL	 A, APL B, L P )  {
 	//printf( "The fixed-point for the Answer is positioned to the right of digit %d.\n", (int) strlen_A-1 );
 	
 	for( i=0; i<(strlen_A-1); i++ )
-		printf( "%c", C.whole[i] );
+		printf( "%c", C->integer[i] );
 	
 	printf( "." );
 	
-	for( ; i<strlen(C.whole); i++ )	
-		printf( "%c", C.whole[i] );
+	for( ; i<strlen(C->integer); i++ )	
+		printf( "%c", C->integer[i] );
 	
 	NL;
 	
@@ -643,7 +664,7 @@ AP CROSS( AP A, AP B )	{
 }
 AP CROSSP( AP A, AP B, AP P )	{
 	
-	return CopyAP( &AP1 );
+	return CopyAP( AP1 );
 }
 AP DOT( AP A, AP B )	{
 
@@ -651,7 +672,7 @@ AP DOT( AP A, AP B )	{
 }
 AP DOTP( AP A, AP B, AP P )	{
 
-	return CopyAP( &AP1 );
+	return CopyAP( AP1 );
 }
 
 char poke( char* in, char* out, L offset ) {
@@ -665,19 +686,18 @@ char poke( char* in, char* out, L offset ) {
 }
 
 
-
-APL RESET0( APL A ) { setPartW( A,0 ); setPartF( A,0 ); return A; }
-APL RESET1( APL A ) { setPartW( A,1 ); setPartF( A,0 ); return A; }
+APL RESET0( APL A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); return A; }
+APL RESET1( APL A ) { setPartW( A,AP1->integer ); setPartF( A,AP0->integer ); return A; }
 
 
 struct _APLIB* Init_APLIB(){
 	
 	// Initialise
 	AP0 = NewAP( 1,0 );
-	AP0.whole[0] = '0';
+	AP0->integer[0] = '0';
 	AP1 = NewAP( 1,0 );
-	AP1.whole[0] = '1';
-	DefaultPrecision = 0; // Sets default precision to indicate the length of the largest string between the 2 operands.
+	AP1->integer[0] = '1';
+	DefaultPrecision = AP0; // Sets default precision to indicate the length of the largest string between the 2 operands.
 
 	struct _APLIB* APLIB = (struct _APLIB*)malloc( sizeof(struct _APLIB) );
 	
@@ -695,7 +715,7 @@ struct _APLIB* Init_APLIB(){
 	APLIB->RECIPROCAL = RECIPROCAL;
 	APLIB->RECIPROCAL2 = RECIPROCAL2;
 	APLIB->RECIPROCALP = RECIPROCALP;
-	APLIB->RECIPROCALP2 = RECIPROCALP2;
+	APLIB->RECIPROCAL2P = RECIPROCAL2P;
 	APLIB->EXP = EXP;
 	APLIB->CROSS = CROSS;
 	APLIB->CROSSP = CROSSP;
@@ -722,14 +742,43 @@ struct _APLIB* Init_APLIB(){
 	APLIB->setSign = setSign;
 	
 
-	APLIB->c = (AVTC)malloc( sizeof(AVTC) );
+	APLIB->ANSI = ANSI;
+	//APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
 	
 	ANSI_init();
 	Init_ANSIVT_CTABLE();
 	ResetAnsiVtCodes(1);
 	colorMode();
 
-	return *APLIB;}
+	return APLIB;
+	
+}
+
+void setSign( APL A,char S ){
+
+	if( S!='+' ){
+		if( S!='-' )
+		A->sign='+';}
+	else
+		A->sign = S;
+}
+
+
+APL RECIPROCAL2( APL A, APL B ){
+	
+	return RECIPROCAL2P( A,B,DefaultPrecision );
+}
+
+
+APL RECIPROCALP( APL A, APL DefaultPrecision ){
+	
+	return DIV( AP1,A ); 
+}
+
+APL RECIPROCAL2P( APL A,APL B,APL ){
+	
+	return DIV( B,A );
+}
 
 // BASE CONVERSION FNCS
 char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (decimal) string.
@@ -744,66 +793,70 @@ char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (dec
 	AP _2 = NewAP(1, 0);
 	AP _j = NewAP(10, 0);
 	
-	_2.whole = strdup( "2" );
+	_2->integer[0] = '2';
 
 	int i, j;
 	
 	for( i=0, j=strlen(bin)-1; i<strlen(bin); i++, j-- )	{
 
-		digit.whole[0] = bin[i];
+		digit->integer[0] = bin[i];
 		
-		sprintf(_j.whole, "%d", j); // itoa()
+		sprintf(_j->integer, "%d", j); // itoa()
 		mult = EXP( _2, _j );
 		dec = ADD( dec, MUL(digit, mult) );
 	}
 	
-	FreeAP( &mult );
-	FreeAP( &digit );
-	FreeAP( &_2 );
-	FreeAP( &_j );
+	FreeAP( mult );
+	FreeAP( digit );
+	FreeAP( _2 );
+	FreeAP( _j );
 	
-	char * result = (char *)malloc( strlen(dec.whole)+1 );
-	result = strdup( dec.whole );
+	char * result = (char *)malloc( strlen(dec->integer)+1 );
+	result = strdup( dec->integer );
 
-	FreeAP( &dec );
+	FreeAP( dec );
 	
 	return result;
 }
-char * DEC_2_BIN(AP input, int packed)	{
+char * DEC_2_BIN(char*  input, L packed)	{
 /**
 PArAm "int packed" is A flag to determine if the returned binary string should be rounded in length to A multiple of 8.
 In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 meAns "do not round", A non-0 value meAns "round up string-length to multiple of 8".
 */
 
-	int length = 0;
+	L length = 0;
 	int flag = 1;
 
-	AP t = NewAP( 1,0 );
-	t.whole = strdup( "0" );
+	AP t = CopyAP( AP0 );
 	
-	AP Check = CopyAP( &input );
+	AP Check = NewAPr( 0,0 );
+	free( Check->integer );
+	Check->integer = getstring( input );
+	
 	while ( flag )	{
 		
 		APL temp;
-		temp=DIVBY2(&Check);
-		*Check=temp;
+		temp = DIVBY2( Check );
+		temp->fractional = getstring( "0" );
+		FreeAP( Check );
+		
+		Check = CopyAP( temp );
 		free( temp );
 		
 		if( DIVBY2_PRINT_ROWS==1 )
-			printf( "\t%c%s\n", Check.sign, Check.whole );
+			printf( "\t%c%s\n", Check->sign, Check->integer );
 			
 		++length;
 		
-		if( CmpAP(&Check,&t)<= 0 )
+		if( CmpAP(Check,t)<= 0 )
 			flag = 0;
 	} 
 	
 	
-	
-	AP stack[strlen(input.whole)];
+	AP stack[strlen(input)];
 	char binary_stack[length+1];
 
-	length = strlen(input.whole);
+	length = strlen(input);
 
 	int pointer;
 	int bs_pointer = 0;
@@ -816,20 +869,20 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 
 		pointer = 0;
 		
-		int i;
+		L i;
 		for( i=0; i<length; i++ )	{
 			
-			A.whole[i] = input.whole[i];
+			A->integer[i] = input[i];
 			
-			pack_trailing_zeroes( A.whole, length, (length-i-1) );
+			PackTrailingZeroes( A->integer, length, (length-i-1) );
 			
-			int dividend = A.whole[i] - '0';
+			int dividend = A->integer[i] - '0';
 			int remainder = dividend % 2;
 			int quotient = dividend / 2;
 			
-			result.whole[i] = quotient + '0';
+			result->integer[i] = quotient + '0';
 			
-			// if A_substring != LSdigit (units position)
+			// if a_substring != LSdigit (units position)
 			// if it is, the remainder is noted As A binary digit 1, And the remainder itself disgArded.
 
 			if( remainder )	{
@@ -839,7 +892,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 					binary_stack[bs_pointer++] = '1';
 				}
 				else
-					result.whole[i+1] = '5';
+					result->integer[i+1] = '5';
 			}
 			else	{
 				
@@ -848,39 +901,64 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 					binary_stack[bs_pointer++] = '0';
 				}
 				else
-					result.whole[i+1] = '0';
+					result->integer[i+1] = '0';
 			}
 
-			pack_trailing_zeroes( result.whole, length, (length-i-2) );
+			if( result->fractional==NULL ){
 			
-			stack[pointer++] = CopyAP(&result);
+				AP __ = CopyAP( AP0 );
+				result->fractional = getstring( __->integer );
+				free( __ );
+			}
+			
+			
+			PackTrailingZeroes( result->integer, length, (length-i-2) );
+			
+			stack[pointer++] = CopyAP(result);
 
 			// finAlly...
 			
-			A.whole[i] = '0';
-			result.whole[i] = '0';
-			result.whole[i+1] = '0';
+			A->integer[i] = '0';
+			result->integer[i] = '0';
+			result->integer[i+1] = '0';
 		}	
 		
 
-		input.whole = strdup( "0" );
-		for(int k = 0; k < pointer; k++ )
-			input = ADD(input, stack[k]);
+		input[0] = '0';
+		AP input2 = NewAPr( 0,0 );
+		free( input2->integer );
+		input2->integer = getstring( input );
 		
-		length = strlen(input.whole);
+		AP input3;
 		
-		int l = strlen(A.whole)-strlen(input.whole);
+		for(int k = 0; k < pointer; k++ )	{
+			
+			input3 = ADD(input2, stack[k]);
+			FreeAP( input2 );
+			input2 = input3;
+			FreeAP( input3 );
+		}
+		
+		free( input );
+		input = getstring( input2->integer );
+		
+		
+		length = strlen(input);
+		
+		int l = strlen(A->integer)-strlen(input);
 		
 		for( int z=0; z<l; z++ )
-			++A.whole;
+			++A->integer;
 
-		pack_trailing_zeroes( A.whole, length, length);
+		PackTrailingZeroes( A->integer, length, length);
 		
 		AP t = NewAP(1,0);
-		t.whole = strdup( "0" );
+		t->integer[0] = '0';
 		
-		if( CmpAP(&input,&t)==0 )
+		if( CmpAP(input2,t)==0 )
 			flag = 0;
+		
+		FreeAP( input2 );
 	}
 	
 	char * b_str = (char *)malloc( bs_pointer+1 );
@@ -935,7 +1013,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 // 2k FNCS
 L Min2K(AP A)	{
 	
-	char * bin_string = DEC_2_BIN( A, 0 );
+	char * bin_string = DEC_2_BIN( A->integer, 0 );
 	
 	int len_bin_string = strlen(bin_string);
 	
@@ -951,7 +1029,7 @@ L Min2K(AP A)	{
 }
 L Max2K(AP A)	{
 	
-	char * bin_string = DEC_2_BIN(A, 0);
+	char * bin_string = DEC_2_BIN(A->integer, 0);
 	
 	int len_bin_string = strlen(bin_string);
 	
@@ -982,13 +1060,13 @@ L Max2K(AP A)	{
 // DIGIT-WISE FNCS
 char d( APL A, L index ){
 	
-	return A->whole[index];
+	return A->integer[index];
 }
 
 
 void setDigit( APL A, L index, char d ){
 			
-	A->whole[index] = d;
+	A->integer[index] = d;
 }
 
 // 
@@ -1002,7 +1080,7 @@ large strlen_(char * str)	{
 }
 LARGE lenp( APL A ){
 	
-	LARGE length = strlen( A->whole );
+	LARGE length = strlen( A->integer );
 	
 	if( A->base==2 )
 	if( A->p   ==0 ){
@@ -1062,7 +1140,7 @@ char * ACCUMULATE( char * apstr )
 	{
 		#if ACC_COPY==1
 		AP bkp = NewAP( apstr_len, 0 );
-		_ = bkp.whole;
+		_ = bkp->integer;
 		#else
 		_ = apstr;
 		#endif
@@ -1106,65 +1184,79 @@ char * ACCUMULATE( char * apstr )
 
 #define ASCII '0'
 APL DIVBY2( APL A )	{
+		
+	int overflow = 0;
+	int value;
+	L strlen_a = strlen( A->integer );
+	APL _ = (APL)malloc( sizeof(APP) );
+	_->integer = zmem( strlen_a );
+	_->fractional = getstring( "0" );
+	LARGE i;
+	_->integer[0] = A->integer[0];
+	for( i=0; i<strlen_a; i++ ) {
 	
-int overflow = 0;
-int value;
-L strlen_a = strlen( A->whole );
-APL _ = (APL)malloc( sizeof(AP) );
-_->whole = memz( strlen_a );
+		if( i<strlen_a-1 )
+			_->integer[i+1] += (A->integer[i+1] - '0');
 
-LARGE i;
-_->whole[0] = A->whole[0];
-for( i=0; i<; i++ )	{		
-_->whole[i+1] += A->whole[i+1] - '0';
+		loop:
 
-loop:
-
-value = _->whole[i] - ASCII;
-if( value>9	){
-// roll over the remainder
-char remainder = value % 10;
-char c = value - remainder;
-_->whole[i] = '0'+c;
-_->whole[i+1] += remainder;}
-
-value = A->whole[i] - '0';
-
-int result = floor( value/2 );
-result += overflow;
-_->whole[i] = result + '0';
-
-if(_->whole[i] - '0' >= 10 ){	
-goto loop;}
-
-if( value%2!= 0 )
-	overflow = 5;
-else
-	overflow = 0;}
-
-if( overflow==5 )
-setPartF( _->fractional, "5" );
-
-//_->whole[i] = '\0'; //NULL-TERMINCATOR
-addnult( _->whole,i );
-	
-	/*// ARCHAIC SUBSECTION FOR TRIMMING LEADING ZERO'S BY SHUNTING THE POINTER FROM THE FRONT.
-	int len = i;
-	for( i=0; i<len; i++ )
-		if( _.whole[i]=='0' )	{
+		value = _->integer[i] - '0';
+		
+		if( value>9	)	{
+		
+			// roll over the remainder
+			char remainder = value % 10;
+			char c = value - remainder;
+			_->integer[i] = '0'+c;
 			
-			++_.whole;
-			--len;
-			--i;
+			if( i<strlen_a-1 )
+				_->integer[i+1] += remainder;
 		}
-		else
-			break;
 
-	if( _->whole[0]=='\0' )
-		--_.whole;
-	*/
+		value = A->integer[i] - '0';
+
+		int result = floor( value/2 );
+		result += overflow;
+		_->integer[i] = result + '0';
+
+		if(_->integer[i] - '0' >= 10 )
+			goto loop;
+
+		if( value%2!= 0 )	{
+			
+			overflow = 5;
+		}
+		else{
+			
+			overflow = 0;
+		}
+
+	}
 	
-	return _;}
+	
+	_->sign = A->sign;
+
+	//_->integer[i] = '\0'; //NULL-TERMINCATOR
+	addnult( _->integer,i );
+		
+		/*// ARCHAIC SUBSECTION FOR TRIMMING LEADING ZERO'S BY SHUNTING THE POINTER FROM THE FRONT.
+		int len = i;
+		for( i=0; i<len; i++ )
+			if( _.integer[i]=='0' )	{
+				
+				++_.integer;
+				--len;
+				--i;
+			}
+			else
+				break;
+
+		if( _->integer[0]=='\0' )
+			--_.integer;
+		*/
+		
+	return _;
+}
 #undef ASCII
 
 APL EXP(APL A, APL B)	{
@@ -1175,30 +1267,31 @@ APL EXP(APL A, APL B)	{
 	
 
 	// if B (exp) is negative
-	if( getSign(&B)=='-' )	{
+	if( getSign(B)=='-' )	{
 
-		B.sign = '+';
+		B->sign = '+';
 		
 		AP C = EXP( A,B );
 		
 		AP D = DIVIDE( AP1, C );
 		
 		//FreeAP( &_ );
-		B.sign = '-';
+
+		B->sign = '-';
 		return D;
 	}
 	
 	// PAST THE NEGATIVE_EXPONENT GATE.
 	
 	// if exponent B=0, Result of A^B := 1. (n exp 0 == 1).
-	if( CmpAP( &B,&AP0 )==0 )
-		return CopyAP( &AP1 );
+	if( CmpAP( B,AP0 )==0 )
+		return CopyAP( AP1 );
 	
 	AP D = SUB( B,AP1 );
 	
-	_ = CopyAP(&A);
+	_ = CopyAP(A);
 	
-	while( CmpAP(&D, &AP0)==+1 )	{
+	while( CmpAP( D,AP0 )==+1 )	{
 		
 		_ = MUL( _,A );
 		
@@ -1209,8 +1302,8 @@ APL EXP(APL A, APL B)	{
 
 	}
 	
-	if( getSign(&A)=='-' )
-		_.sign='-';
+	if( getSign(A)=='-' )
+		_->sign='-';
 	
 	return _;
 }
@@ -1219,10 +1312,10 @@ APL EXP(APL A, APL B)	{
 // VARIOUS MATH FNCS
 L DSTRING2LARGE( APL A ){
 
-char* _ = A->whole;
+char* _ = A->integer;
 L e = strlen(_)-1;
 
-digit d[2];
+char* d = (char*)malloc( 2 );
 d[0] = _[e];
 d[1] = '\0';
 
@@ -1233,88 +1326,98 @@ value += atoi(d) * (10*(e-i)); }
 
 return value;}
 
-APL APLCM( APL a, APL b ){
+/*
+APL APLCM( APL A, APL B ){
 	
-	APL M1 = CopyAP( &AP0 );
-	APL M2 = CopyAP( &AP0 );
+	APL M1 = CopyAP( AP0 );
+	APL M2 = CopyAP( AP0 );
 	
 	#define MAX_ITER 4096
-	APL R1[MAX_ITER] = calloc( sizeof(APL), MAX_ITER );
-	APL R2[MAX_ITER] = calloc( sizeof(APL), MAX_ITER );
+	// It is APL pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
+	APL R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	APL R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
 	
-	AP val = CopyAP( &AP1 );
-	AP inc = CopyAP( &AP0 );
+	AP val = CopyAP( AP1 );
+	AP inc = CopyAP( AP0 );
 	
-	L Match = 0;
+	AP Match = CopyAP( AP0 );
 	
 	string maxiter = int2str(MAX_ITER);
 	AP APMAXITER = NewAP( strlen(maxiter),0 );
-	setPartW( &APMAXITER, maxiter );
+	setPartW( APMAXITER, maxiter );
 	
-	while( !Match ){		
-	if( cmp( &inc,&APMAXITER ) ){
+	while( !CmpAP(Match,AP0) ){		
+	if( CmpAP( inc,APMAXITER ) ){
 	printf("Overflow error: More than %d iterations required.\n", MAX_ITER);
 	exit(1);}
 
-	R1[ DSTRING2LARGE(inc->whole) ] = MUL( A,val );
-	R2[ DSTRING2LARGE(inc->whole) ] = MUL( B,val );
+	R1[ DSTRING2LARGE(inc) ] = MUL( A,val );
+	R2[ DSTRING2LARGE(inc) ] = MUL( B,val );
 	
-	Match = LCMTESTSR( inc,R1,R2 );
+	Match = LCMTESTSTR( inc,R1,R2 );
 	
-	INC( &inc );
-	INC( &val ); }
+	INC( inc );
+	INC( val ); }
 	
 	return R1[ DSTRING2LARGE(inc)+1 ];
 }
+*/
 
+APL LCM( APL A, APL B )	{
 
-int LCM(int A, int B, int flag)	{
-
-	signed int M1 = 0, M2 = 0;
+	APL M1;
+	APL M2;
 	#define MAX_ITER 4096
-	int R1[MAX_ITER] = {0}, R2[MAX_ITER] = {0};
-	int val = 1, inc = 0, match = 0;
-
-	if(flag)
-		val = 2;
+	APL* R1 = (APL*) calloc( sizeof(APL), MAX_ITER );
+	APL* R2 = (APL*) calloc( sizeof(APL), MAX_ITER );
+	
+	APL AP_MAX_ITER = NewAP( 0,0 );
+	free( AP_MAX_ITER->integer );
+	AP_MAX_ITER->integer = int2str ( MAX_ITER );
+	
+	APL val = ADD( AP1, AP1 ), inc = CopyAP( AP0 ), match = CopyAP( AP0 );
 	
 	M1 = A; M2 = B;
 	
-	while (!match)	{
+	while (! CmpAP( match, AP0 ))	{
 		
-		if (inc >= MAX_ITER)	{
+		if ( CmpAP( inc, AP_MAX_ITER)>=0 )	{
 			
-			printf("Overflow error: More thAn %d iterAtions required.\n", MAX_ITER);
-			exit(1);
+			printf( "Overflow error: More thAn %d iterAtions required.\n", MAX_ITER );
+			exit( 1 );
 		}
 		
-		R1[inc] = (int)M1*val; R2[inc] = (int)M2*val;
+		//*(ANSI->c->ANSIVT_CTABLE + (i*4) + 0)
+		*( R1+ str2int(inc->integer)*sizeof(APL) ) = MUL( M1, val ); *(R2+ str2int(inc->integer)*sizeof(APL) ) = MUL( M2,val );
 		
 		//match = lcm_test(inc, R1, R2);
-		match = lcm_test(inc, R1, R2);
+		match = LCMTESTSTR(inc, R1, R2);
 
-		++inc;
-		++val;
+		INC( inc );
+		INC( val );
 	}
 	
 	// print( "The LCM for %d And %d is %d.\n", M1, M2, R1[inc-1]);
 
-	return R1[inc-1];
+	return *( R1 + (str2int(inc->integer)-1)*sizeof(APL) );
 }
 
 #define aptr APL
-APL LCMTESTSR( aptr max, aptr* R1, aptr* R2 )	{
+APL LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
 	
-	for (aptr a = CopyAP( &AP0 ); cmp( a,max )<+1; INC(&a) )
-		for (aptr b = CopyAP( &AP0 ); cmp( b,max )<+1; b++)
-			if ( cmp( R1[a],R2[b] )==0 )
-				return 1;
+	aptr a = NewAPr( 0,0 );
+	aptr b = NewAPr( 0,0 );
+	for (FreeAP(a), a = CopyAP( AP0 ); CmpAP( a,max )<=1; INC(a) )
+		for (FreeAP(b), b = CopyAP( AP0 ); CmpAP( b,max )<=1; INC(b) )
+			if ( CmpAP( R1[str2int(a->integer)],R2[str2int(b->integer)] )==0 )
+				return a;
 			
-	return 0;
+	return b;
 }
 
-int lcm_example(int argc, char **argv)	{
+APL lcm_example(int argc, char **argv)	{
 	
+	/*
 	int flagSet = 0;
 	
 	if((argc == 4) && (argv[3][0] == '-') && (argv[3][1] == 'n'))	{
@@ -1322,33 +1425,50 @@ int lcm_example(int argc, char **argv)	{
 		//printf("flag set!\n");
 		flagSet = 1;
 	}
+	*/
+
+	APL a;
+	APL b;
+	a = NewAPr( 0,0 );
+	free( a->integer );
+	a->integer = argv[1];
 	
-	int a = str2int(argv[1]);
-	int b = str2int(argv[2]);
+	b = NewAPr( 0,0 );
+	free( b->integer );
+	b->integer = argv[2];
 	
-	int lcm = LCM( a, b, flagSet);
-	int gcd = 1; // = GCD(A, B, lcm);
+	APL lcm = LCM( a, b );
+	//int gcd = 1; // = GCD(A, B, lcm);
 	
-	printf( "lcm := (%d)\ngcd := (%d)\n", lcm, gcd );
+	FreeAP( a );
+	FreeAP( b );
 	
-	return 0;
+	//printf( "lcm := (%d)\ngcd := (%d)\n", lcm, gcd );
+	
+	return lcm;
 }
 
+APL NewAPr( large integer_range, large fractional_range )	{
+
+	APL _ = (APL)malloc( sizeof(AP) );
+	_ = NewAP( integer_range,fractional_range );
+	return _;
+}
 
 // CREATE, DUPLICATE, RESET & FREE AP TYPE FNCS
-AP NewAP( large whole_length, large fractional_length )	{
+AP NewAP( large integer_length, large fractional_length )	{
 
-	if( whole_length>MAX_LENGTH_AP_PART )
-		whole_length = MAX_LENGTH_AP_PART;
+	if( integer_length>MAX_LENGTH_AP_PART )
+		integer_length = MAX_LENGTH_AP_PART;
 
 	if( fractional_length>MAX_LENGTH_AP_PART )
 		fractional_length = MAX_LENGTH_AP_PART;
 
-	AP result;
-	result.whole = (char *)malloc(whole_length+1);
-	result.fractional = (char *)malloc(fractional_length+1);
+	AP result = (AP)malloc( sizeof( APP ) );
+	result->integer = (char *)malloc(integer_length+1);
+	result->fractional = (char *)malloc(fractional_length+1);
 	
-	if( (result.whole==NULL)||(result.fractional==NULL) )	{
+	if( (result->integer==NULL)||(result->fractional==NULL) )	{
 		
 		printf("AP NewAP(...) failed 1 or 2 of 2 malloc() calls! Exiting...\n");
 		exit(0);
@@ -1356,43 +1476,46 @@ AP NewAP( large whole_length, large fractional_length )	{
 	
 	int i;
 	
-	for( i=0; i<maj; i++)
-		result.whole[i] = '0';
+	for( i=0; i<integer_length; i++)
+		result->integer[i] = '0';
 	
-	result.whole[maj] = '\0';
+	result->integer[integer_length] = '\0';
 	
-	for( i=0; i<min; i++)
-		result.fractional[i] = '0';
+	for( i=0; i<fractional_length; i++)
+		result->fractional[i] = '0';
 	
-	result.fractional[min] = '\0';
+	result->fractional[fractional_length] = '\0';
 	
-	result.sign = '+';
+	result->sign = '+';
 	return result;
 }
 
-AP CopyAP(AP * A)	{
+AP CopyAP(AP A)	{
 	
-	AP _ = NewAP(strlen(A->major),strlen(A->minor));
+	AP _ = NewAP(strlen(A->integer),strlen(A->fractional));
 	
-	strcpy(_.whole, A->major);
-	strcpy(_.fractional, A->minor);
+	strcpy(_->integer, A->integer);
+	strcpy(_->fractional, A->fractional);
 	
-	_.sign = A->sign;
+	if( A->sign )
+	_->sign = A->sign;
+	else
+	_->sign = '+';
 	
 	return _;
 }
 
 
-void ClearAP(AP * A)	{
+void ClearAP(AP A)	{
 	
 	large i;
-	for( i=0; i< strlen(A->major); i++)
-		A->major[i] = '0';
-	A->major[i] = '\0';
+	for( i=0; i< strlen(A->integer); i++)
+		A->integer[i] = '0';
+	A->integer[i] = '\0';
 	
-	for( i=0; i< strlen(A->minor); i++)
-		A->minor[i] = '0';
-	A->minor[i] = '\0';
+	for( i=0; i< strlen(A->integer); i++)
+		A->integer[i] = '0';
+	A->integer[i] = '\0';
 	
 	A->sign = '+';
 	
@@ -1401,10 +1524,38 @@ void ClearAP(AP * A)	{
 
 
 
+APTR DEC_2_HEX( APTR A,L packed ){
+
+	aplibstdreturn(2);
+}
+APTR HEX_2_DEC( APTR A ){
+
+	aplibstdreturn(10);
+}
+APTR DEC_2_OCTAL( APTR A, L precisiom ){
+
+	aplibstdreturn(8);
+}
+APTR OCTAL_2_DEC( APTR A ){
+
+	aplibstdreturn(10);
+}
+
+APTR BIN_2_OCTAL( APTR A ){
+
+	aplibstdreturn(8);
+}
+APTR OCTAL_2_BIN( APTR A ){
+
+	aplibstdreturn(2);
+}
+
+
+
 void FreeAP( APL A )	{
 	
-	free( A->major );
-	free( A->minor );
+	free( A->integer );
+	free( A->fractional );
 	free( A );
 	
 	return;
@@ -1478,87 +1629,91 @@ char TT_MUL( APL A, APL B )	{
 
 AP RECIPROCAL( AP A )	{
 
-	return DIVIDE( AP1,A );;
+	return RECIPROCALP( A,DefaultPrecision );;
 }
 
 
 // GENERAL HELPER FNCS
 char** getaplibsymbols(){
 	
-	char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
-	
-	symbols[DELIMITERS] = getstring( "([{}])" );
-	symbols[UNKOWN] = getstring("UNKNOWN");
-	symbols[OP_AND] = getstring("AND");
-	symbols[OP_OR] = getstring("OR");
-	symbols[OP_XOR] = getstring("XOR");
-	symbols[OP_NOT] = getstring("NOT");
-	symbols[OP_PLUS] = getstring("+");
-	symbols[OP_MINUS] = getstring("-");
-	symbols[OP_STAR] = getstring("*");
-	symbols[OP_FORWARDSLASH] = getstring("/");
+char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
+
+symbols[DELIMITERS] = getstring( "([{}])" );
+symbols[OP_UNKNOWN] = getstring("UNKNOWN");
+//symbols[OP_] = getstring("");	
+symbols[OP_AND] = getstring("AND");
+symbols[OP_OR] = getstring("OR");
+symbols[OP_XOR] = getstring("XOR");
+symbols[OP_NOT] = getstring("NOT");
+symbols[OP_PLUS] = getstring("+");
+symbols[OP_MINUS] = getstring("-");
+symbols[OP_STAR] = getstring("*");
+symbols[OP_FORWARDSLASH] = getstring("/");
+
+symbols[OP_GT] = getstring( ">" );
+symbols[OP_LT] = getstring("<");
+
+symbols[OP_PLUSEQUALS] = getstring("+=");
+symbols[OP_ISEQUALTO] = getstring("==");
+symbols[OP_RATIO] = getstring("%");
+symbols[OP_RATIO_ASSIGN] = getstring("%=");
+symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
+symbols[OP_CARAT] = getstring("^");
+symbols[OP_LTORISEQUALTO] = getstring("<=");
+symbols[OP_GTORISEQUALTO] = getstring(">=");
+symbols[OP_MINUSEQUALS] = getstring("-=");
+symbols[OP_PLUSEQUALS] = getstring("+=");
+symbols[OP_FORWARDSLASHEQUALS] = getstring("/=");
+symbols[OP_DOUBLESTAR] = getstring("**");
+symbols[OP_CARATEQUALS] = getstring("^=");
+symbols[OP_ISEQUALTO] = getstring("==");
+symbols[OP_INCREMENT] = getstring("++");
+symbols[OP_DECREMENT] = getstring("--");
+symbols[OP_ISDEFINEDAS] = getstring(":=");
+symbols[OP_CONDITIONAL] = getstring("?");
+symbols[OP_BITWISE_AND] = getstring("&");
+symbols[OP_BITWISE_NOT] = getstring("~");
+symbols[OP_PERIOD] = getstring(".");
+symbols[OP_BITWISE_OR] = getstring("|");
+symbols[OP_LOGICAL_OR] = getstring("||");
+symbols[OP_LOGICAL_AND] = getstring("&&");
+symbols[OP_LOGICAL_ISNOT] = getstring("!!");
+
+return symbols; }
+
+int INC( AP A ){
+
+AP _;
+_ = ADD( A,AP1 );
+free( A );
+A = _;
+
+return 1; }
+int DEC( AP A ){
+
+AP _;
+_ = SUB( A,AP1 );
+free( A );
+A = _;
+
+return -1; }
 
 
-	//symbols[OP_] = getstring("");	
-	symbols[OP_GT] = getstring( ">" );
-	symbols[OP_LT] = getstring("<");
-	
-	
-	
-	symbols[OP_PLUSEQUALS] = getstring("+=");
-	symbols[OP_ISEQUALTO] = getstring("==");
-	symbols[OP_RATIO] = getstring("%");
-	symbols[OP_RATIO_ASSIGN] = getstring("%=");
-	symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
-	symbols[OP_CARAT] = getstring("^");
-	symbols[OP_LTORISEQUALTO] = getstring("<=");
-	symbols[OP_GTORISEQUALTO] = getstring(">=");
-	symbols[OP_MINUSEQUALS] = getstring("-=");
-	symbols[OP_PLUSEQUALS] = getstring("+=");
-	symbols[OP_FORWARDSLASHEQUALS] = getstring("/=");
-	symbols[OP_DOUBLESTAR] = getstring("**");
-	symbols[OP_CARATEQUALS] = getstring("^=");
-	symbols[OP_ISEQUALTO] = getstring("==");
-	symbols[OP_INCREMENT] = getstring("++");
-	symbols[OP_DECREMENT] = getstring("--");
-	symbols[OP_ISDEFINEDAS] = getstring(":=");
-	symbols[OP_CONDITIONAL] = getstring("?");
-	symbols[OP_BITWISE_AND] = getstring("&");
-	symbols[OP_BITWISE_NOT] = getstring("~");
-	symbols[OP_PERIOD] = getstring(".");
-	symbols[OP_BITWISE_OR] = getstring("|");
-	symbols[OP_LOGICAL_OR] = getstring("||");
-	symbols[OP_LOGICAL_AND] = getstring("&&");
-	symbols[OP_LOGICAL_ISNOT] = getstring("!!");
-	
-	return symbols;
-}
-
-
-char peek( large c, char* _ )``````{
+char peek( large c, char* _ ){
 // clearly, char at str[0] is considered digit "1"
 return _[c - 1];}
 
-char poke( char* in, char* out, L offset ) {
-	
-L c = 0;
-do {
-out[offset++] = in[c++];
-}while(in[c] != '\0');
-
-return in[--c];}
-
-signed short int CmpAP( APL A, APL B )	{
+scint CmpAP( APL A, APL B )	{
 	
 	
-	while( *(A->major)=='0' )
-		++A->major;
+	while( *(A->integer)=='0' )
+		++A->integer;
 	
-	while( *(B->major)=='0' )
-		++B->major;
+	while( *(B->integer)=='0' )
+		++B->integer;
 	
-	large len_A = strlen(A->major);
-	large len_B = strlen(B->major);
+	large len_A = strlen(A->integer);
+	large len_B = strlen(B->integer);
 	
 	if( len_A<len_B )
 		return -1;
@@ -1568,66 +1723,66 @@ signed short int CmpAP( APL A, APL B )	{
 	
 	for( large test=0; test<len_A; test++ )	{
 		
-		if( A->major[test]>B->major[test] )
+		if( A->integer[test]>B->integer[test] )
 			return +1;
 		
-		if( A->major[test]<B->major[test] )
+		if( A->integer[test]<B->integer[test] )
 			return -1;
 	}
 	
 	return 0;
 }
 
-signed int overflow( AP * C, int result, signed k ) {
+signed int OverFlow( AP C, int result, signed k ) {
   
   if( (k-1) < 0 ) {
     
-    char * _ = (char *)malloc(strlen(C->major) + 1 + 1);
+    char * _ = (char *)malloc(strlen(C->integer) + 1 + 1);
     assert( _ );
     
     _[0] = '0';
     
     large x;
-    for( x=0; x<strlen(C->major); x++)
-      _[x+1] = C->major[x];
+    for( x=0; x<strlen(C->integer); x++)
+      _[x+1] = C->integer[x];
     _[x+1] = 0;
 
-    free( C->major );
-    C->major = _;
+    free( C->integer );
+    C->integer = _;
   }
     
   // 1. get lmost digit of result (1-8)
   
-  short int rd = result % 10;
-  short int td = (result - rd);
-  short int ld = 0;
+  scint rd = result % 10;
+  scint td = (result - rd);
+  scint ld = 0;
   
 	  while(td>0){
 		++ld;
 		td = td - 10;
 	  }
 	  
-	  C->major[k] = '0' + rd;
+	  C->integer[k] = '0' + rd;
 	 
-	  short int iresult;
-	  iresult = ld+(C->major[k-1] - '0');
+	  scint iresult;
+	  iresult = ld+(C->integer[k-1] - '0');
 	  if( iresult <= 9 )
-	  C->major[k-1] = '0' + iresult;
+	  C->integer[k-1] = '0' + iresult;
 	  else{
 		// if c[k-1] + ld > 9, recursive overflow, will need to deAl with here!
 		printf("Recursive overflow! Line %d-ish.\n", __LINE__);
-		k = overflow(C, iresult, k-1);
+		k = OverFlow(C, iresult, k-1);
 		}
 		
 	  return k-1;
-	  // remember, overflow cAn be from 1 tO 8! If [k-1] >= 2, itself mAy ADDItively overflow to [k-2];
+	  // remember, overflow can be from 1 to 8! If [k-1] >= 2, itself may additively overflow to [k-2];
 
 }
 
-int MSD(int num)	{
+L MSD(int num)	{
 	
-  short int rd = num % 10;
-  short int td = (num - rd);
+  scint rd = num % 10;
+  scint td = (num - rd);
   int ld = 0;
   
 	while( td>0 ){
@@ -1637,13 +1792,14 @@ int MSD(int num)	{
 	return ld;
 }
 
-void pack_trailing_zeroes( char* curr_row, int Array_length, int num_zeroes )	{
+void PackTrailingZeroes( char* curr_row, L Array_length, L num_zeroes )	{
 	
 	curr_row[Array_length] = 0;
 	
 	while( num_zeroes > 0 )	{
 		
-		--Array_length;
+	
+	--Array_length;
 		
 		curr_row[Array_length] = '0';
 		
@@ -1660,30 +1816,6 @@ char* fill_leading_zeroes( char* str, large num_zeroes )	{
 		_[i] = '0';
 	
 	strcat( _,str );
-	
-	return _;
-}
-
-int str2int(char* input)	{
-	
-	large len = strlen(input), i = 0, result = 0;
-	
-	if (input[0] == '-')
-		i = 1;
-
-	for(; i<len; i++)
-		result = result * 10 + ( input[i] - '0' );
-	
-	if (input[0] == '-')
-		result = 0 - result;
-	
-	return result;
-}
-
- char* int2str(int v)	{
-	
-	char* _ = mem( 32 );
-	sprintf( _, "%d", v );
 	
 	return _;
 }

@@ -2,7 +2,7 @@
 
 byte getbyte( char* c )	{ return *c; }
 
-void* cmem( large nb )	{ return calloc( nb,1 ); }
+void* cmem( large nb )	{ return calloc( nb+1,1 ); }
 char* mem( large numBytes )	{ return memp( (large)1,numBytes ); }
 char* memp( large numParts, large numBytes )	{
 

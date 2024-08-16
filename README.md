@@ -1,12 +1,13 @@
 AP v0.1
 
-# an arbitrary-precision AriTHmAtiC library, developed by "Dave" (sometimes known as "RickyBobby170*").
+# an arbitrary-precision AriTHmAtiC library, 
+developed by "Dave" (sometimes known as "RickyBobby170*").
 
 # -/-------
 
 
 Makefile assumes GCC Make, targeting GCC C.
-"colour" assumes Windows, but implements ANSI/VT in the control-code implementation part.
+"colour" assumes Windows for the console device handle, but implements ANSI/VT in the control-code implementation part.
 
 
 The library is still fleshing-out, and going reasonably well.

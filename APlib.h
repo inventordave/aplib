@@ -16,6 +16,12 @@
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 #define L LARGE
 
+#define APLS char*
+
+#define scint signed short int
+
+
+
 // CORE DATA STRUCTURES/TYPES
 extern char* MUL_SYM;
 extern char* ADD_SYM;
@@ -46,11 +52,11 @@ lens_	{
 }
 lens_;
 
-#define wp whole
+#define wp integer
 typedef char small;
 typedef struct
 APP {
-	char* whole;
+	char* integer;
 	char* fractional;
 	char sign;
 	small base;
@@ -106,35 +112,42 @@ APExpC_2;
 typedef struct
 _APLIB	{
 	
-	APL (*NOP)( APL,APL );
+	APL (*RESET0)( APL );
+	APL (*RESET1)( APL );
+
+	
+	APL (*NOP)( APL );
 	APL (*ADD)( APL,APL );
-	APL (*ADDP)( APL,APL, L );
+	APL (*ADDP)( APL,APL, APL );
 	APL (*SUB)( APL,APL );
-	APL (*SUBP)( APL,APL, L );
+	APL (*SUBP)( APL,APL, APL );
 	APL (*MUL)( APL,APL );
-	APL (*MULP)( APL,APL, L );
+	APL (*MULP)( APL,APL, APL );
 	APL (*DIV)( APL,APL );
-	APL (*DIVP)( APL,APL, L );
+	APL (*DIVP)( APL,APL, APL );
 	APL (*DIVBY2)( APL );
 	APL (*RECIPROCAL)( APL );
 	APL (*RECIPROCAL2)( APL,APL );
-	APL (*RECIPROCALP)( APL, L );
-	APL (*RECIPROCAL2P)( APL,APL, L );
+	APL (*RECIPROCALP)( APL, APL );
+	APL (*RECIPROCAL2P)( APL,APL, APL );
 	APL (*EXP)( APL,APL );	
 	APL (*CROSS)( APL,APL );
-	APL (*CROSSP)( APL,APL, L );	
+	APL (*CROSSP)( APL,APL, APL );	
 	APL (*DOT)( APL,APL );
-	APL (*DOTP)( APL,APL, L );	
+	APL (*DOTP)( APL,APL, APL );	
 
 	APL (*AND)( APL,APL );
 	APL (*OR)( APL,APL );
 	APL (*XOR)( APL,APL );
 	APL (*NAND)( APL,APL );
 	APL (*NOT)( APL );	
+
+	int (*INC)( APL );
+	int (*DEC)( APL );
 	
 	void (*flipSign)( APL );
 	char (*getSign)( APL );
-	void (*setSign)( APL );
+	void (*setSign)( APL, char );
 	
 	L (*DSTRING2LARGE)( APL );
 	
@@ -142,14 +155,14 @@ _APLIB	{
 	small packed;
 	small defaultBase;
 	
-	struct _ANSI* ANSIVT;
+	struct _ANSI* ANSI;
 }
 _APLIB;	
 
 // APLIB SYSTEM INTRINSICS
 extern AP AP0;
 extern AP AP1;
-extern LARGE DefaultPrecision;
+extern AP DefaultPrecision;
 extern large MAX_LENGTH;
 
 //// --- APLIB SETTINGS --- ////
@@ -178,10 +191,14 @@ extern void ClearAP( APL );
 extern void FreeAP( APL );
 
 // EQUALITY READ-OPERATOR
-extern signed short CmpAP( APL,APL );
+extern short CmpAP( APL,APL );
 
 // CORE OPERATORS
-extern APL NOP( APL,APL );
+extern int INC( AP A );
+extern int DEC( AP A );
+
+
+extern APL NOP( APL A, APL B );
 extern APL ADD( APL A, APL B );
 extern APL ADDP( APL A, APL B, APL P );
 extern APL SUB( APL A, APL B );
@@ -204,19 +221,19 @@ extern APL RECIPROCAL( APL A );
 extern APL RECIPROCAL2( APL A, APL B );
 #define N1 RECIPROCAL
 #define NM RECIPROCAL2
-extern APL RECIPROCALP( APL A, L P );
-extern APL RECIPROCAL2P( APL A, APL B, L P );
+extern APL RECIPROCALP( APL A, APL P );
+extern APL RECIPROCAL2P( APL A, APL B, APL P );
 extern APL EXP(APL A, APL B);
 extern APL CROSS( APL A, APL B );
-extern APL CROSSP( APL A, APL B, L P );
+extern APL CROSSP( APL A, APL B, APL P );
 extern APL DOT( APL A, APL B );
-extern APL DOTP( APL A, APL B, L P );
+extern APL DOTP( APL A, APL B, APL P );
 // BOOLEAN BIT-WISE OPERATORS
 extern APL AND( APL LHS, APL RHS );
 extern APL OR (APL LHS, APL RHS);
 extern APL XOR(APL LHS, APL RHS);
 extern APL NOT(APL v);
-extern APL NAND(APL LHS, APLRHS);
+extern APL NAND(APL LHS, APL RHS);
 
 // SIGN ( +,- )
 extern void flipSign( APL );
@@ -240,7 +257,7 @@ extern large DIVBY2_PRINT_ROWS;
 
 // MODIFYING AP VALUES
 extern L setPart( APL, char*, large part );
-extern L setPartW( APL, char* ); // "whole" part
+extern L setPartW( APL, char* ); // "integer" part
 extern L setPartF( APL, char* ); // "fractional" part
 #define SignPart 0
 #define PartW 1
@@ -252,13 +269,13 @@ extern APL RESET1( APL );
 #define APTR APL
 extern APL GCD( APL,APL, APL lcm );
 extern APL LCM( APL,APL );
-extern APL LCMTESTSR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
+extern APL LCMTESTSTR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
 extern L DSTRING2LARGE( APL );
 
 // BASE CONVERSION
 typedef char* String;
-extern APTR DEC_2_BIN( APTR,L packed );
-extern APTR BIN_2_DEC( APTR );
+extern char* DEC_2_BIN( char*,L packed );
+extern char* BIN_2_DEC( char* );
 extern APTR DEC_2_HEX( APTR,L packed );
 extern APTR HEX_2_DEC( APTR );
 extern APTR DEC_2_OCTAL( APTR,L );
@@ -276,40 +293,15 @@ extern LARGE lenp( APL );
 
 
 #define aplibstdreturn(b) APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; return _;
-APTR DEC_2_HEX( APTR A,L packed ){
-
-	aplibstdreturn(2);
-}
-APTR HEX_2_DEC( APTR A ){
-
-	aplibstdreturn(10);
-}
-APTR DEC_2_OCTAL( APTR A, L precisiom ){
-
-	aplibstdreturn(8);
-}
-APTR OCTAL_2_DEC( APTR A ){
-
-	aplibstdreturn(10);
-}
-
-APTR BIN_2_OCTAL( APTR A ){
-
-	aplibstdreturn(8);
-}
-APTR OCTAL_2_BIN( APTR A ){
-
-	aplibstdreturn(2);
-}
 
 // 2k-BOUNDARY
 extern L Max2K(APL);
 extern L Min2K(APL);
 
-extern L MSD( APL A );
+extern L MSD( int );
 
 // ALIGNMENT TOOLS
-extern L PackTrailingZeroes( char* cr, L alength, L n0 );
+extern void PackTrailingZeroes( char* cr, L alength, L n0 );
 extern string PackLeadingZeroes( char* str, L n0 );
 
 extern signed OverFlow( APL, int result, signed k );
