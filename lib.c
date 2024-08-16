@@ -16,7 +16,8 @@ toggle fliptoggle( toggle* t )	{
 	return *t;
 }
 
-// DAVELIB FNC'S
+// DAVELIB FNC'
+
 
 /*
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).

@@ -259,17 +259,18 @@ APL NAND( APL LHS, APL RHS )	{
 }
 
 // NOP (No-Operation). It returns an AP, or AP0, value.
-APL NOP( APL A, APL B ){
+APL NOP( APL A ){
 
 	if( CmpAP( A, AP0 )==0 )
-		return CopyAP( AP0
-	);
-	return A;
+		return CopyAP( AP0 );
+	return CopyAP( A );
 }
 
 // CORE ARITHMETIC OPERATORS
 APL ADD( APL A, APL B )	{ return ADDP( A, B, DefaultPrecision ); }
 APL ADDP( APL A, APL B, AP P )	{
+	
+	
 	
 	int flag = 0;
 	
@@ -850,11 +851,11 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 			flag = 0;
 	} 
 	
-	
-	AP stack[strlen(input)];
-	char binary_stack[length+1];
+	const L strlen_input = strlen(input);
+	AP* stack = (AP*)calloc( sizeof(AP), strlen_input );
+	char binary_stack = (char*)calloc( length+1, 1 );
 
-	length = strlen(input);
+	length = (L)strlen(input);
 
 	int pointer;
 	int bs_pointer = 0;
@@ -908,13 +909,12 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 				result->fractional = getstring( __->integer );
 				free( __ );
 			}
-			
-			
-			PackTrailingZeroes( result->integer, length, (length-i-2) );
+
+			PackTrailingZeroes( result->integer, length, (length-i-1) );
 			
 			stack[pointer++] = CopyAP(result);
 
-			// finAlly...
+			// finally...
 			
 			A->integer[i] = '0';
 			result->integer[i] = '0';
@@ -931,9 +931,12 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		
 		for(int k = 0; k < pointer; k++ )	{
 			
+			if( stack[k]->(&integer)<10000 )
+				stack[k] = CopyAP( AP0 );
+			
 			input3 = ADD(input2, stack[k]);
 			FreeAP( input2 );
-			input2 = input3;
+			input2 = CopyAP( input3 );
 			FreeAP( input3 );
 		}
 		
@@ -946,7 +949,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		int l = strlen(A->integer)-strlen(input);
 		
 		for( int z=0; z<l; z++ )
-			++A->integer;
+				++A->integer;
 
 		PackTrailingZeroes( A->integer, length, length);
 		
@@ -1790,20 +1793,14 @@ L MSD(int num)	{
 	return ld;
 }
 
-void PackTrailingZeroes( char* curr_row, L Array_length, L num_zeroes )	{
-	
-	curr_row[Array_length] = 0;
-	
-	while( num_zeroes > 0 )	{
-		
-	
-	--Array_length;
-		
-		curr_row[Array_length] = '0';
-		
-		--num_zeroes;
-	}
+void PackTrailingZeroes( char* curr_row, L length, L num_zeroes )	{
+
+	if( num_zeroes>length )
+		num_zeroes=length;
+	while( num_zeroes-- )
+		curr_row[--length] = '0';
 }
+
 
 char* fill_leading_zeroes( char* str, large num_zeroes )	{
 

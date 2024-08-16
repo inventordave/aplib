@@ -198,7 +198,7 @@ extern int INC( AP A );
 extern int DEC( AP A );
 
 
-extern APL NOP( APL A, APL B );
+extern APL NOP( APL A );
 extern APL ADD( APL A, APL B );
 extern APL ADDP( APL A, APL B, APL P );
 extern APL SUB( APL A, APL B );
