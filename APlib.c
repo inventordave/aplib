@@ -5,6 +5,8 @@
 #include "colour.h"
 #include "aplib.h"
 
+#include "stringy.h"
+
 AP AP0;
 AP AP1;
 APL DefaultPrecision;
