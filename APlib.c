@@ -1066,21 +1066,91 @@ char d( APL A, L index ){
 	return A->integer[index];
 }
 
+// assumes a packed-digit string of 4 bits/digit.
+char* unpack( char* _ ) {
+	
+	L strlen__ = strlen( _ );
+
+	int BITMASK_LOWER = 15;
+	int BITMASK_UPPER = 255-15; //240, which is 11110000 (128+64+32+16)
+	char t;
+	
+	L i, j;
+	char* _U = (char*)calloc( 1, (strlen__>>2) + 1 );
+	for( i=0, j=0; i<strlen__; i++ ) {
+		
+		t = _[i] & BITMASK_LOWER;
+		if( t==10 )	t=0;
+		
+		_U[j++] = t + '0';
+		
+		t = (_[i] & BITMASK_UPPER)>>4;
+		if( t==0 )
+			_U[j++] = '\0';
+		else if( t==10 )
+			_U[j++] = '0';
+
+	}
+
+	if( _U[j-1]!='\0' )
+		_U[j] = '\0';
+
+	return _U;
+}
+
+// assumes an unpacked string of 1 char per decimal digit.
+char* pack( char* _ ) {
+	
+	L strlen__ = strlen( _ );
+
+	char* _P = (char*)calloc( 1, (strlen__>>1) + 2 );
+	char t;
+	
+	L i,j;
+	for( i=0,j=0; i<strlen__-1; i+=2, j++ )	{
+		
+		t = _[i] - '0';
+		if( t==0 )
+			t=10;
+		
+		char nd = (_[i+1] - '0');
+		if( nd==0 )
+			nd=10;
+		
+		t += ( nd << 4 );
+		
+		_P[j] = t;		
+	}
+
+	if( i==strlen__-1 )	{
+
+	t = _[i] - '0';
+	if( t==0 )
+		t=10;
+	
+	_P[j++] = t;
+	
+	}
+	_P[j] = '\0';
+	return _P;
+}
 
 void setDigit( APL A, L index, char d ){
 			
 	A->integer[index] = d;
 }
 
-// 
+
 #define strlen strlen_
-large strlen_(char * str)	{
+L strlen_( char * str )	{
 	
-	large i = 0;
+	L i = 0;
 	while( str[i++] != '\0' )
 		;
 	return i-1;
 }
+
+
 LARGE lenp( APL A ){
 	
 	LARGE length = strlen( A->integer );
@@ -1094,9 +1164,9 @@ LARGE lenp( APL A ){
 }
 
 
-large LSD_OFFSET(char * A)	{
+L LSD_OFFSET(char * A)	{
 
-	large strlen_A = strlen(A);
+	large strlen_A = strlen( A );
 
 	large i;
 	large f = 0;
@@ -1115,12 +1185,11 @@ large LSD_OFFSET(char * A)	{
 			g = 0;
 		}
 
-
 	return f;
 }
 
 #define section substring_
-char * substring_(char * source, large start, large end)	{
+char* substring_(char* source, large start, large end)	{
 
 	char * _ = mem( (end-start)+1 );
 	
@@ -1133,16 +1202,16 @@ char * substring_(char * source, large start, large end)	{
 	return _;
 }
 
-#define ACC_COPY 1
-char * ACCUMULATE( char * apstr )
-{
+
+char* ACCUMULATE( char* apstr ) {
+
 	// init.
-	large apstr_len = strlen( apstr );
+	L strlen_apstr = strlen( apstr );
 	
-	char * _;
+	char* _ = (char*)malloc( strlen_apstr+2 );
 	{
 		#if ACC_COPY==1
-		AP bkp = NewAP( apstr_len, 0 );
+		AP bkp = NewAP( strlen_apstr, 0 );
 		_ = bkp->integer;
 		#else
 		_ = apstr;
@@ -1152,7 +1221,7 @@ char * ACCUMULATE( char * apstr )
 	
 	char c;
 	large i;
-	for( i=apstr_len;i>0;--i )	{
+	for( i=strlen_apstr; i>0; --i )	{
 		
 		c = apstr[i];
 
@@ -1161,26 +1230,28 @@ char * ACCUMULATE( char * apstr )
 			c = '0';
 		else
 		if( c>'9' )	{
-			
+
 			_[i-1] = (apstr[i-1]) + ((c-10)-'0');
 			c = c-10;
 		}
 		
 		if( c>='5' )
 			_[i-1] = apstr[i-1]+1;
-		else // this is A roll-up function, not A roll-down function.
+		else // this is a roll-up function, not a roll-down function.
 			_[i-1] = apstr[i-1];
-
 
 		_[i] = c;
 	}
 	
 	// safetycheck
+
 	if( _[0]>'9' )
 		_[0] = '9';
 	else if( _[0]<'0' )
 		_[0] = '0';
-
+	
+	if(_[0]=='0') // this is digit zero, not the nullchar.
+		++_;
 
 	return _;
 }

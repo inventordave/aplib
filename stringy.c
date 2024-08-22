@@ -6,11 +6,6 @@
 #include "stringy.h"
 
 
-int streq( char* a, char* b ){
-	
-	return !strcmp( a,b );
-}
-
 
 scint CC_NULL = 0;
 
@@ -66,22 +61,6 @@ scint CC_HIDDEN_OFF;
 scint CC_HIDDEN_MASKTYPE_BG;
 scint CC_HIDDEN_MASKTYPE_COLOR; // if selected "colour_h" subsystem needs to know whch color.
 
-
-int str2int(char* input)	{
-	
-	int len = strlen(input), i = 0, result = 0;
-	
-	if (input[0] == '-')
-		i = 1;
-
-	for(; i<len; i++)
-		result = result * 10 + ( input[i] - '0' );
-	
-	if (input[0] == '-')
-		result = 0 - result;
-	
-	return result;
-}
 
 
 // STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
@@ -139,15 +118,30 @@ char* sanitizeStr( char* A )	{
 	
 	return _;
 }
+// SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
+int seq(char *a, char *b){
+return (strcmp(a, b) == 0); }
+
+int streq( char* a, char* b ){	
+	return !strcmp( a,b );
+}
 
 
 // INT -> CSTR
-char * itoad(int v)	{
+char* itoad(int v)	{
 	
 	// snprintf (buff, sizeof(buf), "%d",n); // print int 'n' into the char[] buffer
 	char * _ = (char*)malloc(16);
 	
 	snprintf ( _, 16, "%d", v );
+	
+	return _;
+}
+
+char* int2str(int v)	{
+	
+	char* _ = (char*)malloc( 32+1 );
+	sprintf( _, "%d", v );
 	
 	return _;
 }
@@ -176,14 +170,22 @@ char * cat(int c, char * s, ...)	{
 }
 
 
+int str2int(char* input)	{
+	
+	int len = strlen(input), i = 0, result = 0;
+	
+	if (input[0] == '-')
+		i = 1;
 
- char* int2str(int v)	{
+	for(; i<len; i++)
+		result = result * 10 + ( input[i] - '0' );
 	
-	char* _ = (char*)malloc( 32+1 );
-	sprintf( _, "%d", v );
+	if (input[0] == '-')
+		result = 0 - result;
 	
-	return _;
+	return result;
 }
+
 
 void addnult( char* _, unsigned long long int i ){
 

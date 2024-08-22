@@ -82,7 +82,12 @@ extern int strcmp_( char* LHS, char* RHS );
 #define addnullt( _,i ) _[i]='\0';
 
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
+// Basic string-safety check, removes verboten narrow-chars as defined in function body.
 extern char* sanitizeStr( char* );
+
+char* flipstr(char * in, char * out); // places string at 'in' into 'out' in reverse sequence.
+int seq(char *a, char *b); // actually returns 0 for non-match, 1 for match.
+
 
 // ITOA() FUNCTION "ITOAD()"
 extern char * itoad(int v);
