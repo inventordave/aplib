@@ -13,7 +13,7 @@
 
 
 macroEXP: LABEL (=|==) LITERAL
-MACRO: '#' define|ifndef|ifdef|if (ws)+ macroEXP	"\\"?\n"
+MACRO: '#' define|ifndef|ifdef|if (ws)+ macroEXP	"\\"?\\n"
 
 MACROEND: '#' endif
 "if" (ws)* "(" (ws)* conditional (ws)* ")" (ws)* (STTMNT|STTMNTBLOCK)

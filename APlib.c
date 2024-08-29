@@ -1039,7 +1039,7 @@ L Max2K(AP A)	{
 	int i = 0;
 	loop:
 	if( bin_string[i]=='1' )	{
-		// only necessAry for bit-strings with leAding '0's, which is not AlwAys true for return values of DEC_2_BIN()
+		// only necessary because of bit-strings with leading '0's, which is not always true for return values of DEC_2_BIN()
 		int k = i;
 		for( ++i; i < len_bin_string; i++ )	{
 			
@@ -1217,7 +1217,8 @@ APL DIVBY2( APL A )	{
 		}
 
 		value = A->integer[i] - '0';
-
+#
+		// value>>1 (value/2)
 		int result = floor( value/2 );
 		result += overflow;
 		_->integer[i] = result + '0';
@@ -1580,6 +1581,7 @@ void set_sign( APL A, char sym )	{
 	A->sign = sym;
 	return;
 }
+
 
 void flipSign( APL A )	{
 
