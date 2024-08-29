@@ -5,17 +5,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "aplib.h"
 
-#define string char *
 //#define in getchar
 //#define out putchar
 
 #define byte char
 #define octet unsigned char
-#define large unsigned long long int
-
-#define FALSE 0
-#define TRUE 1
 
 byte getbyte( char* );
 

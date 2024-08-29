@@ -62,7 +62,7 @@ void PrintASCIITable(unsigned char start, unsigned char end)	{
 	
 	if( start>end )	{
 	
-		char temp;
+		unsigned char temp;
 		temp = start;
 		start = end;
 		end = temp;
@@ -146,3 +146,4 @@ char* sanitizeStr( char* A )	{
 	
 	return _;
 }
+

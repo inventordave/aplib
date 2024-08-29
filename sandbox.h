@@ -6,9 +6,10 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
+#include "stringy.h"
 
-char * formatString( char* fmt, ... );
-char* getstring( char* );
+//char * formatString( char* fmt, ... );
+
 LARGE searcharray( char**, char*, LARGE ); 
 
 #endif

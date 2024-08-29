@@ -12,6 +12,7 @@
 
 // CUSTOM INC'S
 #include "aplib.h"
+#include "io.h"
 
 
 // CORE DATA STRUCTURES
@@ -103,65 +104,9 @@ char* IEEE_getFloatBit( char * str, LARGE offset );
 char* IEEE_getDoubleBit( char * str, LARGE offset );
 
 // NOT YET IMPLEMENTED
-void systemEndian(){
+void systemEndian();
 
-	//char unknown = 0;
-	//char le = 1;
-	//char be = 2;
-	
-	// Here is the test using signed int.
-	int iwidth = sizeof( int );
-	printf( "sizeof( int ) reports a width of %d bytes.\n", iwidth );
-	
-	signed int t = -256;
-	char* p = (char*) &t;
-	char* _ = zmem( iwidth );
-	
-	for( int i=0; i<iwidth; i++ ){
-		_[i] = p[i];}
 
-	if( iwidth==8 ){
-		// size(4) le= byte 0, byte 3, be= byte 0, byte 2
-		// size(8) le= byte 1, byte 7, be= byte 0, byte 6
-		
-		if(
-			( (p[2] & 255)==1 ) &&
-			( (p[7] & 255)==128 )
-			
-		)	{ printf( "The local system is little-endian.\n" ); }
-		else if(
-			( (p[0] & 255)==128 ) &&
-			( (p[6] & 255)==1   )
-			
-		)	{ printf( "The local system is big-endian.\n" ); }
-
-		
-		// the others in size(8) should have 0.
-	}
-	else if( iwidth==4 ) {
-		// assuming int has width of 4.
-		// if big-endian, the string would be 10000000 00000000 00000001 00000000 (the MSB of each byte is the left-most bit in each substring ,but the bytes go from
-		// left to right in sequence from base-address.
-		// if little-endian, the string would be 00000000 00000001 00000000 100000000
-		
-		if(
-		( (p[0] & 255)==0 ) &&
-			( (p[1] & 255)==1 ) &&
-			( (p[2] & 255)==0 ) &&
-			( (p[3] & 255)==128 )
-		)	{ printf( "The local system is little-endian.\n" ); }
-		
-		else if(
-		( (p[0] & 255)==128 ) &&
-			( (p[1] & 255)==0 ) &&
-			( (p[2] & 255)==1 ) &&
-			( (p[3] & 255)==0 )
-		)	{ printf( "The local system is big-endian.\n" );}
-		
-		else
-			printf( "Unable to determine the local system endianness.\n" ); }
-
-	return;  }
 
 #endif
 

@@ -5,6 +5,8 @@
 #include "colour.h"
 #include "aplib.h"
 
+#include "stringy.h"
+
 AP AP0;
 AP AP1;
 APL DefaultPrecision;
@@ -78,6 +80,10 @@ L setPart( APL A, char * digits, L part )	{
 
 
 L DIVBY2_PRINT_ROWS = 1;
+
+
+APL RESET0( APL A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); A->sign='+'; return A; }
+APL RESET1( APL A ) { setPartW( A,AP1->integer ); setPartF( A,AP1->integer ); A->sign='-'; return A; }
 
 // CORE BOOLEAN OPERATORS
 APL AND( APL LHS, APL RHS )	{
@@ -248,22 +254,6 @@ APL XOR( APL LHS, APL RHS )	{
 	APL _ = (APL)malloc( sizeof(APP) );
 	_->integer = bstr;
 	return _;
-}
-APL NAND( APL LHS, APL RHS )	{
-	
-	APL C = AND( LHS,RHS );
-	APL _ = NOT( C );
-	free( C );
-	
-	return _;
-}
-
-// NOP (No-Operation). It returns an AP, or AP0, value.
-APL NOP( APL A ){
-
-	if( CmpAP( A, AP0 )==0 )
-		return CopyAP( AP0 );
-	return CopyAP( A );
 }
 
 // CORE ARITHMETIC OPERATORS
@@ -656,23 +646,6 @@ AP DIVP( APL A, APL B, APL P )  {
 	return C;
 }
 
-// SKELETON FNC'S FOR FUTURE OPERATO
-AP CROSS( AP A, AP B )	{
-
-	return CROSSP( A, B, DefaultPrecision );
-}
-AP CROSSP( AP A, AP B, AP P )	{
-	
-	return CopyAP( AP1 );
-}
-AP DOT( AP A, AP B )	{
-
-	return DOTP( A, B, DefaultPrecision );
-}
-AP DOTP( AP A, AP B, AP P )	{
-
-	return CopyAP( AP1 );
-}
 
 char poke( char* in, char* out, L offset ) {
 	
@@ -682,75 +655,6 @@ char poke( char* in, char* out, L offset ) {
 	}while(in[c] != '\0');
 	
 	return in[--c];
-}
-
-
-APL RESET0( APL A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); return A; }
-APL RESET1( APL A ) { setPartW( A,AP1->integer ); setPartF( A,AP0->integer ); return A; }
-
-
-struct _APLIB* Init_APLIB(){
-	
-	// Initialise
-	AP0 = NewAP( 1,0 );
-	AP0->integer[0] = '0';
-	AP1 = NewAP( 1,0 );
-	AP1->integer[0] = '1';
-	DefaultPrecision = AP0; // Sets default precision to indicate the length of the largest string between the 2 operands.
-
-	struct _APLIB* APLIB = (struct _APLIB*)malloc( sizeof(struct _APLIB) );
-	
-	// Add the OPERATORS to the APLIB global.
-	APLIB->NOP = NOP;
-	APLIB->ADD = ADD;
-	APLIB->ADDP = ADDP;
-	APLIB->SUB = SUB;
-	APLIB->SUBP = SUBP;
-	APLIB->MUL = MUL;
-	APLIB->MULP = MULP;
-	APLIB->DIV = DIV;
-	APLIB->DIVP = DIVP;
-	APLIB->DIVBY2 = DIVBY2;
-	APLIB->RECIPROCAL = RECIPROCAL;
-	APLIB->RECIPROCAL2 = RECIPROCAL2;
-	APLIB->RECIPROCALP = RECIPROCALP;
-	APLIB->RECIPROCAL2P = RECIPROCAL2P;
-	APLIB->EXP = EXP;
-	APLIB->CROSS = CROSS;
-	APLIB->CROSSP = CROSSP;
-	APLIB->DOT = DOT;
-	APLIB->DOTP = DOTP;
-	APLIB->AND = AND;
-	APLIB->OR = OR;
-	APLIB->XOR = XOR;
-	APLIB->NOT = NOT;
-	APLIB->NAND = NAND;
-
-	APLIB->INC = INC;
-	APLIB->DEC = DEC;
-
-	APLIB->DSTRING2LARGE = DSTRING2LARGE;
-
-
-	APLIB->RESET0 = RESET0;
-	APLIB->RESET1 = RESET1;
-
-	// Add the 'sign' helpers.
-	APLIB->flipSign = flipSign;
-	APLIB->getSign = getSign;
-	APLIB->setSign = setSign;
-	
-
-	APLIB->ANSI = ANSI;
-	//APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
-	
-	ANSI_init();
-	Init_ANSIVT_CTABLE();
-	ResetAnsiVtCodes(1);
-	colorMode();
-
-	return APLIB;
-	
 }
 
 void setSign( APL A,char S ){
@@ -767,8 +671,6 @@ APL RECIPROCAL2( APL A, APL B ){
 	
 	return RECIPROCAL2P( A,B,DefaultPrecision );
 }
-
-
 APL RECIPROCALP( APL A, APL DefaultPrecision ){
 	
 	return DIV( AP1,A ); 
@@ -851,9 +753,9 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 			flag = 0;
 	} 
 	
-	
-	AP stack[strlen(input)];
-	char binary_stack[length+1];
+	const L strlen_input = strlen(input);
+	AP* stack = (AP*)calloc( sizeof(AP), strlen_input );
+	char binary_stack = (char*)calloc( length+1, 1 );
 
 	length = (L)strlen(input);
 
@@ -1037,7 +939,7 @@ L Max2K(AP A)	{
 	int i = 0;
 	loop:
 	if( bin_string[i]=='1' )	{
-		// only necessAry for bit-strings with leAding '0's, which is not AlwAys true for return values of DEC_2_BIN()
+		// only necessary because of bit-strings with leading '0's, which is not always true for return values of DEC_2_BIN()
 		int k = i;
 		for( ++i; i < len_bin_string; i++ )	{
 			
@@ -1058,19 +960,6 @@ L Max2K(AP A)	{
 	return 0;
 }
 
-// DIGIT-WISE FNCS
-char d( APL A, L index ){
-	
-	return A->integer[index];
-}
-
-
-void setDigit( APL A, L index, char d ){
-			
-	A->integer[index] = d;
-}
-
-// 
 #define strlen strlen_
 large strlen_(char * str)	{
 	
@@ -1078,17 +967,6 @@ large strlen_(char * str)	{
 	while( str[i++] != '\0' )
 		;
 	return i-1;
-}
-LARGE lenp( APL A ){
-	
-	LARGE length = strlen( A->integer );
-	
-	if( A->base==2 )
-	if( A->p   ==0 ){
-		L t = length%8;
-		length += (t==0) ? 0: 8-(t);}		
-
-	return length;
 }
 
 
@@ -1131,57 +1009,6 @@ char * substring_(char * source, large start, large end)	{
 	return _;
 }
 
-#define ACC_COPY 1
-char * ACCUMULATE( char * apstr )
-{
-	// init.
-	large apstr_len = strlen( apstr );
-	
-	char * _;
-	{
-		#if ACC_COPY==1
-		AP bkp = NewAP( apstr_len, 0 );
-		_ = bkp->integer;
-		#else
-		_ = apstr;
-		#endif
-	}
-	_[0] = apstr[0];
-	
-	char c;
-	large i;
-	for( i=apstr_len;i>0;--i )	{
-		
-		c = apstr[i];
-
-		// safetycheck
-		if( c<'0' )
-			c = '0';
-		else
-		if( c>'9' )	{
-			
-			_[i-1] = (apstr[i-1]) + ((c-10)-'0');
-			c = c-10;
-		}
-		
-		if( c>='5' )
-			_[i-1] = apstr[i-1]+1;
-		else // this is A roll-up function, not A roll-down function.
-			_[i-1] = apstr[i-1];
-
-
-		_[i] = c;
-	}
-	
-	// safetycheck
-	if( _[0]>'9' )
-		_[0] = '9';
-	else if( _[0]<'0' )
-		_[0] = '0';
-
-
-	return _;
-}
 
 #define ASCII '0'
 APL DIVBY2( APL A )	{
@@ -1215,7 +1042,8 @@ APL DIVBY2( APL A )	{
 		}
 
 		value = A->integer[i] - '0';
-
+#
+		// value>>1 (value/2)
 		int result = floor( value/2 );
 		result += overflow;
 		_->integer[i] = result + '0';
@@ -1259,55 +1087,6 @@ APL DIVBY2( APL A )	{
 	return _;
 }
 #undef ASCII
-
-APL EXP(APL A, APL B)	{
-	
-	// ResultObject
-	
-	AP _;
-	
-
-	// if B (exp) is negative
-	if( getSign(B)=='-' )	{
-
-		B->sign = '+';
-		
-		AP C = EXP( A,B );
-		
-		AP D = DIVIDE( AP1, C );
-		
-		//FreeAP( &_ );
-
-		B->sign = '-';
-		return D;
-	}
-	
-	// PAST THE NEGATIVE_EXPONENT GATE.
-	
-	// if exponent B=0, Result of A^B := 1. (n exp 0 == 1).
-	if( CmpAP( B,AP0 )==0 )
-		return CopyAP( AP1 );
-	
-	AP D = SUB( B,AP1 );
-	
-	_ = CopyAP(A);
-	
-	while( CmpAP( D,AP0 )==+1 )	{
-		
-		_ = MUL( _,A );
-		
-		//AP temp = CopyAP( &D );
-		//FreeAP( &D );
-		D = SUB( D,AP1 );
-		//FreeAP( &temp );
-
-	}
-	
-	if( getSign(A)=='-' )
-		_->sign='-';
-	
-	return _;
-}
 
 
 // VARIOUS MATH FNCS
@@ -1363,91 +1142,6 @@ APL APLCM( APL A, APL B ){
 	return R1[ DSTRING2LARGE(inc)+1 ];
 }
 */
-
-APL LCM( APL A, APL B )	{
-
-	APL M1;
-	APL M2;
-	#define MAX_ITER 4096
-	APL* R1 = (APL*) calloc( sizeof(APL), MAX_ITER );
-	APL* R2 = (APL*) calloc( sizeof(APL), MAX_ITER );
-	
-	APL AP_MAX_ITER = NewAP( 0,0 );
-	free( AP_MAX_ITER->integer );
-	AP_MAX_ITER->integer = int2str ( MAX_ITER );
-	
-	APL val = ADD( AP1, AP1 ), inc = CopyAP( AP0 ), match = CopyAP( AP0 );
-	
-	M1 = A; M2 = B;
-	
-	while (! CmpAP( match, AP0 ))	{
-		
-		if ( CmpAP( inc, AP_MAX_ITER)>=0 )	{
-			
-			printf( "Overflow error: More thAn %d iterAtions required.\n", MAX_ITER );
-			exit( 1 );
-		}
-		
-		//*(ANSI->c->ANSIVT_CTABLE + (i*4) + 0)
-		*( R1+ str2int(inc->integer)*sizeof(APL) ) = MUL( M1, val ); *(R2+ str2int(inc->integer)*sizeof(APL) ) = MUL( M2,val );
-		
-		//match = lcm_test(inc, R1, R2);
-		match = LCMTESTSTR(inc, R1, R2);
-
-		INC( inc );
-		INC( val );
-	}
-	
-	// print( "The LCM for %d And %d is %d.\n", M1, M2, R1[inc-1]);
-
-	return *( R1 + (str2int(inc->integer)-1)*sizeof(APL) );
-}
-
-#define aptr APL
-APL LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
-	
-	aptr a = NewAPr( 0,0 );
-	aptr b = NewAPr( 0,0 );
-	for (FreeAP(a), a = CopyAP( AP0 ); CmpAP( a,max )<=1; INC(a) )
-		for (FreeAP(b), b = CopyAP( AP0 ); CmpAP( b,max )<=1; INC(b) )
-			if ( CmpAP( R1[str2int(a->integer)],R2[str2int(b->integer)] )==0 )
-				return a;
-			
-	return b;
-}
-
-APL lcm_example(int argc, char **argv)	{
-	
-	/*
-	int flagSet = 0;
-	
-	if((argc == 4) && (argv[3][0] == '-') && (argv[3][1] == 'n'))	{
-		
-		//printf("flag set!\n");
-		flagSet = 1;
-	}
-	*/
-
-	APL a;
-	APL b;
-	a = NewAPr( 0,0 );
-	free( a->integer );
-	a->integer = argv[1];
-	
-	b = NewAPr( 0,0 );
-	free( b->integer );
-	b->integer = argv[2];
-	
-	APL lcm = LCM( a, b );
-	//int gcd = 1; // = GCD(A, B, lcm);
-	
-	FreeAP( a );
-	FreeAP( b );
-	
-	//printf( "lcm := (%d)\ngcd := (%d)\n", lcm, gcd );
-	
-	return lcm;
-}
 
 APL NewAPr( large integer_range, large fractional_range )	{
 
@@ -1524,35 +1218,6 @@ void ClearAP(AP A)	{
 }
 
 
-
-APTR DEC_2_HEX( APTR A,L packed ){
-
-	aplibstdreturn(2);
-}
-APTR HEX_2_DEC( APTR A ){
-
-	aplibstdreturn(10);
-}
-APTR DEC_2_OCTAL( APTR A, L precisiom ){
-
-	aplibstdreturn(8);
-}
-APTR OCTAL_2_DEC( APTR A ){
-
-	aplibstdreturn(10);
-}
-
-APTR BIN_2_OCTAL( APTR A ){
-
-	aplibstdreturn(8);
-}
-APTR OCTAL_2_BIN( APTR A ){
-
-	aplibstdreturn(2);
-}
-
-
-
 void FreeAP( APL A )	{
 	
 	free( A->integer );
@@ -1578,6 +1243,7 @@ void set_sign( APL A, char sym )	{
 	A->sign = sym;
 	return;
 }
+
 
 void flipSign( APL A )	{
 
@@ -1699,40 +1365,39 @@ A = _;
 
 return -1; }
 
+scint CmpAP_ws( APL A, APL B )	{
+	
+	if( A->sign=='+' && B->sign=='-' ) return  1;
+	if( A->sign=='-' && B->sign=='+' ) return -1;
 
-char peek( large c, char* _ ){
-// clearly, char at str[0] is considered digit "1"
-return _[c - 1];}
+	APP copy_A, copy_B;	
+	copy_A.integer = A->integer;
+	copy_B.integer = B->integer;
 
-scint CmpAP( APL A, APL B )	{
+	large i;
+	i=0;
+	while( *(A->integer[i++])=='0' )
+		++copy_A.integer;
 	
+	i=0;
+	while( *(B->integer[i++])=='0' )
+		++copy_B.integer;
 	
-	while( *(A->integer)=='0' )
-		++A->integer;
-	
-	while( *(B->integer)=='0' )
-		++B->integer;
-	
-	large len_A = strlen(A->integer);
-	large len_B = strlen(B->integer);
-	
-	if( len_A<len_B )
-		return -1;
-	
-	if( len_A>len_B )
-		return +1;
-	
+	large len_A = strlen(copy_A.integer);
+	large len_B = strlen(copy_B.integer);
+
+	if( len_A>len_B )	return +1;	
+	if( len_A<len_B )	return -1;
+
 	for( large test=0; test<len_A; test++ )	{
 		
-		if( A->integer[test]>B->integer[test] )
-			return +1;
-		
-		if( A->integer[test]<B->integer[test] )
-			return -1;
+		if( (copy_A.integer[test]) > (copy B.integer[test]) )	return +1;
+		if( (copy_A.integer[test]) < (copy_B.integer[test]) )	return -1;
 	}
 	
-	return 0;
+	return +0;
 }
+
 
 signed int OverFlow( AP C, int result, signed k ) {
   

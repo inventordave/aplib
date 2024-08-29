@@ -8,18 +8,21 @@
 #include <math.h>
 #include <assert.h>
 
+// largest primitive integer type on target systems.
+typedef unsigned long long int large;
+#define L large
+#define LARGE large
+
+
 // CUSTOM INC'S
 #include "lib.h"
 #include "colour.h"
 
 // STATIC DEF'S
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
-#define L LARGE
 
 #define APLS char*
-
 #define scint signed short int
-
 
 
 // CORE DATA STRUCTURES/TYPES
@@ -41,46 +44,48 @@ extern char* BASE2_SYM;
 extern char* BASE16_SYM;
 extern char* ALL_DIGITAL_SYMBOLS;
 
-typedef char*
-OPCODE; // +, -, *, /, ^ (exp), and, or, not...
+// +, -, *, /, etc
+typedef char* opcode;
 
-typedef struct
-lens_	{
 
-	L p;
-	L x;
-}
-lens_;
+// A byte, the smallest primitive integer type on target systems.
+typedef unsigned char small;
 
-#define wp integer
-typedef char small;
 typedef struct
 APP {
+	
 	char* integer;
 	char* fractional;
+
+	// '+' or '-'.
 	char sign;
+	
+	// base2, base10, base16
 	small base;
-	L fp;
+
+	// The offset where a floating-point would be correctly positioned under the assumption that the digit-string (ASCII numeric alphabet glyphs, beginning at ASCII offset 68
+	L fp; 
+	
+	// Level of precision.
 	L p;
 
-	lens_ lens;
-}
-APP;
+} APP;
+
+// AP Value reference. These (pointer) types have to be instantiated.
 typedef APP* APL;
-#define AP APP*
+typedef APP* AP;
 #define ap AP
 
 typedef struct
 APExp { // AP OP AP
 AP A;
 AP B;
-OPCODE OP;
+opcode OP;
 }
 APExp;
 typedef APExp* APE;
 #define ape APE
 #define apex APE
-#define apexp APE
 #define apexpression APE
 
 typedef struct
@@ -88,10 +93,14 @@ APExpC	{ // (AP OP AP) [OP] (AP OP AP)
 	
 	APExp A;
 	APExp B;	
-	OPCODE OP;
+	opcode OP;
 }
 APExpC;
-typedef APExpC* CEX;
+
+
+typedef APExpC* complexexpression;
+typedef APExpC* complex;
+
 #define cex CEX
 #define complex CEX
 #define complexexpression CEX
@@ -104,7 +113,7 @@ APExpC_2	{ // (APExpC OP APExpC)
 	APExpC A;
 	APExpC B;
 	
-	OPCODE OP;
+	opcode OP;
 	
 }
 APExpC_2;
@@ -151,10 +160,11 @@ _APLIB	{
 	
 	L (*DSTRING2LARGE)( APL );
 	
-	L p;
+	L DefaultPrecision;
 	small packed;
-	small defaultBase;
+	small DefaultBase;
 	
+	// The ANSI/VT "colour.h" Interface
 	struct _ANSI* ANSI;
 }
 _APLIB;	
@@ -164,14 +174,6 @@ extern AP AP0;
 extern AP AP1;
 extern AP DefaultPrecision;
 extern large MAX_LENGTH;
-
-//// --- APLIB SETTINGS --- ////
-// APLIB->p
-// 0 means the LHS/RHS operands determine the precision of a result value.
-//APLIB->DefaultBase
-// 2,8,10,16
-//APLIB->packed
-// if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
 
 // INIT()
 extern struct _APLIB* Init_APLIB();
@@ -190,15 +192,19 @@ extern APL CopyAP( APL );
 extern void ClearAP( APL );
 extern void FreeAP( APL );
 
-// EQUALITY READ-OPERATOR
-extern short CmpAP( APL,APL );
+// MODIFYING AP VALUES
+extern L setPart( APL, char*, large part );
+extern L setPartW( APL, char* ); // "integer" part
+extern L setPartF( APL, char* ); // "fractional" part
+#define SignPart 0
+#define PartW 1
+#define PartF 2
+extern APL RESET0( APL );
+extern APL RESET1( APL );
 
 // CORE OPERATORS
 extern int INC( AP A );
 extern int DEC( AP A );
-
-
-extern APL NOP( APL A );
 extern APL ADD( APL A, APL B );
 extern APL ADDP( APL A, APL B, APL P );
 extern APL SUB( APL A, APL B );
@@ -234,46 +240,43 @@ extern APL OR (APL LHS, APL RHS);
 extern APL XOR(APL LHS, APL RHS);
 extern APL NOT(APL v);
 extern APL NAND(APL LHS, APL RHS);
+extern APL NOP( APL A );
+
+// EQUALITY READ-OPERATORS
+extern short CmpAP( APL,APL );
+extern scint CmpAP_abs( APL, APL );
 
 // SIGN ( +,- )
 extern void flipSign( APL );
 extern void setSign( APL,char );
 extern char getSign( APL );
 
-// 1-based peek at [large]-th digit.
+// 1-based peek/poke at [large]-th digit.
 extern char peek( L,char* );
 #define PEEK peek
-
 extern char poke( char*, char*, L offset );
+#define POKE poke
 
-
-
-// QUICK SIGN-IDENTIFICATION FOR NORMAL'D RESULT VALUES.
+// QUICK SIGN-IDENTIFICATION FOR NORMALED RESULT VALUES.
 extern char TT_ADD( APL,APL );
 extern char TT_MUL( APL,APL );
 
 // FOR DIAGNOSTICS, OR JUST FOR THE PRETTY-PRINTER.
 extern large DIVBY2_PRINT_ROWS;
 
-// MODIFYING AP VALUES
-extern L setPart( APL, char*, large part );
-extern L setPartW( APL, char* ); // "integer" part
-extern L setPartF( APL, char* ); // "fractional" part
-#define SignPart 0
-#define PartW 1
-#define PartF 2
-extern APL RESET0( APL );
-extern APL RESET1( APL );
-
 // USEFUL FEATURES
 #define APTR APL
+extern L DSTRING2LARGE( APL );
+extern char* pack( char* );
+extern char* unpack( char* );
+
+// NOT-YET-IMPLEMENTED LCM, GCD FUNCTIONS.
 extern APL GCD( APL,APL, APL lcm );
 extern APL LCM( APL,APL );
 extern APL LCMTESTSTR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
-extern L DSTRING2LARGE( APL );
 
 // BASE CONVERSION
-typedef char* String;
+typedef char* string;
 extern char* DEC_2_BIN( char*,L packed );
 extern char* BIN_2_DEC( char* );
 extern APTR DEC_2_HEX( APTR,L packed );
@@ -291,8 +294,7 @@ extern APTR BIN_2_OCTAL( APTR );
 extern LARGE lenp( APL );
 
 
-
-#define aplibstdreturn(b) APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; return _;
+#define aplibstdreturn(b) { APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; _->sign='+'; return _; }
 
 // 2k-BOUNDARY
 extern L Max2K(APL);
@@ -304,16 +306,16 @@ extern L MSD( int );
 extern void PackTrailingZeroes( char* cr, L alength, L n0 );
 extern string PackLeadingZeroes( char* str, L n0 );
 
+
 extern signed OverFlow( APL, int result, signed k );
 
 // ENCODE/DECODE
-extern L charp2L(char* input);
-extern char* L2charp( L v );
+extern L CharP2L(char* input);
+extern char* L2CharP( L v );
 
 // APLIB API SUPPORT FUNCTIONS
-extern char** GetAPSymbols();
-// 	GetAPSymbols DEFS.
 #include "aplib_sym.h"
+extern char** GetAPSymbols();
 
 #endif
 

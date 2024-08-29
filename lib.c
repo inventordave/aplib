@@ -62,9 +62,7 @@ char* sanitizeStr( char* A )	{
 
 */
 
-// SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
-int seq(char *a, char *b){
-return (strcmp(a, b) == 0); }
+
 
 
 // PAUSE: Simply pauses interactivity in console-mode until a key is pressed.

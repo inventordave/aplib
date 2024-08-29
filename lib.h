@@ -6,6 +6,7 @@
 #define DAVELIB_HEADER_FILE
 
 // INC'S
+#include <stdbool.h>
 #include <string.h>
 #include "io.h"
 
@@ -20,17 +21,9 @@
 #define RIGHT 79
 
 // CUSTOM TYPES
-#define large unsigned long long int
-#define LARGE large
-#define bool int
-#define statusCode int
-
-#define ascii ASCII
-#define E_ASCII ascii
-#define e_ascii E_ASCII
-
+#define ascii '0'
 // 'TOGGLE'
-#define TOGGLE char
+#define TOGGLE bool
 #define toggle TOGGLE
 
 toggle fliptoggle( toggle* t );

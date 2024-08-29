@@ -8,36 +8,32 @@
 #include "aplib.h"
 #include "sandbox.h"
 
-#define op OP
+
 
 // QUICKDRAW
-char* opcode;
-
-// C needs to be pre-allocated with zeroes, or a starting null to the correct length.
-// in an ADD op, C will be len( longest digit-string between A and B ) + 1.
-
+#define op OP
 #define ap AP
 APL A;
 APL B;
 APL C;
 
-
 LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
 	for( LARGE i=0; i<arraysize; i++ )
-		if( !strcmp( p2p2[i],_ ) )
+		if( p2p2[i][0] == '\0' )
+			break;
+		else if( !strcmp( p2p2[i],_ ) )
 			return i;
 		
-	return 0;
-	
-}
+	return arraysize;
 
+}
 
 APL OP( char* opcode, APL A, APL B ){
 
 	#define digit char
-
-	LARGE symbol = searcharray( getaplibsymbols(), opcode );	
+	scint equalityAB = CmpAP( A,B );
+	LARGE symbol = searcharray( GetAPSymbols(), opcode, 65535 );	
 	AP P = DefaultPrecision;
 	
 	switch( symbol )	{
@@ -133,7 +129,7 @@ APL OP( char* opcode, APL A, APL B ){
 			break;
 			
 		case OP_NOT:
-			return NOT( A,AP0) );
+			return NOT( A );
 		
 		case OP_NAND:
 			return NAND( A,B );
@@ -153,42 +149,51 @@ int main(int argc, char **argv)	{
 	if( argc<3 )
 		exit( printf( "Not enough command-line args passed. You should pass an Operator, then 2 Integer values, with at least 1 space between each of the 3 args.\n") );
 
-	init_();
+	//struct _APLIB* APLIB = Init_APLIB();
+
+	// not using the APLIB object yet, but I need to initialise the aplib-local globals, AP0 and AP1
+	struct _APLIB*  APLIB = Init_APLIB();
+
+	if( APLIB == NULL )
+		printf( "APLIB did not initialise!\n" );
 	
 	ANSI_init();
 	Init_ANSIVT_CTABLE();
 	ResetAnsiVtCodes(1);
 	colorMode();
-	ANSI->SetVT( "black", "lightblue" ); //fg and bg colour.
+	ANSI->c->fg( getstring( "green" ) );
+	//ANSI->c->bg( getstring( "black" ) ); //fg and bg colour.
 
 	APL (*OP)( APL A, APL B );
-	int OPCODE = 0;
+	opcode OPCODE = 0;
 	
 	// archaic.
 	//printf( "%s", FG_BRIGHT_WHITE );
 	
 	if( seq(argv[1], "*") || seq(argv[1],"MUL") || seq(argv[1],"MULTIPLY") )
 	{OP = MUL;
-	OPCODE = 1;}
+	OPCODE = "MUL";}
 	else
 	if( seq(argv[1], "/") || seq(argv[1], "DIV") || seq(argv[1], "DIVIDE") )
 	{OP = DIV;
-	OPCODE = 2;}
+	OPCODE = "DIV";}
 	else
 	if( seq(argv[1], "+") || seq(argv[1], "ADD") )
 	{OP = ADD;
-	OPCODE = 3;}
+	OPCODE = "ADD";}
 	else
 	if( seq(argv[1], "-") || seq(argv[1], "SUB") || seq(argv[1], "SUBTRACT") )
 	{OP = SUB;
-	OPCODE = 4;}
+	OPCODE = "SUB";}
 	else
 	if( seq(argv[1], "E") || seq(argv[1], "EXP") || seq(argv[1], "EXPONENT") )
 	{OP = EXP;
-	OPCODE = 5;}
+	OPCODE = "EXP";}
 	else
-	{OP = NOP;
-	OPCODE = 0;}
+	{OP = NULL;
+	OPCODE = "NOP";}
+	
+	printf( "OPCODE set to '%s'.\n", OPCODE );
 	
 	AP A = NewAP( strlen(argv[2]), 0 );
 	setPartW( A,argv[2] );
@@ -204,8 +209,19 @@ int main(int argc, char **argv)	{
 	
 	AP C = OP( A,B );
 	
-	printf( "%sResult:\nA='%s'\nOPCODE(%d)\nB='%s'\n==\nC='%s'\n", FG_BRIGHT_YELLOW, A->integer, OPCODE, B->integer, C->integer );
+	char* fractpart = (char*)malloc( strlen(C->fractional) + 1 );
 	
+	if( cmp_dstr( C->fractional, AP0->integer ) )	{
+	
+		strcpy( fractpart, "." );
+		strcat( fractpart, C->fractional );
+	}
+	else
+		strcpy( fractpart, "" );
+	
+	printf( "Result:\nA='%s'\nOPCODE(%s)\nB='%s'\n==\nC='%s%s'\n", A->integer, OPCODE, B->integer, C->integer, fractpart );
+	
+	ANSI->SetVT( getstring( "black" ), getstring( "white" ) );
 	return 0;
 }
 
@@ -248,6 +264,8 @@ char* nextArg( char* type, va_list args )	{
 }
 
 //sprintf( str, ... )
+
+/**
 char* formatString( char* fmt, ... )	{
 
 	va_list args;
@@ -296,7 +314,7 @@ char* formatString( char* fmt, ... )	{
 
 	if( mode==0 ){
 		mode=1;
-		va_start( args, refCount+1 );
+		va_start( args, fmt );
 		free( _ );
 		_ = mem( i*10 );
 		goto loop;}
@@ -306,4 +324,7 @@ char* formatString( char* fmt, ... )	{
 	_ = (char*)realloc( (void*)_,i );
 
 	return _; }
+*/
+
+
 

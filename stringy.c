@@ -6,11 +6,6 @@
 #include "stringy.h"
 
 
-int streq( char* a, char* b ){
-	
-	return !strcmp( a,b );
-}
-
 
 scint CC_NULL = 0;
 
@@ -66,22 +61,6 @@ scint CC_HIDDEN_OFF;
 scint CC_HIDDEN_MASKTYPE_BG;
 scint CC_HIDDEN_MASKTYPE_COLOR; // if selected "colour_h" subsystem needs to know whch color.
 
-
-int str2int(char* input)	{
-	
-	int len = strlen(input), i = 0, result = 0;
-	
-	if (input[0] == '-')
-		i = 1;
-
-	for(; i<len; i++)
-		result = result * 10 + ( input[i] - '0' );
-	
-	if (input[0] == '-')
-		result = 0 - result;
-	
-	return result;
-}
 
 
 // STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
@@ -139,15 +118,140 @@ char* sanitizeStr( char* A )	{
 	
 	return _;
 }
+// SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
+int seq(char *a, char *b){
+return streq( a,b );
+}
+
+int streq( char* a, char* b ){
+
+	char _a = 0, _b = 0;
+	if( a==(char*)0 ){
+		a = getstring( "\0" );
+		_a = 1;
+	}
+	if( b==(char*)0 ){
+		b = getstring( "\0" );
+		_b = 1;
+	}
+	
+	int _ = !strcmp( a,b );
+	
+	if( _a ) free(a);
+	if( _b ) free(b);
+	return _;
+}
+
+
+int cmp_dstr( char* a, char* b )	{
+
+	if( a == NULL )
+		printf( "Warning. Arg 'a' in cmp_dstr (\"%s\":%d) is a NULL ptr.\n", __FILE__, __LINE__ );
+	if( b == NULL )
+		printf( "Warning. Arg 'b' in cmp_dstr (\"%s\":%d) is a NULL ptr.\n", __FILE__, __LINE__ );
+	
+	fflush( stdout );
+	
+	int i = 0;
+	
+	while( a[i++]=='0' )
+		++a;
+	
+	i = 0;
+	while( b[i++]=='0' )
+		++b;
+	
+	int len_a = strlen( a );
+	int len_b = strlen( b );
+	
+	if( len_a<len_b )
+		return -1;
+
+	if( len_a>len_b )
+		return +1;
+
+	for( int test=0; test<len_a; test++ )
+		if( a[test]>b[test] )
+			return +1;
+		else if( a[test]<b[test] )
+			return -1;
+	
+	return 0;	
+}
+
+// EXTRA FNCS
+void PrintASCIITable(char start, char end)	{
+
+	
+	if( (start<32 || end<32) )	{
+		
+		printf("A scurrilous attempt was made to print the non-printable ascii characters below codepoint 32. Or even those new-fangled extended-ascii characters above codepoint 127. This is an outrage, and the function is immediately returning!");
+		return;
+	}
+	
+	if( start>end )	{
+	
+		char temp;
+		temp = start;
+		start = end;
+		end = temp;
+	}
+	
+	for( char i=start; ; i+=5 )	{
+		
+		if( i>end )
+		i = end;
+		
+		char j=i;
+		signed int k = (end-i);
+		
+		if( k>4 )
+		k=4;
+		
+		switch(k)
+		{
+			case 4:
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
+			case 3:
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
+			case 2:
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
+			case 1:
+			printf("[%d]:=(%c)\t", j, j);
+			++j;
+			case 0:
+			printf("[%d]:=(%c)", j, j);
+			default:
+			printf( "\n" );
+			break;
+		}
+		
+		if(i==end)
+		return;
+	}
+	
+	return;
+}
 
 
 // INT -> CSTR
-char * itoad(int v)	{
+char* itoad(int v)	{
 	
 	// snprintf (buff, sizeof(buf), "%d",n); // print int 'n' into the char[] buffer
 	char * _ = (char*)malloc(16);
 	
 	snprintf ( _, 16, "%d", v );
+	
+	return _;
+}
+
+char* int2str(int v)	{
+	
+	char* _ = (char*)malloc( (sizeof(int)*8)+1 );
+	sprintf( _, "%d", v );
 	
 	return _;
 }
@@ -164,7 +268,7 @@ char * cat(int c, char * s, ...)	{
 	
 	strcpy(_, s);
 
-	va_start(ap, c);
+	va_start(ap, s);
 	for(scint i=0; i<c; i++)	{
 	
 		_ = safecat(_, (char *)va_arg(ap, char*));
@@ -175,15 +279,34 @@ char * cat(int c, char * s, ...)	{
 	return _;
 }
 
-
-
- char* int2str(int v)	{
+char* int2str(int v)	{
 	
-	char* _ = (char*)malloc( 32+1 );
+	char* _ = (char*)malloc( (sizeof(int)*8)+1 );
 	sprintf( _, "%d", v );
 	
 	return _;
 }
+
+#include <limits.h>
+int str2int(char* input)	{
+	
+	if( cmp_dstr( int2str(INT_MAX), input )<0 )
+		return 0; // The input string represents a number too large!
+
+	int len = strlen(input), i = 0, result = 0;
+	
+	if (input[0] == '-')
+		i = 1;
+
+	for(; i<len; i++)
+		result = result * 10 + ( input[i] - '0' );
+	
+	if (input[0] == '-')
+		result = 0 - result;
+	
+	return result;
+}
+
 
 void addnult( char* _, unsigned long long int i ){
 

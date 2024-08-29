@@ -42,7 +42,7 @@ if( c==" )
 		else
 			inside_q_str=0
 	else
-		; // vanilla single charpoint pattern
+		; // vanilla single CharPoint pattern
 		literal_pattern .= "
 
 if( c==[ )
