@@ -116,62 +116,6 @@ signed int getOptions( int* argc, char** argv )	{
 }
 
 
-// EXTRA FNCS
-void PrintASCIITable(char start, char end)	{
-
-	
-	if( (start<32 || end<32) )	{
-		
-		printf("A scurrilous attempt was made to print the non-printable ascii characters below codepoint 32. Or even those new-fangled extended-ascii characters above codepoint 127. This is an outrage, and the function is immediately returning!");
-		return;
-	}
-	
-	if( start>end )	{
-	
-		char temp;
-		temp = start;
-		start = end;
-		end = temp;
-	}
-	
-	for( char i=start; ; i+=5 )	{
-		
-		if( i>end )
-		i = end;
-		
-		char j=i;
-		signed int k = (end-i);
-		
-		if( k>4 )
-		k=4;
-		
-		switch(k)
-		{
-			case 4:
-			printf("[%d]:=(%c)\t", j, j);
-			++j;
-			case 3:
-			printf("[%d]:=(%c)\t", j, j);
-			++j;
-			case 2:
-			printf("[%d]:=(%c)\t", j, j);
-			++j;
-			case 1:
-			printf("[%d]:=(%c)\t", j, j);
-			++j;
-			case 0:
-			printf("[%d]:=(%c)", j, j);
-			default:
-			NL;
-			break;
-		}
-		
-		if(i==end)
-		return;
-	}
-	
-	return;
-}
 
 #endif
 

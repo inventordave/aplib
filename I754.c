@@ -23,6 +23,8 @@ struct i754 * initi754()	{
 }
 
 
+
+
 // BITWISE FNCS //
 
 // THE FUNCTION BELOW ADDS 1 TO A BINARY STRING

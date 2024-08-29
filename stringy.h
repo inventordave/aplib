@@ -65,15 +65,20 @@ extern scint CC_HIDDEN_OFF;
 extern scint CC_HIDDEN_MASKTYPE_BG;
 extern scint CC_HIDDEN_MASKTYPE_COLOR; // if selected "colour_h" subsystem needs to know whch color.
 
+void PrintASCIITable(char start, char end);
 
 
 // SAFE-CONCATENATE
-extern char * safecat(char* s, char* rhs);
+extern char* safecat(char* s, char* rhs);
 
+extern char* int2str(int v);
 extern int str2int(char*);
 
 // SUGAR
 extern int streq( char*,char* ); // returns true (1) if the 2 c-strings match, as it should...
+int seq(char *a, char *b); // actually returns 0 for non-match, 1 for match.
+
+extern scint cmp_dstr( char*, char* );
 
 #define strcmp strcmp_
 extern int strcmp_( char* LHS, char* RHS );
@@ -81,25 +86,26 @@ extern int strcmp_( char* LHS, char* RHS );
 // ADD NULL-TERMINATOR TO CHAR*, REQUIRES INDEX
 #define addnullt( _,i ) _[i]='\0';
 
-// SANITIZESTR: General method for pre-processing of an input c-string (safety).
 // Basic string-safety check, removes verboten narrow-chars as defined in function body.
 extern char* sanitizeStr( char* );
 
-char* flipstr(char * in, char * out); // places string at 'in' into 'out' in reverse sequence.
-int seq(char *a, char *b); // actually returns 0 for non-match, 1 for match.
+// places string at 'in' into 'out' in reverse sequence.
+char* flipstr(char* in, char* out); 
+
+
 
 
 // ITOA() FUNCTION "ITOAD()"
-extern char * itoad(int v);
+extern char* itoad(int v);
 
 // CONCATENATE (VARIADIC FNC)
-extern char * cat(int c, char * s, ...);
+extern char* cat(int c, char * s, ...);
 
 
 // STRING-SAFETY METHODS //
 
 extern char* getstring( char* in );
-extern char* int2str(int v);
+
 extern void addnult( char*, unsigned long long int );
 
 #endif

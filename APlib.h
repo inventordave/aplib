@@ -8,6 +8,12 @@
 #include <math.h>
 #include <assert.h>
 
+// largest primitive integer type on target systems.
+typedef unsigned long long int large;
+#define L large
+#define LARGE large
+
+
 // CUSTOM INC'S
 #include "lib.h"
 #include "colour.h"
@@ -15,8 +21,6 @@
 // STATIC DEF'S
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
-
-#define L LARGE
 #define APLS char*
 #define scint signed short int
 
@@ -43,8 +47,6 @@ extern char* ALL_DIGITAL_SYMBOLS;
 // +, -, *, /, etc
 typedef char* opcode;
 
-// largest primitive integer type on target systems.
-typedef unsigned long long int large;
 
 // A byte, the smallest primitive integer type on target systems.
 typedef unsigned char small;
@@ -173,83 +175,6 @@ extern AP AP1;
 extern AP DefaultPrecision;
 extern large MAX_LENGTH;
 
-//// --- APLIB SETTINGS --- ////
-// APLIB->p
-// 0 means the LHS/RHS operands determine the precision of a result value.
-//APLIB->DefaultBase
-// 2,8,10,16
-//APLIB->packed
-// if set, each digit is stored in 4 bits instead of 8, meaning each byte can store 2 digits instead of 1. the strings would need to be unpacked, though.
-
-// assumes a packed-digit string of 4 bits/digit.
-char* unpack( char* _ ) {
-	
-	L strlen__ = strlen( _ );
-
-	int BITMASK_LOWER = 15;
-	int BITMASK_UPPER = 255-15; //240, which is 11110000 (128+64+32+16)
-	char t;
-	
-	L i, j;
-	char* _U = (char*)calloc( 1, (strlen__>>2) + 1 );
-	for( i=0, j=0; i<strlen__; i++ ) {
-		
-		t = _[i] & BITMASK_LOWER;
-		if( t==10 )	t=0;
-		
-		_U[j++] = t + '0';
-		
-		t = (_[i] & BITMASK_UPPER)>>4;
-		if( t==0 )
-			_U[j++] = '\0';
-		else if( t==10 )
-			_U[j++] = '0';
-
-	}
-
-	if( _U[j-1]!='\0' )
-		_U[j] = '\0';
-
-	return _U;
-}
-
-// assumes an unpacked string of 1 char per decimal digit.
-char* pack( char* _ ) {
-	
-	L strlen__ = strlen( _ );
-
-	char* _P = (char*)calloc( 1, (strlen__>>1) + 2 );
-	char t;
-	
-	L i,j;
-	for( i=0,j=0; i<strlen__-1; i+=2, j++ )	{
-		
-		t = _[i] - '0';
-		if( t==0 )
-			t=10;
-		
-		char nd = (_[i+1] - '0');
-		if( nd==0 )
-			nd=10;
-		
-		t += ( nd << 4 );
-		
-		_P[j] = t;		
-	}
-
-	if( i==strlen__-1 )	{
-
-	t = _[i] - '0';
-	if( t==0 )
-		t=10;
-	
-	_P[j++] = t;
-	
-	}
-	_P[j] = '\0';
-	return _P;
-}
-
 // INIT()
 extern struct _APLIB* Init_APLIB();
 
@@ -267,15 +192,19 @@ extern APL CopyAP( APL );
 extern void ClearAP( APL );
 extern void FreeAP( APL );
 
-// EQUALITY READ-OPERATOR
-extern short CmpAP( APL,APL );
+// MODIFYING AP VALUES
+extern L setPart( APL, char*, large part );
+extern L setPartW( APL, char* ); // "integer" part
+extern L setPartF( APL, char* ); // "fractional" part
+#define SignPart 0
+#define PartW 1
+#define PartF 2
+extern APL RESET0( APL );
+extern APL RESET1( APL );
 
 // CORE OPERATORS
 extern int INC( AP A );
 extern int DEC( AP A );
-
-
-extern APL NOP( APL A );
 extern APL ADD( APL A, APL B );
 extern APL ADDP( APL A, APL B, APL P );
 extern APL SUB( APL A, APL B );
@@ -311,49 +240,43 @@ extern APL OR (APL LHS, APL RHS);
 extern APL XOR(APL LHS, APL RHS);
 extern APL NOT(APL v);
 extern APL NAND(APL LHS, APL RHS);
+extern APL NOP( APL A );
+
+// EQUALITY READ-OPERATORS
+extern short CmpAP( APL,APL );
+extern scint CmpAP_abs( APL, APL );
 
 // SIGN ( +,- )
 extern void flipSign( APL );
 extern void setSign( APL,char );
 extern char getSign( APL );
 
-// 1-based peek at [large]-th digit.
+// 1-based peek/poke at [large]-th digit.
 extern char peek( L,char* );
 #define PEEK peek
-
 extern char poke( char*, char*, L offset );
+#define POKE poke
 
-
-
-// QUICK SIGN-IDENTIFICATION FOR NORMAL'D RESULT VALUES.
+// QUICK SIGN-IDENTIFICATION FOR NORMALED RESULT VALUES.
 extern char TT_ADD( APL,APL );
 extern char TT_MUL( APL,APL );
 
 // FOR DIAGNOSTICS, OR JUST FOR THE PRETTY-PRINTER.
 extern large DIVBY2_PRINT_ROWS;
 
-// MODIFYING AP VALUES
-extern L setPart( APL, char*, large part );
-extern L setPartW( APL, char* ); // "integer" part
-extern L setPartF( APL, char* ); // "fractional" part
-#define SignPart 0
-#define PartW 1
-#define PartF 2
-extern APL RESET0( APL );
-extern APL RESET1( APL );
-
 // USEFUL FEATURES
 #define APTR APL
-extern APL GCD( APL,APL, APL lcm );
-extern APL LCM( APL,APL );
-extern APL LCMTESTSTR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
 extern L DSTRING2LARGE( APL );
 extern char* pack( char* );
 extern char* unpack( char* );
 
+// NOT-YET-IMPLEMENTED LCM, GCD FUNCTIONS.
+extern APL GCD( APL,APL, APL lcm );
+extern APL LCM( APL,APL );
+extern APL LCMTESTSTR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
 
 // BASE CONVERSION
-typedef char* String;
+typedef char* string;
 extern char* DEC_2_BIN( char*,L packed );
 extern char* BIN_2_DEC( char* );
 extern APTR DEC_2_HEX( APTR,L packed );
@@ -371,7 +294,6 @@ extern APTR BIN_2_OCTAL( APTR );
 extern LARGE lenp( APL );
 
 
-
 #define aplibstdreturn(b) { APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; _->sign='+'; return _; }
 
 // 2k-BOUNDARY
@@ -384,6 +306,7 @@ extern L MSD( int );
 extern void PackTrailingZeroes( char* cr, L alength, L n0 );
 extern string PackLeadingZeroes( char* str, L n0 );
 
+
 extern signed OverFlow( APL, int result, signed k );
 
 // ENCODE/DECODE
@@ -391,9 +314,8 @@ extern L CharP2L(char* input);
 extern char* L2CharP( L v );
 
 // APLIB API SUPPORT FUNCTIONS
-extern char** GetAPSymbols();
-// 	GetAPSymbols DEFS.
 #include "aplib_sym.h"
+extern char** GetAPSymbols();
 
 #endif
 

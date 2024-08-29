@@ -1,3 +1,6 @@
+#ifndef DAVELIB_APLIB_SYM_H
+#define DAVELIB_APLIB_SYM_H
+
 #define DELIMITERS 999
 #define OP_UNKNOWN 0
 #define OP_AND 1
@@ -21,8 +24,8 @@
 #define OP_LT 29
 #define OP_CARAT 30
 #define OP_RATIO 31
-#define OP_RATIO_ASSIGN 32
-#define OP_RATIO_ISEQUALTO 33
+#define OP_MODULO_ASSIGN 32
+#define OP_MODULO_ISEQUALTO 33
 #define OP_INCREMENT 34
 #define OP_DECREMENT 35
 #define OP_ISDEFINEDAS 36
@@ -40,3 +43,9 @@
 
 #define OP_NORMAL 48
 #define OP_ISNOT 49
+#define OP_MUL 50
+#define OP_DIV 51
+#define OP_MODULO 52
+
+#endif
+

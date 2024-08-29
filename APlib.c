@@ -263,12 +263,28 @@ APL NAND( APL LHS, APL RHS )	{
 // NOP (No-Operation). It returns an AP, or AP0, value.
 APL NOP( APL A ){
 
-	if( CmpAP( A, AP0 )==0 )
-		return CopyAP( AP0 );
 	return CopyAP( A );
 }
 
 // CORE ARITHMETIC OPERATORS
+
+int INC( AP A ){
+
+AP _;
+_ = ADD( A,AP1 );
+free( A );
+A = _;
+
+return 1; }
+int DEC( AP A ){
+
+AP _;
+_ = SUB( A,AP1 );
+free( A );
+A = _;
+
+return -1; }
+
 APL ADD( APL A, APL B )	{ return ADDP( A, B, DefaultPrecision ); }
 APL ADDP( APL A, APL B, AP P )	{
 	
@@ -363,18 +379,18 @@ APL ADDP( APL A, APL B, AP P )	{
 	return C;
 }
 AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
-APL SUBP( APL A, APL B, AP P )	{
+AP SUBP( APL A, APL B, AP P )	{
 	
 
-	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(A,B)>=1) ){
+	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(A,B)>=0) ){
 
 		int i, j, k, valA, valB, valC;
 		APL C = NewAPr(strlen(A->integer),0);
-		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>0; i--, j--, k--){
+		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>=0; i--, j--, k--){
 		
 			if(i>=0)
 				valA = A->integer[i] - '0';
-			else
+			else 
 				valA = 0;
 			
 			if(j>=0)
@@ -393,7 +409,8 @@ APL SUBP( APL A, APL B, AP P )	{
 			}
 
 			int value = valA - valB;
-			C->integer[k] = '0' + value; }
+			C->integer[k] = '0' + value;
+		}
 		
 		int len = strlen(C->integer);
 		char* _ = getstring( C->integer );
@@ -506,12 +523,9 @@ AP DIV( APL A, APL B )	{
 AP DIVP( APL A, APL B, APL P )  {
 
 	int fractional = 0;
-	int L0 = 1;
-	
-	//char * integer;
-	//char * fractional;
-	
+
 	AP C = NewAP(0, 0);
+	char* Cc = C->integer;
 	large offset = strlen(B->integer) - 1;
 	AP Remainder = NewAP( strlen(B->integer) , 0 );
 	
@@ -521,10 +535,10 @@ AP DIVP( APL A, APL B, APL P )  {
 	
 	Remainder->integer[i] = '\0';
 	
-	AP Dropdown = NewAP(1, 0);
+	AP Dropdown = CopyAP( AP0 );
 	
-	AP v = NewAP(1, 0); v->integer[0] = '0';
-	AP inc = NewAP(1, 0); inc->integer[0] = '1';
+	AP v = CopyAP( AP0 );
+	AP inc = CopyAP( AP1 );
 	
 	AP temp;
 	AP v2;
@@ -540,116 +554,121 @@ AP DIVP( APL A, APL B, APL P )  {
 	
 	int LOOPS = 0;
 	
-	int MAX_LOOPS = 100;
+	int MAX_LOOPS = 50;
 
 	//int count = 0;
+	
+	int loopCount = strlen_A;
 	loop:
-	while( offset<strlen_A )	{
+	while( offset<loopCount )	{
 		
 		++LOOPS;
 		if( LOOPS>MAX_LOOPS )
 			goto maxiterations;
 		
-		v->integer[0] = '0';
+		v->integer[0] = '1';
 		
 		temp = MUL( B,v );
 		while( CmpAP( temp,Remainder ) < 1 )	{
 			
-			v2 = ADD(v, inc);
-			free( v->integer );
-			v = CopyAP(v2);
-			free( v2->integer );
+			FreeAP( temp );
 			
-			free( temp->integer );
+			v2 = ADD(v, inc);
+			FreeAP( v );
+			v = CopyAP(v2);
+			FreeAP( v2 );
+
 			temp = MUL( B,v );
 		}
+		FreeAP( temp );
 		
 		v2 = SUB(v, inc);
-		free( v->integer );
+		FreeAP( v );
 		v = CopyAP(v2);
-		free( v2->integer );
+		FreeAP( v2 );
 		
 		result = MUL( B,v );
 		v2 = SUB(Remainder, result);
-		free( result->integer );
-		free( Remainder->integer );
+		FreeAP( result );
+		FreeAP( Remainder );
 		Remainder = CopyAP(v2);
-		free( v2->integer );
+		FreeAP( v2 );
 
-		
-		#define CONCAT(__A,__B) strcat(__A->integer, __B->integer)
+		#define CONCAT(__A,__B) strcat(__A, __B)
 		
 		//printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
 		//++count;
-		CONCAT( C,v );
-		
-		if( !fractional )
-			if( L0==1 )	{
-
-				if( v->integer[0]=='0' )	{
-					
-						++C->integer;
-				}
-				else
-					L0=0;
-			}
-		
-		if( Remainder->integer[0] > '0' )
-			CONCAT( Remainder,Dropdown );
-		else	
-		if( offset != (strlen(B->integer)-1) )
-			Remainder->integer[0] = Dropdown->integer[0];
+		CONCAT( Cc,v->integer );
 
 		if( fractional )	{
-			
-			if( CmpAP( Remainder,AP0 ) == 0 )	{
-				break;
-			}
+			Dropdown->integer[0] = '0';
 		}
-		else	{
+		
+		if( !fractional )	{
 
 			if( (offset+1)<strlen_A )
-				
 				Dropdown->integer[0] = A->integer[offset+1];
-			else
+			else	{
 				Dropdown->integer[0] = '0';
+			}
 		}
+		
+		CONCAT( Remainder->integer,Dropdown->integer );
 
+/*
+		#define report printf
+		int r;
+		if( (r = cmp_dstr( Remainder->integer, B->integer )) >=0 )	{
+			
+			report( "Remainder = %s\nDivisor = %s\nLOOPS = %d\nC = %s.%s\n", Remainder->integer, B->integer ,LOOPS, C->integer, C->fractional );
+			fflush( stdout );
+			char ch;
+			if( (ch = getchar())=='q' )
+				exit(0);
+		}
+*/
 		++offset;
 	}
 	
 	
 	// fractional overflow
-	
-	if( fractional==0 )	{
+	if( !fractional )	{
 		
-		fractional = 1;
+		if( CmpAP( Remainder, AP0 )!=0 )	{
 
-		if( CmpAP( C,AP0 )==0 )
-			--C->integer;
-		
-		//integer = strdup( C->integer );
+			fractional = 1;
+			Cc[ strlen(Cc) ] = '\0';
+			Cc = C->fractional;
+			//offset = 0;
+			loopCount = MAX_LOOPS+1;
+			goto loop;
+		}
 	}
 	
-	offset = 0;
-	Dropdown->integer[0] = '0';
-	
-	if( CmpAP( Remainder,AP0 ) == 1 )
-		goto loop;
 	
 	maxiterations: // Upper-bound for precision of calculation reached.
 	// RESULT COMPUTED.
+	Cc[ strlen(Cc) ] = '\0';
 	
-	//printf( "The fixed-point for the Answer is positioned to the right of digit %d.\n", (int) strlen_A-1 );
+	if( cmp_dstr( C->integer, AP0->integer ) )
+		printf( "%s", C->integer );
+	else
+		printf( "0" );
 	
-	for( i=0; i<(strlen_A-1); i++ )
+	if( cmp_dstr( C->fractional, AP0->integer ) )
+		printf( ".%s", C->fractional );
+	NL;
+	
+	
+	/**
+	for( i=0; i<strlen_A; i++ )
 		printf( "%c", C->integer[i] );
 	
 	printf( "." );
 	
 	for( ; i<strlen(C->integer); i++ )	
 		printf( "%c", C->integer[i] );
-	
+	*/
 	NL;
 	
 	printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
@@ -657,6 +676,7 @@ AP DIVP( APL A, APL B, APL P )  {
 	
 	return C;
 }
+
 
 // SKELETON FNC'S FOR FUTURE OPERATO
 AP CROSS( AP A, AP B )	{
@@ -782,7 +802,7 @@ APL RECIPROCAL2P( APL A,APL B,APL ){
 }
 
 // BASE CONVERSION FNCS
-char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (decimal) string.
+char* BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (decimal) string.
 
 */
 
@@ -819,7 +839,9 @@ char * BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (dec
 	
 	return result;
 }
-char * DEC_2_BIN(char*  input, L packed)	{
+
+// The function below (DEC_2_BIN) is not finished. I forgot about it, because I keep getting drunk. It's fun programming when you're drunk, but you always forget what you were working on!!
+char* DEC_2_BIN(char*  input, L packed)	{
 /**
 PArAm "int packed" is A flag to determine if the returned binary string should be rounded in length to A multiple of 8.
 In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 meAns "do not round", A non-0 value meAns "round up string-length to multiple of 8".
@@ -855,7 +877,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	
 	const L strlen_input = strlen(input);
 	AP* stack = (AP*)calloc( sizeof(AP), strlen_input );
-	char binary_stack = (char*)calloc( length+1, 1 );
+	char* binary_stack = (char*)calloc( length+1, 1 );
 
 	length = (L)strlen(input);
 
@@ -932,9 +954,6 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		AP input3;
 		
 		for(int k = 0; k < pointer; k++ )	{
-			
-			if( stack[k]->(&integer)<10000 )
-				stack[k] = CopyAP( AP0 );
 			
 			input3 = ADD(input2, stack[k]);
 			FreeAP( input2 );
@@ -1209,6 +1228,7 @@ char* ACCUMULATE( char* apstr ) {
 	L strlen_apstr = strlen( apstr );
 	
 	char* _ = (char*)malloc( strlen_apstr+2 );
+	
 	{
 		#if ACC_COPY==1
 		AP bkp = NewAP( strlen_apstr, 0 );
@@ -1244,13 +1264,12 @@ char* ACCUMULATE( char* apstr ) {
 	}
 	
 	// safetycheck
-
 	if( _[0]>'9' )
 		_[0] = '9';
 	else if( _[0]<'0' )
 		_[0] = '0';
 	
-	if(_[0]=='0') // this is digit zero, not the nullchar.
+	if(_[0]=='0')// this is digit zero, not the nullchar.
 		++_;
 
 	return _;
@@ -1700,7 +1719,6 @@ char TT_MUL( APL A, APL B )	{
 }
 
 
-
 AP RECIPROCAL( AP A )	{
 
 	return RECIPROCALP( A,DefaultPrecision );;
@@ -1708,7 +1726,7 @@ AP RECIPROCAL( AP A )	{
 
 
 // GENERAL HELPER FNCS
-char** getaplibsymbols(){
+char** GetAPSymbols(){
 	
 char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
 
@@ -1729,9 +1747,9 @@ symbols[OP_LT] = getstring("<");
 
 symbols[OP_PLUSEQUALS] = getstring("+=");
 symbols[OP_ISEQUALTO] = getstring("==");
-symbols[OP_RATIO] = getstring("%");
-symbols[OP_RATIO_ASSIGN] = getstring("%=");
-symbols[OP_RATIO_ISEQUALTO] = getstring("%==");
+symbols[OP_MODULO] = getstring("%");
+symbols[OP_MODULO_ASSIGN] = getstring("%=");
+symbols[OP_MODULO_ISEQUALTO] = getstring("%==");
 symbols[OP_CARAT] = getstring("^");
 symbols[OP_LTORISEQUALTO] = getstring("<=");
 symbols[OP_GTORISEQUALTO] = getstring(">=");
@@ -1755,53 +1773,123 @@ symbols[OP_LOGICAL_ISNOT] = getstring("!!");
 
 return symbols; }
 
-int INC( AP A ){
-
-AP _;
-_ = ADD( A,AP1 );
-free( A );
-A = _;
-
-return 1; }
-int DEC( AP A ){
-
-AP _;
-_ = SUB( A,AP1 );
-free( A );
-A = _;
-
-return -1; }
-
 
 char peek( large c, char* _ ){
 // clearly, char at str[0] is considered digit "1"
 return _[c - 1];}
 
+// scint CmpAP( APL, APL )
 scint CmpAP( APL A, APL B )	{
 	
+	if( A->integer == NULL )
+		printf( "Warning. Arg A in CmpAP is NULLptr.\n" );
+	if( B->integer == NULL )
+		printf( "Warning. Arg B in CmpAP is NULLptr.\n" );
 	
-	while( *(A->integer)=='0' )
-		++A->integer;
+	APP Ac, Bc;
 	
-	while( *(B->integer)=='0' )
-		++B->integer;
+	Ac.integer = A->integer;
+	Bc.integer = B->integer;
 	
-	large len_A = strlen(A->integer);
-	large len_B = strlen(B->integer);
+	L i = 0;
 	
-	if( len_A<len_B )
+	if( A->integer != NULL )
+		while( A->integer[i++]=='0' )
+		++Ac.integer;
+	
+	i = 0;
+	if( B->integer != NULL )
+	while( B->integer[i++]=='0' )
+		++Bc.integer;
+	
+	large len_A = strlen(Ac.integer);
+	large len_B = strlen(Bc.integer);
+	
+	if( len_A<len_B )	{
+	
 		return -1;
+	}
 	
-	if( len_A>len_B )
+	
+	if( len_A>len_B )	{
+		
+		return +1;
+	}
+	
+	
+	for( L test=0; test<len_A; test++ )	{
+		
+		if( Ac.integer[test]>Bc.integer[test] ){
+		return +1;}
+		
+		
+		if( Ac.integer[test]<Bc.integer[test] ){
+			return -1;}
+	}
+	
+	return 0;
+}
+
+
+
+scint CmpAP_signed( APL A, APL B )	{
+	
+	if( A->sign=='-' && B->sign=='+' )
+		return -1;
+	if( A->sign=='+' && B->sign=='-' )
 		return +1;
 	
-	for( large test=0; test<len_A; test++ )	{
+	APP Ac, Bc;
+	
+	Ac.integer = A->integer;
+	Bc.integer = B->integer;
+	
+	L i = 0;
+	
+	if( A->integer != NULL )
+		while( A->integer[i++]=='0' )
+		++Ac.integer;
+	
+	i = 0;
+	if( B->integer != NULL )
+	while( B->integer[i++]=='0' )
+		++Bc.integer;
+	
+	large len_A = strlen(Ac.integer);
+	large len_B = strlen(Bc.integer);
+	
+	if( len_A<len_B )	{
 		
-		if( A->integer[test]>B->integer[test] )
+		if( !( A->sign=='+' && B->sign=='-') )
 			return +1;
 		
-		if( A->integer[test]<B->integer[test] )
-			return -1;
+		return -1;
+	}
+	
+	
+	if( len_A>len_B )	{
+	
+		if( ( A->sign=='-' ) )
+		return -1;
+		
+		return +1;
+	}
+	
+	
+	for( L test=0; test<len_A; test++ )	{
+		
+		if( Ac.integer[test]>Bc.integer[test] ){
+			if( A->sign=='-' )
+				return -1;
+			else
+		return +1;}
+		
+		
+		if( Ac.integer[test]<Bc.integer[test] ){
+			if( A->sign=='+' )
+				return -1;
+			else
+		return +1;}
 	}
 	
 	return 0;
@@ -1825,31 +1913,33 @@ signed int OverFlow( AP C, int result, signed k ) {
     C->integer = _;
   }
     
-  // 1. get lmost digit of result (1-8)
-  
-  scint rd = result % 10;
-  scint td = (result - rd);
-  scint ld = 0;
-  
-	  while(td>0){
+	// 1. get lmost digit of result (1-8)
+
+	scint rd = result % 10;
+	scint td = (result - rd);
+	scint ld = 0;
+
+	while(td>0)	{
+
 		++ld;
 		td = td - 10;
-	  }
-	  
-	  C->integer[k] = '0' + rd;
-	 
-	  scint iresult;
-	  iresult = ld+(C->integer[k-1] - '0');
-	  if( iresult <= 9 )
-	  C->integer[k-1] = '0' + iresult;
-	  else{
-		// if c[k-1] + ld > 9, recursive overflow, will need to deAl with here!
+	}
+
+	C->integer[k] = '0' + rd;
+
+	scint iresult;
+	iresult = ld+(C->integer[k-1] - '0');
+	if( iresult <= 9 )
+		C->integer[k-1] = '0' + iresult;
+	else	{
+
+		// if c[k-1] + ld > 9, recursive overflow, will need to deal with here!
 		printf("Recursive overflow! Line %d-ish.\n", __LINE__);
 		k = OverFlow(C, iresult, k-1);
-		}
-		
-	  return k-1;
-	  // remember, overflow can be from 1 to 8! If [k-1] >= 2, itself may additively overflow to [k-2];
+	}
+
+	return k-1;
+	// remember, overflow can be from 1 to 8! If [k-1] >= 2, itself may additively overflow to [k-2];
 
 }
 

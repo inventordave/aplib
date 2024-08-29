@@ -195,12 +195,12 @@ char* SetVT( char* fg, char* bg )	{
 	int i;
 	
 	//FG:
-	if( fg==0 || streq( fg,"0" ) )
+	if( fg==(char*)0 )
 		goto BG;
 	
 	for( i=0; i<16; i++ ){
 
-		if( streq( fg, *(ANSI->c->ANSIVT_CTABLE + (i*4) + 0) ) ){
+		if( streq( fg, ANSI->c->ANSIVT_CTABLE[i*4] ) ){
 			
 			fg_ = getstring( *(ANSI->c->ANSIVT_CTABLE + (i*4) + 4) );
 			printf( "%s", fg_ );
@@ -211,14 +211,14 @@ char* SetVT( char* fg, char* bg )	{
 	}
 	
 	BG:
-	if( bg==0 || streq( bg,"0" ) )
+	if( bg==(char*)0 )
 		goto NEXT;
 
 	for( i=16; i<(16*2); i++ ){
 
-		if( streq( bg, *(ANSI->c->ANSIVT_CTABLE + (i*4) + 0) ) ){
+		if( streq( bg, ANSI->c->ANSIVT_CTABLE[i*4] ) ){
 			
-			bg_ = getstring( *(ANSI->c->ANSIVT_CTABLE + (i*4) + 4) );
+			bg_ = getstring( ANSI->c->ANSIVT_CTABLE[(i*4)+4] );
 			printf( "%s", bg_ );
 			ANSI->ANSIVT_BG = bg;
 			ANSI->c->bg( bg_ );
@@ -255,105 +255,105 @@ char** ANSIVT_CTABLE/*64*2*/ = (char**)malloc( (64*2) * sizeof(char*) );
 
 uint32_t i=0;
 //FG
-*(ANSIVT_CTABLE + (i*4) + 0)= "black"; // BASE + (i*4) + (0*4)
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" ); // BASE + (i*4) + (0*4)
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "red";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "green";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "yellow";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "blue";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "magenta";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "cyan";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "white";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_WHITE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_black";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_red";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_green";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_yellow";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_blue";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_magenta";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_cyan";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_white";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
 *(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_WHITE;
 
 // BG
-*(ANSIVT_CTABLE + (i*4) + 0)= "black";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "red";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "green";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "yellow";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "blue";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "magenta";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "cyan";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "white";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_WHITE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_black";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_red";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_green";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_yellow";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_blue";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_magenta";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_cyan";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= "bright_white";
+*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
 *(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_WHITE;
 
 // RESET
-*(ANSIVT_CTABLE + (i*4) + 0) = "default";
+*(ANSIVT_CTABLE + (i*4) + 0) = getstring( "default" );
 *(ANSIVT_CTABLE + (i*4) + 4) = NORMAL;
 
 // i contains a count of all the colour codes. Should be 33.
@@ -416,6 +416,7 @@ void ANSI_init(){
 	
 	ANSI->is = ANSI_IS;
 	ANSI->c = Init_AVTC();
+	ANSI->SetVT = SetVT;
 	
 }
 
