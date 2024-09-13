@@ -9,7 +9,7 @@ double qdiv_i(int n, int d);
 
 
 #define cint short unsigned int
-char * cat(int c, char * s, ...);
+char 	* cat(int c, char * s, ...);
 char * safecat(char * s, char * rhs);
 double expound(double base, int exp);
 APL prime(APL, APL, cint);
