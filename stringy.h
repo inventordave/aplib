@@ -67,7 +67,6 @@ extern scint CC_HIDDEN_MASKTYPE_COLOR; // if selected "colour_h" subsystem needs
 
 void PrintASCIITable(char start, char end);
 
-
 // SAFE-CONCATENATE
 extern char* safecat(char* s, char* rhs);
 
@@ -92,20 +91,14 @@ extern char* sanitizeStr( char* );
 // places string at 'in' into 'out' in reverse sequence.
 char* flipstr(char* in, char* out); 
 
-
-
-
 // ITOA() FUNCTION "ITOAD()"
 extern char* itoad(int v);
 
 // CONCATENATE (VARIADIC FNC)
 extern char* cat(int c, char * s, ...);
 
-
-// STRING-SAFETY METHODS //
-
+// STRING-SAFETY METHODS
 extern char* getstring( char* in );
-
 extern void addnult( char*, unsigned long long int );
 
 #endif

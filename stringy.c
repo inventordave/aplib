@@ -143,7 +143,7 @@ int streq( char* a, char* b ){
 }
 
 
-int cmp_dstr( char* a, char* b )	{
+scint cmp_dstr( char* a, char* b )	{
 
 	if( a == NULL )
 		printf( "Warning. Arg 'a' in cmp_dstr (\"%s\":%d) is a NULL ptr.\n", __FILE__, __LINE__ );
@@ -244,14 +244,6 @@ char* itoad(int v)	{
 	char * _ = (char*)malloc(16);
 	
 	snprintf ( _, 16, "%d", v );
-	
-	return _;
-}
-
-char* int2str(int v)	{
-	
-	char* _ = (char*)malloc( (sizeof(int)*8)+1 );
-	sprintf( _, "%d", v );
 	
 	return _;
 }

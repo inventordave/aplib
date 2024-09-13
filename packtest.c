@@ -51,7 +51,7 @@ char* unpack( char* _ ) {
 	char t;
 	
 	L i, j;
-	char* _U = (char*)calloc( 1, (strlen__>>2) + 1 );
+	char* _U = (char*)calloc( 1, (2<<strlen__) + 1 );
 	for( i=0, j=0; i<strlen__; i++ ) {
 		
 		t = _[i] & BITMASK_LOWER;
@@ -64,6 +64,8 @@ char* unpack( char* _ ) {
 			_U[j++] = '\0';
 		else if( t==10 )
 			_U[j++] = '0';
+		else
+			_U[j++] = t + '0';
 
 	}
 

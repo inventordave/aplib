@@ -1,6 +1,7 @@
 // DEV_TESTING SANDBOX
 
 // INC'S
+#include <ctype.h>
 #include "stdlib.h"
 #include "lib.h"
 #include "stringy.h"
@@ -8,7 +9,7 @@
 #include "aplib.h"
 #include "sandbox.h"
 
-
+#include <signal.h>
 
 // QUICKDRAW
 #define op OP
@@ -16,6 +17,153 @@
 APL A;
 APL B;
 APL C;
+
+char* strtolower( char* _ )	{
+	
+	L strlen__ = strlen( _ );
+	char* s = (char*)malloc( strlen__ + 1 );
+	char* t = s;
+	while( strlen__-- )	{
+
+		*t++ = tolower( *_++ );
+	}
+	
+	*t = 0;
+	
+	return s;
+}
+
+
+void* davealloc( L size, uint8_t item )	{
+
+	char* _ = malloc( size );
+	char* t = _;
+	
+	while( size-->0 )
+		*t++ = item;
+	
+	*t = 0;
+	return _;
+}
+
+
+char* strtoupper( char* _ )	{
+
+	L strlen__ = strlen( _ );
+	char* s = (char*)malloc( strlen__ + 1 );
+	char* t = s;
+	while( strlen__-- )	{
+
+		*t++ = toupper( *_++ );
+	}
+
+	*t = 0;
+
+	return s;
+}
+
+volatile sig_atomic_t status = 0;
+
+static void _catchFnc( int sig )	{
+	
+	status = sig;
+	printf( "Caught signal %d!!\n", status );
+	
+	fflush( stdout );
+	
+}
+
+// MAIN() ENTRYPOINT
+int main(int argc, char **argv)	{
+
+	if( argc<3 )
+		exit( printf( "Not enough command-line args passed. You should pass an Operator, then 2 Integer values, with at least 1 space between each of the 3 args.\n") );
+
+	//struct _APLIB* APLIB = Init_APLIB();
+
+	// not using the APLIB object yet, but I need to initialise the aplib-local globals, AP0 and AP1
+	struct _APLIB*  APLIB = Init_APLIB();
+
+	if( APLIB == NULL )
+		printf( "APLIB did not initialise!\n" );
+	
+	ANSI_init();
+	Init_ANSIVT_CTABLE();
+	ResetAnsiVtCodes(1);
+	colorMode();
+	ANSI->c->fg( getstring( "green" ) );
+	//ANSI->c->bg( getstring( "black" ) ); //fg and bg colour.
+
+	APL (*OP)( APL A, APL B );
+	opcode OPCODE = 0;
+	
+	// archaic.
+	//printf( "%s", FG_BRIGHT_WHITE );
+	
+	if( seq(argv[1], "*") || seq(argv[1],"MUL") || seq(argv[1],"MULTIPLY") )
+	{OP = MUL;
+	OPCODE = "MUL";}
+	else
+	if( seq(argv[1], "/") || seq(argv[1], "DIV") || seq(argv[1], "DIVIDE") )
+	{OP = DIV;
+	OPCODE = "DIV";}
+	else
+	if( seq(argv[1], "+") || seq(argv[1], "ADD") )
+	{OP = ADD;
+	OPCODE = "ADD";}
+	else
+	if( seq(argv[1], "-") || seq( strtoupper( argv[1] ), "SUB") || seq(argv[1], "SUBTRACT") )
+	{OP = SUB;
+	OPCODE = "SUB";}
+	else
+	if( seq(argv[1], "E") || seq(argv[1], "EXP") || seq(argv[1], "EXPONENT") )
+	{OP = EXP;
+	OPCODE = "EXP";}
+	else
+	{OP = NULL;
+	OPCODE = "NOP";}
+	
+	printf( "OPCODE set to '%s'.\n", OPCODE );
+	
+	
+	if( signal(SIGSEGV, _catchFnc)==SIG_ERR ) printf( "Couldn't register SIGSEGV handle.\n"), exit(1);
+	if( signal(SIGABRT, _catchFnc)==SIG_ERR ) printf( "Couldn't register SIGABRT handle.\n"), exit(1);
+	
+	
+	AP A = NewAP( strlen(argv[2]), 0 );
+
+	AP B;
+	
+	setPartW( A,argv[2] );
+	
+	if( argc < 4 )
+	B = CopyAP( AP1 );
+	else{
+	B = NewAP( strlen(argv[3]), 0 );
+	setPartW( B,argv[3] );
+	}
+
+
+	AP C = OP( A,B );
+	
+	char* fractpart = (char*)malloc( strlen(C->fractional) + 1 );
+	
+	if( cmp_dstr( C->fractional, AP0->integer ) )	{
+	
+		strcpy( fractpart, "." );
+		strcat( fractpart, C->fractional );
+	}
+	else
+		strcpy( fractpart, "" );
+	
+	printf( "Result:\nA='%s'\nOPCODE(%s)\nB='%s'\n==\nC='%s%s'\n", A->integer, OPCODE, B->integer, C->integer, fractpart );
+	
+	ANSI->SetVT( getstring( "black" ), getstring( "white" ) );
+	return 0;
+}
+
+
+
 
 LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 	
@@ -143,87 +291,6 @@ APL OP( char* opcode, APL A, APL B ){
 	return CopyAP( AP0 );
 }
 	
-// MAIN() ENTRYPOINT
-int main(int argc, char **argv)	{
-
-	if( argc<3 )
-		exit( printf( "Not enough command-line args passed. You should pass an Operator, then 2 Integer values, with at least 1 space between each of the 3 args.\n") );
-
-	//struct _APLIB* APLIB = Init_APLIB();
-
-	// not using the APLIB object yet, but I need to initialise the aplib-local globals, AP0 and AP1
-	struct _APLIB*  APLIB = Init_APLIB();
-
-	if( APLIB == NULL )
-		printf( "APLIB did not initialise!\n" );
-	
-	ANSI_init();
-	Init_ANSIVT_CTABLE();
-	ResetAnsiVtCodes(1);
-	colorMode();
-	ANSI->c->fg( getstring( "green" ) );
-	//ANSI->c->bg( getstring( "black" ) ); //fg and bg colour.
-
-	APL (*OP)( APL A, APL B );
-	opcode OPCODE = 0;
-	
-	// archaic.
-	//printf( "%s", FG_BRIGHT_WHITE );
-	
-	if( seq(argv[1], "*") || seq(argv[1],"MUL") || seq(argv[1],"MULTIPLY") )
-	{OP = MUL;
-	OPCODE = "MUL";}
-	else
-	if( seq(argv[1], "/") || seq(argv[1], "DIV") || seq(argv[1], "DIVIDE") )
-	{OP = DIV;
-	OPCODE = "DIV";}
-	else
-	if( seq(argv[1], "+") || seq(argv[1], "ADD") )
-	{OP = ADD;
-	OPCODE = "ADD";}
-	else
-	if( seq(argv[1], "-") || seq(argv[1], "SUB") || seq(argv[1], "SUBTRACT") )
-	{OP = SUB;
-	OPCODE = "SUB";}
-	else
-	if( seq(argv[1], "E") || seq(argv[1], "EXP") || seq(argv[1], "EXPONENT") )
-	{OP = EXP;
-	OPCODE = "EXP";}
-	else
-	{OP = NULL;
-	OPCODE = "NOP";}
-	
-	printf( "OPCODE set to '%s'.\n", OPCODE );
-	
-	AP A = NewAP( strlen(argv[2]), 0 );
-	setPartW( A,argv[2] );
-
-	AP B;
-	
-	if( argc < 4 )
-	B = CopyAP( AP1 );
-	else{
-	B = NewAP( strlen(argv[3]), 0 );
-	setPartW( B,argv[3] );
-	}
-	
-	AP C = OP( A,B );
-	
-	char* fractpart = (char*)malloc( strlen(C->fractional) + 1 );
-	
-	if( cmp_dstr( C->fractional, AP0->integer ) )	{
-	
-		strcpy( fractpart, "." );
-		strcat( fractpart, C->fractional );
-	}
-	else
-		strcpy( fractpart, "" );
-	
-	printf( "Result:\nA='%s'\nOPCODE(%s)\nB='%s'\n==\nC='%s%s'\n", A->integer, OPCODE, B->integer, C->integer, fractpart );
-	
-	ANSI->SetVT( getstring( "black" ), getstring( "white" ) );
-	return 0;
-}
 
 #define string char*
 #define eq !strcmp

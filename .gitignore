@@ -2,3 +2,5 @@
 *.o
 *.tmp*
 *.txt
+*vcx*
+*.sln

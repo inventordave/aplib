@@ -581,13 +581,16 @@ AP DIVP( APL A, APL B, APL P )  {
 			temp = MUL( B,v );
 		}
 		FreeAP( temp );
-		
+		 
 		v2 = SUB(v, inc);
 		FreeAP( v );
 		v = CopyAP(v2);
 		FreeAP( v2 );
 		
 		result = MUL( B,v );
+		
+//		if( cmp_dstr( result->integer,Remainder->integer )>0 ) ;
+		
 		v2 = SUB(Remainder, result);
 		FreeAP( result );
 		FreeAP( Remainder );
@@ -614,6 +617,10 @@ AP DIVP( APL A, APL B, APL P )  {
 		}
 		
 		CONCAT( Remainder->integer,Dropdown->integer );
+		
+		
+		//if( fractional && !CmpAP(Remainder,AP0) )
+		//	break;
 
 /*
 		#define report printf
@@ -645,7 +652,6 @@ AP DIVP( APL A, APL B, APL P )  {
 		}
 	}
 	
-	
 	maxiterations: // Upper-bound for precision of calculation reached.
 	// RESULT COMPUTED.
 	Cc[ strlen(Cc) ] = '\0';
@@ -658,8 +664,8 @@ AP DIVP( APL A, APL B, APL P )  {
 	if( cmp_dstr( C->fractional, AP0->integer ) )
 		printf( ".%s", C->fractional );
 	NL;
-	
-	
+
+
 	/**
 	for( i=0; i<strlen_A; i++ )
 		printf( "%c", C->integer[i] );
@@ -670,9 +676,9 @@ AP DIVP( APL A, APL B, APL P )  {
 		printf( "%c", C->integer[i] );
 	*/
 	NL;
-	
-	printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
-	pause();
+
+	//printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
+	//pause();
 	
 	return C;
 }
@@ -1647,8 +1653,13 @@ APTR OCTAL_2_BIN( APTR A ){
 
 void FreeAP( APL A )	{
 	
+	//if( A->integer!=NULL )
 	free( A->integer );
+
+	//if( A->fractional!=NULL )
 	free( A->fractional );
+
+	//if( A!=NULL )
 	free( A );
 	
 	return;
