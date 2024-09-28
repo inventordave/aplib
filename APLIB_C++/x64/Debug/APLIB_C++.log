@@ -1,0 +1,8 @@
+﻿  stringy.c: In function 'cat':
+stringy.c(167,9): warning G2F246D5E: second parameter of 'va_start' not last named argument [-Wvarargs]
+    167 |         va_start(ap, c);
+        |         ^~~~~~~~
+  /usr/lib/gcc/x86_64-pc-cygwin/12/../../../../x86_64-pc-cygwin/bin/ld: /usr/lib/gcc/x86_64-pc-cygwin/12/../../../../lib/libcygwin.a(libcmain.o): in function `main':
+  /usr/src/debug/cygwin-3.5.3-1/winsup/cygwin/lib/libcmain.c:37:(.text.startup+0x7b): undefined reference to `WinMain'
+collect2 : error : ld returned 1 exit status
+C:\Program Files\Microsoft Visual Studio\2022\Community\MSBuild\Microsoft\VC\v170\Microsoft.MakeFile.Targets(45,5): error MSB3073: The command "gcc -g api.cpp stringy.c colour.c io.c" exited with code 1.

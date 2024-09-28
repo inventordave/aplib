@@ -1,6 +1,11 @@
+LOAD REGISTER[	$LOC
+				#VAL]
 
+INC *
+DEC *
 
-#include "io.h"
-
-// general IO functions for my portable DAVELIB.
+ADD *,*
+SUB *,*
+MUL *,*
+DIV *,*
 

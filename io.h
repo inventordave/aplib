@@ -5,24 +5,21 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+#include "aplib.h"
 
-#define string char *
-#define in getchar
-#define out putchar
+//#define in getchar
+//#define out putchar
 
 #define byte char
 #define octet unsigned char
-#define large unsigned long long int
-
-#define FALSE 0
-#define TRUE 1
 
 byte getbyte( char* );
 
 // MEMORY HELPER FNC'S
-char* mem( large numBytes );
-char* memp( large numParts, large numBytes );
+extern char* mem( large numBytes );
+extern char* memp( large numParts, large numBytes );
 extern void* cmem( large nb );
-char* zmem( large nb );
+extern char* zmem( large nb );
+
 #endif
 

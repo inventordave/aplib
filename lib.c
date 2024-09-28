@@ -1,11 +1,9 @@
 // LIB_C
 // DAVE'S DAVELIB.
 
-
 // INC'S
 #include "io.h"
 #include "lib.h"
-
 
 // 'TOGGLE'
 toggle fliptoggle( toggle* t )	{
@@ -18,9 +16,10 @@ toggle fliptoggle( toggle* t )	{
 	return *t;
 }
 
-// DAVELIB FNC'S
+// DAVELIB FNC'
 
 
+/*
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A )	{
 	
@@ -41,14 +40,14 @@ char* sanitizeStr( char* A )	{
 			case 63: // ? question-mark
 			case 124:// | pipe
 
-				// printf( "Invalid char ('%c') (%d).\n", *_, *_ );
+				// printf( "Invalid char ('%c') (%d).\n", *A, *A );
 				// Uncomment above line to see reporting to stdout of detected invalid chars in the input string.
 				*B = '.'; // Arbitrary printable-char to replace invalid char with.
 				break;
 			
 			default:
 				*B = *A; 
-				//printf( "char ok: '%c'\n", (*str) );
+				//printf( "char ok: '%c'\n", (*A) );
 				break;	
 		}
 		
@@ -61,30 +60,10 @@ char* sanitizeStr( char* A )	{
 	return _;
 }
 
-// SEQ: Sensible version of strcmp(a,b) which returns 1 on a match, not 0.
-int seq(char *a, char *b) {
+*/
 
-	return (strcmp(a, b) == 0);
-}
 
-// STRCMP: Returns 0 for match, +n for larger LHS, -n for larger RHS.
-#define strcmp strcmp_
-int strcmp_( char* LHS, char* RHS ){
 
-	if( strlen(LHS)==strlen(RHS) ){
-		for( large i=0; i<strlen(LHS); i++ )
-		{
-		if( LHS[i]==RHS[i] )
-		continue;
-		else
-		return LHS[i]-RHS[i];
-		}
-	}
-	else
-		return strlen(LHS)-strlen(RHS);
-	
-	return 0;
-}
 
 // PAUSE: Simply pauses interactivity in console-mode until a key is pressed.
 void pause()	{
@@ -95,12 +74,10 @@ void pause()	{
 
 // ARG_ASSERT: Custom assert() for the cmd-line args count. Pass the "argc" Env variable to it, with the min number of cmd-line args needed to continue
 // Does not include argv[0], which by system default holds the executable name ,so just the min-count for actual args passed.)
-void arg_assert( int argc, int min )	{
-	
-	if( (argc-1)<min ){
-	//printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
-	exit(1);}
+void arg_assert( int argc, int min ){
+if( (argc-1)<min ){
+//printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
+exit(1);}
 
-	return;
-}
+return; }
 

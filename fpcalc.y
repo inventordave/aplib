@@ -7,6 +7,8 @@
 	
 	#include "fpcalc.tab.h"
 	
+	#include "aplib.h"
+	
     int yylex();
     int yyerror(const char*);
 	
@@ -25,6 +27,8 @@
 	double vars[256] = { -10000 };
 	char*  evars[256] = { '\0' };
 	
+	
+	
 	short int optionsFlag = 0;
 	
 	char* enum_str;
@@ -41,6 +45,8 @@
     char    		name;
     double		    val;
 	int				lo_;
+	char*			sNum;
+	ap*             apNum;
 }
 
 %token NUM ENUM ID OTHER PLUS MINUS MUL DIV EQUALS NL SP TAB POW OB CB COMMA PRINT OPTIONSET OPTIONUNSET TRUE FALSE
@@ -210,6 +216,8 @@ exp : PRINT		{ printVars(); printf("\n\nOption to trim numbers set? %s.\n", opti
 					if ($3 == _Null) { $3 = 0.0; } else if ($3 == _Null) { $3 = 0.0; };
 	
 					$$ = $1 / $3; printf("\t\tResult of %s / %s is: %s\n", function($1), function($3), function($$)); }
+
+
     | exp PLUS exp  { if ($1 == _TRUE) { $1 = 1.0; } else if ($1 == _FALSE) { $1 = 0.0; };
 					if ($3 == _TRUE) { $3 = 1.0; } else if ($3 == _FALSE) { $3 = 0.0; };
 					if ($1 == _Null) { $1 = 0.0; } else if ($1 == _Null)  { $1 = 0.0; };
@@ -627,10 +635,25 @@ char *trim(double x)
 }
 
 
+ap* QuickAP( char* in )	{
+
+	ap* _ = (ap*)malloc( sizeof(AP) );
+		_->sign = '+';
+		_->fp = getstring( "" );
+		_->p = 0;
+		
+	_->wholepart = getstring( in );
+
+	return _;
+}
+
+
 int main()
 {
 
 	function = convert;
+	//function = QuickAP;
+	
 	
 	enum_str = (char *)calloc(NUM_STRING_LENGTH + 1 + NUM_STRING_LENGTH, 1);
 	
