@@ -1,13 +1,13 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the AP Engine Code is.
 
 aplib: aplib.c aplib.h colour.c colour.h io.c io.h
-	gcc -Wall -g aplib.c colour.c io.c -lstd -c aplib.o
+	gcc -Wall -g -DDEBUG aplib.c colour.c io.c -lstd -c aplib.o
 
 test: testFnc.c testFnc.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
-	gcc -Wall -mconsole -g aplib.c i754.c stringy.c colour.c lib.c io.c testFnc.c -o test.exe
+	gcc -Wall -mconsole -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c testFnc.c -o test.exe
 
 sandbox: sandbox.c sandbox.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
-	gcc -Wall -mconsole -g aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe
+	gcc -Wall -mconsole -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
