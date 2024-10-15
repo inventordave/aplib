@@ -802,7 +802,7 @@ APL RECIPROCALP( APL A, APL DefaultPrecision ){
 	return DIV( AP1,A ); 
 }
 
-APL RECIPROCAL2P( APL A,APL B,APL ){
+APL RECIPROCAL2P( APL A,APL B,APL DefaultPrecision ){
 	
 	return DIV( B,A );
 }
@@ -822,13 +822,13 @@ char* BIN_2_DEC(char * bin)	{ /** Converts base2 (binary) string to base10 (deci
 	
 	_2->integer[0] = '2';
 
-	int i, j;
+	int i, strlen_bin = strlen(bin);
 	
-	for( i=0, j=strlen(bin)-1; i<strlen(bin); i++, j-- )	{
+	for( i=0; i<strlen_bin; i++ )	{
 
 		digit->integer[0] = bin[i];
 		
-		sprintf(_j->integer, "%d", j); // itoa()
+		sprintf(_j->integer, "%d", strlen_bin-1-i); // itoa()
 		mult = EXP( _2, _j );
 		dec = ADD( dec, MUL(digit, mult) );
 	}
@@ -912,7 +912,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 			result->integer[i] = quotient + '0';
 			
 			// if a_substring != LSdigit (units position)
-			// if it is, the remainder is noted As A binary digit 1, And the remainder itself disgArded.
+			// if it is, the remainder is noted as a binary digit 1, And the remainder itself discarded.
 
 			if( remainder )	{
 				
