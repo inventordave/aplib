@@ -14,7 +14,8 @@ char* genRndDStr( int len )	{
 	int i;
 	for( i=0; i<len; i++ )	{
 		_[i] = rand()%10;
-	}
+
+	_[i] = '\0';
 
 	return _;
 }
@@ -22,9 +23,11 @@ char* genRndDStr( int len )	{
 int unitTests( void )	{
 
 	int count = 0;
+	
+	AP A;
+	AP B;
 
-	AP A = NewAP(0,0);
-	AP B = NewAP(0,0);
+	AP C;
 
 	char* _A;
 	char* _B;
@@ -35,54 +38,75 @@ int unitTests( void )	{
 
 	_A = genRndDStr( 20 );
 	setPartW( A, _A );
-	_B = strdup( _A );
-	setPartW( B, _B );
+	setPartW( B, _A );
 
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
 
-	printf( "%c%s\t+\t%c%s = %c%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C-integer );
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_abs > B_abs
 
 	_A = genRndDStr( 25 );
 	setPartW( A, _A );
+	
 	_B = genRndDStr( 20 );
 	setPartW( B, _B );
 
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
+	
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
 
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
+	
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_abs < B_abs
 
 	_A = genRndDStr( 20 );
@@ -91,26 +115,36 @@ int unitTests( void )	{
 	_B = genRndDStr( 25 );
 	setPartW( B, _B );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
 
+		C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
-
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_abs > B_abs
 
 	_A = genRndDStr( 25 );
@@ -119,24 +153,33 @@ int unitTests( void )	{
 	_B = genRndDStr( 20 );
 	setPartW( B, _B );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
-
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
-
+	C = ADD( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	count++;
 
 	return count;
 
