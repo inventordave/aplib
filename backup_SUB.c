@@ -1,11 +1,11 @@
 // The below snippet is cut from the APlib.c::SUBP function.
 
-AP SUBP( APL A, APL B, AP P )	{
+AP SUBP( AP A, AP B, AP P )	{
 
 	if( (A->sign=='+') && (B->sign=='+') && (CmpAP_abs(A,B)>=0) ){
 
 		int i, j, k, valA, valB, valC;
-		APL C = NewAPr(strlen(A->integer),0);
+		AP C = NewAPr(strlen(A->integer),0);
 		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>=0; i--, j--, k--){
 		
 			if(i>=0)
@@ -51,7 +51,7 @@ AP SUBP( APL A, APL B, AP P )	{
 	// Alt. SUB Algorithm:
 	// The subtrAction of A reAl number (the subtrAhend [B]) from Another (the minuend [A]) cAn be defined As the ADition of the minuend [A] And the ADitive inverse of the subtrAhend [B].
 	flipSign(B);
-	APL result = ADD(A, B);
+	AP result = ADD(A, B);
 	flipSign(B);
 
 	return result;

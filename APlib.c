@@ -9,7 +9,7 @@
 
 AP AP0;
 AP AP1;
-APL DefaultPrecision;
+AP DefaultPrecision;
 
 struct _APLIB APLIB;
 
@@ -33,16 +33,16 @@ char* ALL_DIGITAL_SYMBOLS = "0123456789abcdefABCDEF.hHxX";
 
 L MAX_LENGTH = 4096-1;
 
-L setPartW( APL A, char * _ )	{
+L setPartW( AP A, char * _ )	{
 
 	return setPart( A, _, PartW );
 }
-L setPartF( APL A, char * _ )	{
+L setPartF( AP A, char * _ )	{
 
 	return setPart( A, _, PartF );
 }
 
-L setPart( APL A, char * digits, L part )	{
+L setPart( AP A, char * digits, L part )	{
 
 	if( part==SignPart )	{
 
@@ -82,7 +82,7 @@ L setPart( APL A, char * digits, L part )	{
 L DIVBY2_PRINT_ROWS = 1;
 
 // CORE BOOLEAN OPERATORS
-APL AND( APL LHS, APL RHS )	{
+AP AND( AP LHS, AP RHS )	{
 	
 	char* A = LHS->integer;
 	char* B = RHS->integer;
@@ -129,7 +129,7 @@ APL AND( APL LHS, APL RHS )	{
 	setPartW( _,bstr );
 	return _;
 }
-APL NOT(APL v)	{
+AP NOT(AP v)	{
 	
 	
 	APLS _v = v->integer;
@@ -147,11 +147,11 @@ APL NOT(APL v)	{
 		
 	_[i] = '\0';
 	
-	APL _2 = (APL)malloc( sizeof( APP ) );
+	AP _2 = (APL)malloc( sizeof( APP ) );
 	_2->integer = _;
 	return _2;
 }
-APL OR( APL LHS, APL RHS)	{
+AP OR( AP LHS, AP RHS)	{
 
 	char * A;
 	char * B;
@@ -195,13 +195,13 @@ APL OR( APL LHS, APL RHS)	{
 	
 	assert( k==-1 );
 	
-	APL _b = NewAPr( 0,0 );
+	AP _b = NewAPr( 0,0 );
 	
 	_b->integer = b_str;
 	
 	return _b;
 }
-APL XOR( APL LHS, APL RHS )	{
+AP XOR( AP LHS, AP RHS )	{
 
 	char* A = LHS->integer;
 	char* B = RHS->integer;
@@ -247,21 +247,21 @@ APL XOR( APL LHS, APL RHS )	{
 
 	assert( k==-1 );
 	
-	APL _ = (APL)malloc( sizeof(APP) );
+	AP _ = (APL)malloc( sizeof(APP) );
 	_->integer = bstr;
 	return _;
 }
-APL NAND( APL LHS, APL RHS )	{
+AP NAND( AP LHS, AP RHS )	{
 	
-	APL C = AND( LHS,RHS );
-	APL _ = NOT( C );
+	AP C = AND( LHS,RHS );
+	AP _ = NOT( C );
 	free( C );
 	
 	return _;
 }
 
 // NOP (No-Operation). It returns an AP, or AP0, value.
-APL NOP( APL A ){
+AP NOP( AP A ){
 
 	return CopyAP( A );
 }
@@ -285,12 +285,11 @@ A = _;
 
 return -1; }
 
-APL ADD( APL A, APL B )	{ return ADDP( A, B, DefaultPrecision ); }
-APL ADDP( APL A, APL B, AP P )	{
+AP ADD( AP A, AP B )	{ return ADDP( A, B, DefaultPrecision ); }
+AP ADDP( AP A, AP B, AP P )	{
 	
-	signed sign_A = getSign(A)=='+' ? +1 : -1;
-	signed sign_B = getSign(B)=='+' ? +1 : -1;
-	int flag = 0;
+	signed sign_A = A->sign=='+' ? +1 : -1;
+	signed sign_B = B->sign=='+' ? +1 : -1;
 	
 	large strlen_a = strlen(A->integer);
 	large strlen_b = strlen(B->integer);
@@ -298,19 +297,10 @@ APL ADDP( APL A, APL B, AP P )	{
 	int AorB = CmpAP_abs( A,B );
 
 	large size = ( !AorB ? strlen_b : strlen_a );
-	APL C = NewAPr( size+1,0 );
+	AP C = NewAPr( size+1,0 );
 
 	signed value;
 	signed valA, valB, valC;
-	
-	APL temp;
-
-	if( !AorB )	{
-
-		temp = B;
-		B = A;
-		A = temp;
-	}
 
 	signed int i, j, k;
 		
@@ -342,75 +332,76 @@ APL ADDP( APL A, APL B, AP P )	{
 			C->integer[k-1] += 1;
 		}
 		
-		//C->integer[k] = '0' + value;
-		
-		setDigit( C,k,('0'+value) );
+		C->integer[k] = '0' + value;
 	}
+	
+	char sign_C = '+';
 
-	/**
-	else	{
-		
-	//Subtract the smaller absolute value from the larger absolute value and give the answer the same sign as the number with the larger absolute value
-		char tsign;
-		char asign = A->sign;
-		char bsign = B->sign;
+	switch( AorB )	{
 
-		char AorB = CmpAP_abs(A,B);
-		if( AorB==-1 )
-			tsign = bsign;
-		else
-			tsign = asign;
-		
-		A->sign = '+';
-		B->sign = '+';
+		case 0:
+			if( (A->sign=='-') && (B->sign=='+') )
+				sign_C = '+';
+			
+			else{
+			if( (A->sign=='-') && (B->sign=='-') )
+				sign_C = '-';
+			
+			else{
+			if( (A->sign=='+') && (B->sign=='-') )
+				sign_C = '+';
+			}}
 
-		C = ( AorB>-1 ? SUB( A,B ) : SUB( B,A ) );
-		C->sign = tsign;
-
-		A->sign = asign;
-		B->sign = bsign;
-	}
-	*/
-
-	/*
-	register char * _ = (char *)malloc(strlen(C->integer)+1);
-	strcpy(_, C->integer);
-	for( i=0; i<(int)strlen(_); i++ )
-		if( _[i] == '0' )
-			++C->integer;
-		else
 			break;
-	
-	free( _ );
-	
-	if( *C->integer == '\0' )
-		--C->integer;
-	*/
 
-	if( !AorB )	{
+		case -1:
+			if( (A->sign=='-') && (B->sign=='+') )
+				sign_C = '+';
+			
+			else{
+			if( (A->sign=='-') && (B->sign=='-') )
+				sign_C = '-';
+			
+			else{
+			if( (A->sign=='+') && (B->sign=='-') )
+				sign_C = '-';
+			}}
 
-		temp = B;
-		B = A;
-		A = temp;
-	}
+			break;
 
-	if( CmpAP_signed( A, B ) )
+		case +1:
+			if{( (A->sign=='-') && (B->sign=='-') )
+				sign_C = '-';
 
+			else{
+			if( (A->sign=='+') && (B->sign=='-') )
+				sign_C = '+';
+			
+			else{
+			if( (A->sign=='-') && (B->sign=='+') )
+				sign_C = '-';
+			}}
+
+			break;
+
+	};
+
+	C->sign = sign_C;
 	return C;
 }
-AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
-AP SUBP( APL A, APL B, AP P )	{
+AP SUB( AP A, AP B )	{ return SUBP( A, B, DefaultPrecision ); }
+AP SUBP( AP A, AP B, AP P )	{
 
 	// Alt. SUB Algorithm:
 	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
 	flipSign(B);
-	APL result = ADD(A, B);
+	AP result = ADD(A, B);
 	flipSign(B);
 
 	return result;
 }
-AP MUL( APL A, APL B )	{ return MULP( A, B, DefaultPrecision ); }
-AP MULP( APL A, APL B, APL P )  {
+AP MUL( AP A, AP B )	{ return MULP( A, B, DefaultPrecision ); }
+AP MULP( AP A, AP B, AP P )  {
 
 	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
@@ -477,7 +468,7 @@ AP MULP( APL A, APL B, APL P )  {
 		
 		D->integer = strdup(result_row);
 		
-		APL _ = (APL)malloc( sizeof( APP ) );
+		AP _ = (APL)malloc( sizeof( APP ) );
 		*_ = *C;
 		free( C->fractional	);
 		free ( C );
@@ -489,11 +480,11 @@ AP MULP( APL A, APL B, APL P )  {
 	C->sign = TT_MUL( A,B );
 	return C;
 }
-AP DIV( APL A, APL B )	{
+AP DIV( AP A, AP B )	{
 
 	return DIVP( A, B, DefaultPrecision );
 }
-AP DIVP( APL A, APL B, APL P )  {
+AP DIVP( AP A, AP B, AP P )  {
 
 	int fractional = 0;
 
@@ -686,8 +677,8 @@ char poke( char* in, char* out, L offset ) {
 }
 
 
-APL RESET0( APL A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); return A; }
-APL RESET1( APL A ) { setPartW( A,AP1->integer ); setPartF( A,AP0->integer ); return A; }
+AP RESET0( AP A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); return A; }
+AP RESET1( AP A ) { setPartW( A,AP1->integer ); setPartF( A,AP0->integer ); return A; }
 
 
 struct _APLIB* Init_APLIB(){
@@ -754,7 +745,7 @@ struct _APLIB* Init_APLIB(){
 	
 }
 
-void setSign( APL A,char S ){
+void setSign( AP A,char S ){
 
 	if( S!='+' ){
 		if( S!='-' )
@@ -764,18 +755,18 @@ void setSign( APL A,char S ){
 }
 
 
-APL RECIPROCAL2( APL A, APL B ){
+AP RECIPROCAL2( AP A, AP B ){
 	
 	return RECIPROCAL2P( A,B,DefaultPrecision );
 }
 
 
-APL RECIPROCALP( APL A, APL DefaultPrecision ){
+AP RECIPROCALP( AP A, AP DefaultPrecision ){
 	
 	return DIV( AP1,A ); 
 }
 
-APL RECIPROCAL2P( APL A,APL B,APL DefaultPrecision ){
+AP RECIPROCAL2P( AP A,AP B,AP DefaultPrecision ){
 	
 	return DIV( B,A );
 }
@@ -837,7 +828,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	
 	while ( flag )	{
 		
-		APL temp;
+		AP temp;
 		temp = DIVBY2( Check );
 		temp->fractional = getstring( "0" );
 		FreeAP( Check );
@@ -1059,7 +1050,7 @@ L Max2K(AP A)	{
 }
 
 // DIGIT-WISE FNCS
-char d( APL A, L index ){
+char d( AP A, L index ){
 	
 	return A->integer[index];
 }
@@ -1133,7 +1124,7 @@ char* pack( char* _ ) {
 	return _P;
 }
 
-void setDigit( APL A, L index, char d ){
+void setDigit( AP A, L index, char d ){
 			
 	A->integer[index] = d;
 }
@@ -1149,7 +1140,7 @@ L strlen_( char * str )	{
 }
 
 
-LARGE lenp( APL A ){
+LARGE lenp( AP A ){
 	
 	LARGE length = strlen( A->integer );
 	
@@ -1255,12 +1246,12 @@ char* ACCUMULATE( char* apstr ) {
 }
 
 #define ASCII '0'
-APL DIVBY2( APL A )	{
+AP DIVBY2( AP A )	{
 		
 	int overflow = 0;
 	int value;
 	L strlen_a = strlen( A->integer );
-	APL _ = (APL)malloc( sizeof(APP) );
+	AP _ = (APL)malloc( sizeof(APP) );
 	_->integer = zmem( strlen_a );
 	_->fractional = getstring( "0" );
 	LARGE i;
@@ -1332,7 +1323,7 @@ APL DIVBY2( APL A )	{
 }
 #undef ASCII
 
-APL EXP(APL A, APL B)	{
+AP EXP(AP A, AP B)	{
 	
 	// ResultObject
 	
@@ -1383,7 +1374,7 @@ APL EXP(APL A, APL B)	{
 
 
 // VARIOUS MATH FNCS
-L DSTRING2LARGE( APL A ){
+L DSTRING2LARGE( AP A ){
 
 char* _ = A->integer;
 L e = strlen(_)-1;
@@ -1400,15 +1391,15 @@ value += atoi(d) * (10*(e-i)); }
 return value;}
 
 /*
-APL APLCM( APL A, APL B ){
+AP APLCM( AP A, AP B ){
 	
-	APL M1 = CopyAP( AP0 );
-	APL M2 = CopyAP( AP0 );
+	AP M1 = CopyAP( AP0 );
+	AP M2 = CopyAP( AP0 );
 	
 	#define MAX_ITER 4096
-	// It is APL pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
-	APL R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
-	APL R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	// It is AP pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
+	AP R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	AP R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
 	
 	AP val = CopyAP( AP1 );
 	AP inc = CopyAP( AP0 );
@@ -1436,19 +1427,19 @@ APL APLCM( APL A, APL B ){
 }
 */
 
-APL LCM( APL A, APL B )	{
+AP LCM( AP A, AP B )	{
 
-	APL M1;
-	APL M2;
+	AP M1;
+	AP M2;
 	#define MAX_ITER 4096
 	APL* R1 = (APL*) calloc( sizeof(APL), MAX_ITER );
 	APL* R2 = (APL*) calloc( sizeof(APL), MAX_ITER );
 	
-	APL AP_MAX_ITER = NewAP( 0,0 );
+	AP AP_MAX_ITER = NewAP( 0,0 );
 	free( AP_MAX_ITER->integer );
 	AP_MAX_ITER->integer = int2str ( MAX_ITER );
 	
-	APL val = ADD( AP1, AP1 ), inc = CopyAP( AP0 ), match = CopyAP( AP0 );
+	AP val = ADD( AP1, AP1 ), inc = CopyAP( AP0 ), match = CopyAP( AP0 );
 	
 	M1 = A; M2 = B;
 	
@@ -1476,7 +1467,7 @@ APL LCM( APL A, APL B )	{
 }
 
 #define aptr APL
-APL LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
+AP LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
 	
 	aptr a = NewAPr( 0,0 );
 	aptr b = NewAPr( 0,0 );
@@ -1488,7 +1479,7 @@ APL LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
 	return b;
 }
 
-APL lcm_example(int argc, char **argv)	{
+AP lcm_example(int argc, char **argv)	{
 	
 	/*
 	int flagSet = 0;
@@ -1500,8 +1491,8 @@ APL lcm_example(int argc, char **argv)	{
 	}
 	*/
 
-	APL a;
-	APL b;
+	AP a;
+	AP b;
 	a = NewAPr( 0,0 );
 	free( a->integer );
 	a->integer = argv[1];
@@ -1510,7 +1501,7 @@ APL lcm_example(int argc, char **argv)	{
 	free( b->integer );
 	b->integer = argv[2];
 	
-	APL lcm = LCM( a, b );
+	AP lcm = LCM( a, b );
 	//int gcd = 1; // = GCD(A, B, lcm);
 	
 	FreeAP( a );
@@ -1521,9 +1512,9 @@ APL lcm_example(int argc, char **argv)	{
 	return lcm;
 }
 
-APL NewAPr( large integer_range, large fractional_range )	{
+AP NewAPr( large integer_range, large fractional_range )	{
 
-	APL _ = (APL)malloc( sizeof(AP) );
+	AP _ = (APL)malloc( sizeof(AP) );
 	_ = NewAP( integer_range,fractional_range );
 	return _;
 }
@@ -1625,7 +1616,7 @@ APTR OCTAL_2_BIN( APTR A ){
 
 
 
-void FreeAP( APL A )	{
+void FreeAP( AP A )	{
 	
 	//if( A->integer!=NULL )
 	free( A->integer );
@@ -1641,13 +1632,13 @@ void FreeAP( APL A )	{
 
 
 // SIGN FNCS
-char getSign( APL A )	{
+char getSign( AP A )	{
 
 	return A->sign;
 }
 
 
-void set_sign( APL A, char sym )	{
+void set_sign( AP A, char sym )	{
 
 	if( sym!='-' )
 		sym='+';
@@ -1657,7 +1648,7 @@ void set_sign( APL A, char sym )	{
 }
 
 
-void flipSign( APL A )	{
+void flipSign( AP A )	{
 
 	if( A->sign == '-' )
 		A->sign = '+';
@@ -1667,7 +1658,7 @@ void flipSign( APL A )	{
 	return;
 }
 
-char TT_ADD( APL A, APL B )	{
+char TT_ADD( AP A, AP B )	{
 	
 	signed int a = CmpAP_abs(A,B);
 	
@@ -1696,7 +1687,7 @@ char TT_ADD( APL A, APL B )	{
 	return '+';
 }
 
-char TT_MUL( APL A, APL B )	{
+char TT_MUL( AP A, AP B )	{
 
 	if( getSign(A)!=getSign(B) )
 		return '-';
@@ -1764,8 +1755,8 @@ char peek( large c, char* _ ){
 // clearly, char at str[0] is considered digit "1"
 return _[c - 1];}
 
-// scint CmpAP_abs( APL, APL )
-scint CmpAP_abs( APL A, APL B )	{
+// scint CmpAP_abs( APL, AP )
+scint CmpAP_abs( AP A, AP B )	{
 	
 	if( A->integer == NULL )
 		printf( "Warning. Arg A in CmpAP_abs is NULLptr.\n" );
@@ -1818,7 +1809,7 @@ scint CmpAP_abs( APL A, APL B )	{
 
 
 
-scint CmpAP_signed( APL A, APL B )	{
+scint CmpAP_signed( AP A, AP B )	{
 	
 	if( A->sign=='-' && B->sign=='+' )
 		return -1;

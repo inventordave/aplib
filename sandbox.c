@@ -14,9 +14,9 @@
 // QUICKDRAW
 #define op OP
 #define ap AP
-APL A;
-APL B;
-APL C;
+AP A;
+AP B;
+AP C;
 
 char* strtolower( char* _ )	{
 	
@@ -94,7 +94,7 @@ int main(int argc, char **argv)	{
 	ANSI->c->fg( getstring( "green" ) );
 	//ANSI->c->bg( getstring( "black" ) ); //fg and bg colour.
 
-	APL (*OP)( APL A, APL B );
+	AP (*OP)( AP A, AP B );
 	opcode OPCODE = 0;
 	
 	// archaic.
@@ -177,7 +177,7 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 
 }
 
-APL OP( char* opcode, APL A, APL B ){
+AP OP( char* opcode, AP A, AP B ){
 
 	#define digit char
 	scint equalityAB = CmpAP_abs( A,B );

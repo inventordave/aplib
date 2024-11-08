@@ -8,9 +8,9 @@
 #include "native.h"
 
 
-// Ths function is broken in it's current state. Drunken, disorganised porting to APL interface. Needs reviewing.
+// Ths function is broken in it's current state. Drunken, disorganised porting to AP interface. Needs reviewing.
 // i = ith prime number, if n is set, i is ignored. n will test for a prime number. f is a flag, set to TRUE if you want the ith prime number, or if you want to test if the arg u pass is literally prime.
-APL isprime ( APL IN )	{
+AP isprime ( AP IN )	{
 	
 	toggle report;
 	
@@ -27,7 +27,7 @@ APL isprime ( APL IN )	{
 			return CopyAP( AP1 );
 		}
 		
-		APL AP2 = ADD( AP1,AP1 );
+		AP AP2 = ADD( AP1,AP1 );
 		if( CmpAP_abs`( IN,AP2 )==0 ){
 			// base case 2, it interferes with the test conditional, as 2 % 2 == 0, which fails the value 2 for the test. 
 			// Subsequent n % k tests don't have to check if n == k, as k will never be more than sqrt(n)
@@ -38,13 +38,13 @@ APL isprime ( APL IN )	{
 			return AP2;
 		}
 		
-		APL SQRT = SQROOT(IN) + 1;
+		AP SQRT = SQROOT(IN) + 1;
 	
 //-------------------------------
 
 	for (AP K=CopyAP(AP0); CmpAP_abs( K,SQRT )==-1; INC(K) ){
 		
-		APL T;
+		AP T;
 		if( CmpAP_abs( (T=(APL)MODULO(IN,K)), AP0) ){
 			
 			if( report==ON )
@@ -61,7 +61,7 @@ APL isprime ( APL IN )	{
 
 	large j = 3;
 	large k = 0;
-	APL P = CopyAP( AP0 );
+	AP P = CopyAP( AP0 );
 	
 	while( 1 )	{
 	

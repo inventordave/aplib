@@ -9,7 +9,7 @@
 
 AP AP0;
 AP AP1;
-APL DefaultPrecision;
+AP DefaultPrecision;
 
 struct _APLIB APLIB;
 
@@ -33,16 +33,16 @@ char* ALL_DIGITAL_SYMBOLS = "0123456789abcdefABCDEF.hHxX";
 
 L MAX_LENGTH = 4096-1;
 
-L setPartW( APL A, char * _ )	{
+L setPartW( AP A, char * _ )	{
 
 	return setPart( A, _, PartW );
 }
-L setPartF( APL A, char * _ )	{
+L setPartF( AP A, char * _ )	{
 
 	return setPart( A, _, PartF );
 }
 
-L setPart( APL A, char * digits, L part )	{
+L setPart( AP A, char * digits, L part )	{
 
 	if( part==SignPart )	{
 
@@ -82,11 +82,11 @@ L setPart( APL A, char * digits, L part )	{
 L DIVBY2_PRINT_ROWS = 1;
 
 
-APL RESET0( APL A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); A->sign='+'; return A; }
-APL RESET1( APL A ) { setPartW( A,AP1->integer ); setPartF( A,AP1->integer ); A->sign='-'; return A; }
+AP RESET0( AP A ) { setPartW( A,AP0->integer ); setPartF( A,AP0->integer ); A->sign='+'; return A; }
+AP RESET1( AP A ) { setPartW( A,AP1->integer ); setPartF( A,AP1->integer ); A->sign='-'; return A; }
 
 // CORE BOOLEAN OPERATORS
-APL AND( APL LHS, APL RHS )	{
+AP AND( AP LHS, AP RHS )	{
 	
 	char* A = LHS->integer;
 	char* B = RHS->integer;
@@ -133,7 +133,7 @@ APL AND( APL LHS, APL RHS )	{
 	setPartW( _,bstr );
 	return _;
 }
-APL NOT(APL v)	{
+AP NOT(AP v)	{
 	
 	
 	APLS _v = v->integer;
@@ -151,11 +151,11 @@ APL NOT(APL v)	{
 		
 	_[i] = '\0';
 	
-	APL _2 = (APL)malloc( sizeof( APP ) );
+	AP _2 = (APL)malloc( sizeof( APP ) );
 	_2->integer = _;
 	return _2;
 }
-APL OR( APL LHS, APL RHS)	{
+AP OR( AP LHS, AP RHS)	{
 
 	char * A;
 	char * B;
@@ -199,13 +199,13 @@ APL OR( APL LHS, APL RHS)	{
 	
 	assert( k==-1 );
 	
-	APL _b = NewAPr( 0,0 );
+	AP _b = NewAPr( 0,0 );
 	
 	_b->integer = b_str;
 	
 	return _b;
 }
-APL XOR( APL LHS, APL RHS )	{
+AP XOR( AP LHS, AP RHS )	{
 
 	char* A = LHS->integer;
 	char* B = RHS->integer;
@@ -251,14 +251,14 @@ APL XOR( APL LHS, APL RHS )	{
 
 	assert( k==-1 );
 	
-	APL _ = (APL)malloc( sizeof(APP) );
+	AP _ = (APL)malloc( sizeof(APP) );
 	_->integer = bstr;
 	return _;
 }
 
 // CORE ARITHMETIC OPERATORS
-APL ADD( APL A, APL B )	{ return ADDP( A, B, DefaultPrecision ); }
-APL ADDP( APL A, APL B, AP P )	{
+AP ADD( AP A, AP B )	{ return ADDP( A, B, DefaultPrecision ); }
+AP ADDP( AP A, AP B, AP P )	{
 	
 	
 	
@@ -267,7 +267,7 @@ APL ADDP( APL A, APL B, AP P )	{
 	large strlen_a = strlen(A->integer);
 	large strlen_b = strlen(B->integer);
 	large size = ( strlen_b > strlen_a ? strlen_b : strlen_a );
-	APL C = NewAPr( size+1,0 );
+	AP C = NewAPr( size+1,0 );
 
 	scint value;
 	scint valA, valB, valC;
@@ -350,14 +350,14 @@ APL ADDP( APL A, APL B, AP P )	{
 	
 	return C;
 }
-AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
-APL SUBP( APL A, APL B, AP P )	{
+AP SUB( AP A, AP B )	{ return SUBP( A, B, DefaultPrecision ); }
+AP SUBP( AP A, AP B, AP P )	{
 	
 
 	if( (A->sign=='+') && (B->sign=='+') && (CmpAP_abs(A,B)>=1) ){
 
 		int i, j, k, valA, valB, valC;
-		APL C = NewAPr(strlen(A->integer),0);
+		AP C = NewAPr(strlen(A->integer),0);
 		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>0; i--, j--, k--){
 		
 			if(i>=0)
@@ -402,13 +402,13 @@ APL SUBP( APL A, APL B, AP P )	{
 	// Alt. SUB Algorithm:
 	// The subtrAction of A reAl number (the subtrAhend [B]) from Another (the minuend [A]) cAn be defined As the ADition of the minuend [A] And the ADitive inverse of the subtrAhend [B].
 	flipSign(B);
-	APL result = ADD(A, B);
+	AP result = ADD(A, B);
 	flipSign(B);
 
 	return result;
 }
-AP MUL( APL A, APL B )	{ return MULP( A, B, DefaultPrecision ); }
-AP MULP( APL A, APL B, APL P )  {
+AP MUL( AP A, AP B )	{ return MULP( A, B, DefaultPrecision ); }
+AP MULP( AP A, AP B, AP P )  {
 
 	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
@@ -475,7 +475,7 @@ AP MULP( APL A, APL B, APL P )  {
 		
 		D->integer = strdup(result_row);
 		
-		APL _ = (APL)malloc( sizeof( APP ) );
+		AP _ = (APL)malloc( sizeof( APP ) );
 		*_ = *C;
 		free( C->fractional	);
 		free ( C );
@@ -487,11 +487,11 @@ AP MULP( APL A, APL B, APL P )  {
 	C->sign = TT_MUL( A,B );
 	return C;
 }
-AP DIV( APL A, APL B )	{
+AP DIV( AP A, AP B )	{
 
 	return DIVP( A, B, DefaultPrecision );
 }
-AP DIVP( APL A, APL B, APL P )  {
+AP DIVP( AP A, AP B, AP P )  {
 
 	int fractional = 0;
 	int L0 = 1;
@@ -657,7 +657,7 @@ char poke( char* in, char* out, L offset ) {
 	return in[--c];
 }
 
-void setSign( APL A,char S ){
+void setSign( AP A,char S ){
 
 	if( S!='+' ){
 		if( S!='-' )
@@ -667,16 +667,16 @@ void setSign( APL A,char S ){
 }
 
 
-APL RECIPROCAL2( APL A, APL B ){
+AP RECIPROCAL2( AP A, AP B ){
 	
 	return RECIPROCAL2P( A,B,DefaultPrecision );
 }
-APL RECIPROCALP( APL A, APL DefaultPrecision ){
+AP RECIPROCALP( AP A, AP DefaultPrecision ){
 	
 	return DIV( AP1,A ); 
 }
 
-APL RECIPROCAL2P( APL A,APL B,APL ){
+AP RECIPROCAL2P( AP A,AP B,AP ){
 	
 	return DIV( B,A );
 }
@@ -736,7 +736,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	
 	while ( flag )	{
 		
-		APL temp;
+		AP temp;
 		temp = DIVBY2( Check );
 		temp->fractional = getstring( "0" );
 		FreeAP( Check );
@@ -1011,12 +1011,12 @@ char * substring_(char * source, large start, large end)	{
 
 
 #define ASCII '0'
-APL DIVBY2( APL A )	{
+AP DIVBY2( AP A )	{
 		
 	int overflow = 0;
 	int value;
 	L strlen_a = strlen( A->integer );
-	APL _ = (APL)malloc( sizeof(APP) );
+	AP _ = (APL)malloc( sizeof(APP) );
 	_->integer = zmem( strlen_a );
 	_->fractional = getstring( "0" );
 	LARGE i;
@@ -1090,7 +1090,7 @@ APL DIVBY2( APL A )	{
 
 
 // VARIOUS MATH FNCS
-L DSTRING2LARGE( APL A ){
+L DSTRING2LARGE( AP A ){
 
 char* _ = A->integer;
 L e = strlen(_)-1;
@@ -1107,15 +1107,15 @@ value += atoi(d) * (10*(e-i)); }
 return value;}
 
 /*
-APL APLCM( APL A, APL B ){
+AP APLCM( AP A, AP B ){
 	
-	APL M1 = CopyAP( AP0 );
-	APL M2 = CopyAP( AP0 );
+	AP M1 = CopyAP( AP0 );
+	AP M2 = CopyAP( AP0 );
 	
 	#define MAX_ITER 4096
-	// It is APL pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
-	APL R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
-	APL R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	// It is AP pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
+	AP R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	AP R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
 	
 	AP val = CopyAP( AP1 );
 	AP inc = CopyAP( AP0 );
@@ -1143,9 +1143,9 @@ APL APLCM( APL A, APL B ){
 }
 */
 
-APL NewAPr( large integer_range, large fractional_range )	{
+AP NewAPr( large integer_range, large fractional_range )	{
 
-	APL _ = (APL)malloc( sizeof(AP) );
+	AP _ = (APL)malloc( sizeof(AP) );
 	_ = NewAP( integer_range,fractional_range );
 	return _;
 }
@@ -1218,7 +1218,7 @@ void ClearAP(AP A)	{
 }
 
 
-void FreeAP( APL A )	{
+void FreeAP( AP A )	{
 	
 	free( A->integer );
 	free( A->fractional );
@@ -1229,13 +1229,13 @@ void FreeAP( APL A )	{
 
 
 // SIGN FNCS
-char getSign( APL A )	{
+char getSign( AP A )	{
 
 	return A->sign;
 }
 
 
-void set_sign( APL A, char sym )	{
+void set_sign( AP A, char sym )	{
 
 	if( sym!='-' )
 		sym='+';
@@ -1245,7 +1245,7 @@ void set_sign( APL A, char sym )	{
 }
 
 
-void flipSign( APL A )	{
+void flipSign( AP A )	{
 
 	if( A->sign == '-' )
 		A->sign = '+';
@@ -1255,7 +1255,7 @@ void flipSign( APL A )	{
 	return;
 }
 
-char TT_ADD( APL A, APL B )	{
+char TT_ADD( AP A, AP B )	{
 	
 	signed int a = CmpAP_abs(A,B);
 	
@@ -1284,7 +1284,7 @@ char TT_ADD( APL A, APL B )	{
 	return '+';
 }
 
-char TT_MUL( APL A, APL B )	{
+char TT_MUL( AP A, AP B )	{
 
 	if( getSign(A)!=getSign(B) )
 		return '-';
@@ -1365,7 +1365,7 @@ A = _;
 
 return -1; }
 
-scint CmpAP_abs_ws( APL A, APL B )	{
+scint CmpAP_abs_ws( AP A, AP B )	{
 	
 	if( A->sign=='+' && B->sign=='-' ) return  1;
 	if( A->sign=='-' && B->sign=='+' ) return -1;

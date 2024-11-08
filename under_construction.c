@@ -91,8 +91,8 @@ char* genAlgorithm( char* A, char* B )	{
 AP testFncDivMul( AP A, AP B ) {	
 	
 	int t = (strlen(B->integer)>strlen(A->integer)?strlen(B->integer):strlen(A->integer));
-	APL C = NewAP( t+2, 0 );
-	APL R = NewAP( t, 0 );
+	AP C = NewAP( t+2, 0 );
+	AP R = NewAP( t, 0 );
 	
 	
 	char* A_ = A->integer;
@@ -116,8 +116,8 @@ AP testFncDivMul( AP A, AP B ) {
 	digit c = overflow-1;
 	*C = c + '0';
 	
-	APL _b = NewAPr( 1, 0 );
-	APL _c = NewAPr( 1, 0 );
+	AP _b = NewAPr( 1, 0 );
+	AP _c = NewAPr( 1, 0 );
 
 	//case '/':
 	while (1) {
@@ -129,8 +129,8 @@ AP testFncDivMul( AP A, AP B ) {
 			c = *(C_++);
 			//_ += b*c;
 			_b->integer[0]=b, _c->integer[0]=c;
-			APL temp2;
-			APL temp=op( "+=", _, temp2=op( "*", _b, _c ) );
+			AP temp2;
+			AP temp=op( "+=", _, temp2=op( "*", _b, _c ) );
 			
 			free( temp2 );
 			free( _ );
@@ -143,7 +143,7 @@ AP testFncDivMul( AP A, AP B ) {
 		// reset the char* pointer to AP B->integer
 		B_ = B->integer;
 		
-		APL temp;
+		AP temp;
 		if( (temp=op( ">", _,R ))->integer[0]=='1' )
 			--c;
 		else{
@@ -157,8 +157,8 @@ AP testFncDivMul( AP A, AP B ) {
 		
 	*(C_++) = c;
 
-	APL temp2;
-	APL temp = op( "=", R, temp2=op( "-", R,_ ) );
+	AP temp2;
+	AP temp = op( "=", R, temp2=op( "-", R,_ ) );
 
 
 	loop_with_equality_cmp:

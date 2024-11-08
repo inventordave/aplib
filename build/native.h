@@ -12,18 +12,18 @@ double qdiv_i(int n, int d);
 char 	* cat(int c, char * s, ...);
 char * safecat(char * s, char * rhs);
 double expound(double base, int exp);
-APL prime(APL, APL, cint);
+AP prime(APL, APL, cint);
 
 
 double expound(double base, int exp);
-//APL prime(APL, APL, cint);
+//AP prime(APL, APL, cint);
 
-APL primedata(APL min, APL max, APL step);
+AP primedata(AP min, AP max, AP step);
 
 #define LARGE unsigned long long int
 #define large LARGE
 
-APL isprime ( APL );
+AP isprime ( AP );
 
 #endif
 
