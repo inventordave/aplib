@@ -1514,7 +1514,6 @@ AP lcm_example(int argc, char **argv)	{
 
 AP NewAPr( large integer_range, large fractional_range )	{
 
-	AP _ = (APL)malloc( sizeof(AP) );
 	_ = NewAP( integer_range,fractional_range );
 	return _;
 }

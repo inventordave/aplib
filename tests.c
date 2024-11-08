@@ -6,6 +6,135 @@
 #include "ap_io.h"
 
 
+char* genRndDStr( int len )	{
+
+	char* _ = malloc( len+1 );
+
+	int i;
+	for( i=0; i<len; i++ )
+		_[i] = rand()%10;
+
+	
+
+}
+
+int unitTests( void )	{
+
+	AP A;
+	AP B;
+
+	char* _A, _B;
+
+	// Tests 1-12, ADD( A,B )
+
+	// A_abs == B_abs
+
+	_A = genRndDStr( 20 );
+	setPartW( A, _A );
+	B = CopyAP( A );
+
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+
+	// A_abs > B_abs
+
+	_A = genRndDStr( 20 );
+	setPartW( A, _A );
+	B = CopyAP( A );
+
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+
+	// A_abs < B_abs
+
+	_A = genRndDStr( 20 );
+	setPartW( A, _A );
+
+	_B = genRndDStr( 25 );
+	setPartW( B, _B );
+
+
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+
+
+	// A_abs > B_abs
+
+	_A = genRndDStr( 25 );
+	setPartW( A, _A );
+
+	_B = genRndDStr( 20 );
+	setPartW( B, _B );
+
+
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+
+
+
+}
+
+
 // TEST FNCS
 void exOrTest(int argc, char ** argv)	{
 	
