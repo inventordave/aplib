@@ -1,4 +1,5 @@
 // T£STS.c
+#include <stdlib.h>
 #include "tests.h"
 #include "aplib.h"
 #include "ap.h"
@@ -11,19 +12,22 @@ char* genRndDStr( int len )	{
 	char* _ = malloc( len+1 );
 
 	int i;
-	for( i=0; i<len; i++ )
+	for( i=0; i<len; i++ )	{
 		_[i] = rand()%10;
+	}
 
-	
-
+	return _;
 }
 
 int unitTests( void )	{
 
-	AP A;
-	AP B;
+	int count = 0;
 
-	char* _A, _B;
+	AP A = NewAP(0,0);
+	AP B = NewAP(0,0);
+
+	char* _A;
+	char* _B;
 
 	// Tests 1-12, ADD( A,B )
 
@@ -31,11 +35,14 @@ int unitTests( void )	{
 
 	_A = genRndDStr( 20 );
 	setPartW( A, _A );
-	B = CopyAP( A );
+	_B = strdup( _A );
+	setPartW( B, _B );
 
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
+
+	printf( "%c%s\t+\t%c%s = %c%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C-integer );
 
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
@@ -53,9 +60,10 @@ int unitTests( void )	{
 
 	// A_abs > B_abs
 
-	_A = genRndDStr( 20 );
+	_A = genRndDStr( 25 );
 	setPartW( A, _A );
-	B = CopyAP( A );
+	_B = genRndDStr( 20 );
+	setPartW( B, _B );
 
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
@@ -130,9 +138,11 @@ int unitTests( void )	{
 	setSign( B, '-' );
 
 
-
+	return count;
 
 }
+
+/**
 
 
 // TEST FNCS
@@ -196,7 +206,7 @@ void orTest(int argc, char ** argv)	{
 	
 	printf( "%s%s\n", a_or_b?dummy:buf, a );
 	printf( "%s%s\n", a_or_b?buf:dummy, b );
-	printf( "%s\n", formatbinary(c) );
+	printf( "%s\n", formatBinary(c) );
 	
 	free( buf );
 	free( dummy );
@@ -211,7 +221,7 @@ void notTest(int argc, char ** argv)	{
 	
 	printf( "Input  string: %s\n", formatBinary(str) );
 	
-	char * str2 = NOT(str);
+	char * str2 = NOT(str)->integer;
 	printf( "Output string: %s\n", formatBinary(str2) );
 
 	return;
@@ -225,7 +235,7 @@ void andTest(int argc, char **argv)	{
 	int len_a = strlen(a);
 	int len_B = strlen(b);
 	
-	char * c = aND(a, B);
+	char * c = AND(a, B);
 	
 	int a_or_B = (len_a>=len_B)?1:0;
 	int diff = a_or_B?(len_a-len_B):(len_B-len_a);
@@ -397,14 +407,15 @@ void fs_test1(int argc, char **argv)	{
 
 void q_test(int argc, char **argv)	{
 
-	/*
-	1. create float.
-	2. convert float to string, then printf
-	3. create ieee_float object from &float
-	4. read ieee_float object to float
-	5. convert float to string, then printf
-	6. when correct, both printed strings should be identical
-	*/
+	
+	//1. create float.
+	//2. convert float to string, then printf
+	//3. create ieee_float object from &float
+	//4. read ieee_float object to float
+	//5. convert float to string, then printf
+	//6. when correct, both printed strings should be identical
+	
+
 
 	float f = -6543.21f;
 	char * str = IEEE_readFloat( f );
@@ -468,4 +479,6 @@ void readFloatTest(int argc, char **argv)	{
 
 	return;
 }
+
+*/
 

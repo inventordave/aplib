@@ -4,6 +4,7 @@
 #include "colour.h"
 #include "aplib.h"
 #include "testFnc.h"
+#include "tests.h"
 
 int main( int argc, char** argv ){
 
@@ -13,7 +14,7 @@ int main( int argc, char** argv ){
 	INC( AP1 );
 	
 	
-	int result = unitTests( char* argv[1], char* argv[2] );
+	int result = unitTests( );
 
 	printf( "Number of Unit tests succeeded: %d\n", result );
 

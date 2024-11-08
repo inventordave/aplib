@@ -6,7 +6,7 @@
 
 // TEST FUNCTION DECLS
 
-int unitTests( char* A, char* B );
+int unitTests( void );
 
 void dec_2_Bin_2_dec(int argc, char **argv);
 void basicTest(int argc, char **argv); // AD, SUB, MUL, EXP - requires 2 decimal strings in argv[1]/argv[2].

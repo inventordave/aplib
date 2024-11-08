@@ -3,8 +3,10 @@
 aplib: aplib.c aplib.h colour.c colour.h io.c io.h
 	gcc -Wall -g -DDEBUG aplib.c colour.c io.c -lstd -c aplib.o
 
-test: testFnc.c testFnc.h tests.c test.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
-	gcc -Wall -mconsole -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c tests.c testFnc.c -o test.exe
+# testFnc.c testFnc.h tests.c tests.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
+
+test:
+	gcc -Wall -g -DDEBUG aplib.c i754.c lib.c io.c tests.c testFnc.c -o test.exe
 
 sandbox: sandbox.c sandbox.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
 	gcc -Wall -mconsole -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe

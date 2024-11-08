@@ -2,7 +2,7 @@
 
 #include "lib.h"
 #include "stringy.h"
-#include "colour.h"
+// #include "colour.h"
 #include "aplib.h"
 
 #include "stringy.h"
@@ -370,7 +370,7 @@ AP ADDP( AP A, AP B, AP P )	{
 			break;
 
 		case +1:
-			if{( (A->sign=='-') && (B->sign=='-') )
+			if( (A->sign=='-') && (B->sign=='-') )
 				sign_C = '-';
 
 			else{
@@ -1514,7 +1514,7 @@ AP lcm_example(int argc, char **argv)	{
 
 AP NewAPr( large integer_range, large fractional_range )	{
 
-	_ = NewAP( integer_range,fractional_range );
+AP 	_ = NewAP( integer_range,fractional_range );
 	return _;
 }
 
