@@ -288,81 +288,91 @@ return -1; }
 APL ADD( APL A, APL B )	{ return ADDP( A, B, DefaultPrecision ); }
 APL ADDP( APL A, APL B, AP P )	{
 	
-	
-	
+	signed sign_A = getSign(A)=='+' ? +1 : -1;
+	signed sign_B = getSign(B)=='+' ? +1 : -1;
 	int flag = 0;
 	
 	large strlen_a = strlen(A->integer);
 	large strlen_b = strlen(B->integer);
-	large size = ( strlen_b > strlen_a ? strlen_b : strlen_a );
+
+	int AorB = CmpAP_abs( A,B );
+
+	large size = ( !AorB ? strlen_b : strlen_a );
 	APL C = NewAPr( size+1,0 );
 
-	scint value;
-	scint valA, valB, valC;
+	signed value;
+	signed valA, valB, valC;
 	
-	signed int i, j, k;
-	
-	if( getSign(A) == getSign(B) )	{
-		
-		for( i=strlen_a-1, j=strlen_b-1, k=size; k>0; i--, j--, k--)	{
-		
-			if(i>=0)
-				valA = A->integer[i] - '0';
-			else
-				valA = 0;
-			
-			if(j>=0)
-				valB = B->integer[j] - '0';
-			else
-				valB = 0;
-			
-			valC = (C->integer[k] - '0');	
-			
-			valA += valC;
+	APL temp;
 
-				
-			value = valA + valB;
+	if( !AorB )	{
 
-			if( value>=10 )	{
-				
-				value -= 10;
-				C->integer[k-1] += 1;
-			}
-			
-			//C->integer[k] = '0' + value;
-			
-			setDigit( C,k,('0'+value) );
-
-		}
+		temp = B;
+		B = A;
+		A = temp;
 	}
+
+	signed int i, j, k;
+		
+	for( i=strlen_a-1, j=strlen_b-1, k=size; k>0; i--, j--, k--)	{
+	
+		if(i>=0)
+			valA = A->integer[i] - '0';
+		else
+			valA = 0;
+		
+		valA *= sign_A;
+
+		if(j>=0)
+			valB = B->integer[j] - '0';
+		else
+			valB = 0;
+
+		valB *= sign_B;
+		
+		valC = (C->integer[k] - '0');	
+		
+		valA += valC;
+
+		value = valA + valB;
+
+		if( value>=10 )	{
+			
+			value -= 10;
+			C->integer[k-1] += 1;
+		}
+		
+		//C->integer[k] = '0' + value;
+		
+		setDigit( C,k,('0'+value) );
+	}
+
+	/**
 	else	{
 		
-	//SubtrAct the smAller Absolute value from the lArger Absolute value And give the Answer the sAme sign As the number with the lArger Absolute value
+	//Subtract the smaller absolute value from the larger absolute value and give the answer the same sign as the number with the larger absolute value
 		char tsign;
-		if( CmpAP(A,B)==-1 )	{
-			
-			tsign = B->sign;
-			
-			AP temp;
-			temp = A;
-			A = B;
-			B = temp;
-		}
+		char asign = A->sign;
+		char bsign = B->sign;
+
+		char AorB = CmpAP_abs(A,B);
+		if( AorB==-1 )
+			tsign = bsign;
 		else
-			tsign = A->sign;
+			tsign = asign;
 		
 		A->sign = '+';
-		C->sign = '+';
-		C = SUB( A,B );
-		C->sign = tsign;
-		flag = 1;
-	}
-	
-	
-	if( ( TT_ADD( A,B )=='-' ) && (flag==0) )
-		C->sign = '-';
+		B->sign = '+';
 
-	
+		C = ( AorB>-1 ? SUB( A,B ) : SUB( B,A ) );
+		C->sign = tsign;
+
+		A->sign = asign;
+		B->sign = bsign;
+	}
+	*/
+
+	/*
 	register char * _ = (char *)malloc(strlen(C->integer)+1);
 	strcpy(_, C->integer);
 	for( i=0; i<(int)strlen(_); i++ )
@@ -375,61 +385,24 @@ APL ADDP( APL A, APL B, AP P )	{
 	
 	if( *C->integer == '\0' )
 		--C->integer;
-	
+	*/
+
+	if( !AorB )	{
+
+		temp = B;
+		B = A;
+		A = temp;
+	}
+
+	if( CmpAP_signed( A, B ) )
+
 	return C;
 }
 AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
 AP SUBP( APL A, APL B, AP P )	{
-	
 
-	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(A,B)>=0) ){
-
-		int i, j, k, valA, valB, valC;
-		APL C = NewAPr(strlen(A->integer),0);
-		for( i=strlen(A->integer)-1, j=strlen(B->integer)-1, k=strlen(C->integer)-1; k>=0; i--, j--, k--){
-		
-			if(i>=0)
-				valA = A->integer[i] - '0';
-			else 
-				valA = 0;
-			
-			if(j>=0)
-				valB = B->integer[j] - '0';
-			else
-				valB = 0;
-			
-			valC = (C->integer[k] - '0');	
-			
-			valA += valC;
-
-			if( valA<valB )	{
-				
-				C->integer[k-1] -= 1;
-				valA += 10;
-			}
-
-			int value = valA - valB;
-			C->integer[k] = '0' + value;
-		}
-		
-		int len = strlen(C->integer);
-		char* _ = getstring( C->integer );
-		for( i=0; i<len; i++ )
-			if( _[i] == '0' )
-				++C->integer;
-			else
-				break;
-	
-		free( _ );
-	
-		if( *(C->integer) == '\0' )
-			--C->integer;
-		
-		return C;
-	}
-	
 	// Alt. SUB Algorithm:
-	// The subtrAction of A reAl number (the subtrAhend [B]) from Another (the minuend [A]) cAn be defined As the ADition of the minuend [A] And the ADitive inverse of the subtrAhend [B].
+	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
 	flipSign(B);
 	APL result = ADD(A, B);
 	flipSign(B);
@@ -569,7 +542,7 @@ AP DIVP( APL A, APL B, APL P )  {
 		v->integer[0] = '1';
 		
 		temp = MUL( B,v );
-		while( CmpAP( temp,Remainder ) < 1 )	{
+		while( CmpAP_abs( temp,Remainder ) < 1 )	{
 			
 			FreeAP( temp );
 			
@@ -619,7 +592,7 @@ AP DIVP( APL A, APL B, APL P )  {
 		CONCAT( Remainder->integer,Dropdown->integer );
 		
 		
-		//if( fractional && !CmpAP(Remainder,AP0) )
+		//if( fractional && !CmpAP_abs(Remainder,AP0) )
 		//	break;
 
 /*
@@ -641,7 +614,7 @@ AP DIVP( APL A, APL B, APL P )  {
 	// fractional overflow
 	if( !fractional )	{
 		
-		if( CmpAP( Remainder, AP0 )!=0 )	{
+		if( CmpAP_abs( Remainder, AP0 )!=0 )	{
 
 			fractional = 1;
 			Cc[ strlen(Cc) ] = '\0';
@@ -877,7 +850,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 			
 		++length;
 		
-		if( CmpAP(Check,t)<= 0 )
+		if( CmpAP_abs(Check,t)<= 0 )
 			flag = 0;
 	} 
 	
@@ -983,7 +956,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		AP t = NewAP(1,0);
 		t->integer[0] = '0';
 		
-		if( CmpAP(input2,t)==0 )
+		if( CmpAP_abs(input2,t)==0 )
 			flag = 0;
 		
 		FreeAP( input2 );
@@ -1384,14 +1357,14 @@ APL EXP(APL A, APL B)	{
 	// PAST THE NEGATIVE_EXPONENT GATE.
 	
 	// if exponent B=0, Result of A^B := 1. (n exp 0 == 1).
-	if( CmpAP( B,AP0 )==0 )
+	if( CmpAP_abs( B,AP0 )==0 )
 		return CopyAP( AP1 );
 	
 	AP D = SUB( B,AP1 );
 	
 	_ = CopyAP(A);
 	
-	while( CmpAP( D,AP0 )==+1 )	{
+	while( CmpAP_abs( D,AP0 )==+1 )	{
 		
 		_ = MUL( _,A );
 		
@@ -1446,8 +1419,8 @@ APL APLCM( APL A, APL B ){
 	AP APMAXITER = NewAP( strlen(maxiter),0 );
 	setPartW( APMAXITER, maxiter );
 	
-	while( !CmpAP(Match,AP0) ){		
-	if( CmpAP( inc,APMAXITER ) ){
+	while( !CmpAP_abs(Match,AP0) ){		
+	if( CmpAP_abs( inc,APMAXITER ) ){
 	printf("Overflow error: More than %d iterations required.\n", MAX_ITER);
 	exit(1);}
 
@@ -1479,9 +1452,9 @@ APL LCM( APL A, APL B )	{
 	
 	M1 = A; M2 = B;
 	
-	while (! CmpAP( match, AP0 ))	{
+	while (! CmpAP_abs( match, AP0 ))	{
 		
-		if ( CmpAP( inc, AP_MAX_ITER)>=0 )	{
+		if ( CmpAP_abs( inc, AP_MAX_ITER)>=0 )	{
 			
 			printf( "Overflow error: More thAn %d iterAtions required.\n", MAX_ITER );
 			exit( 1 );
@@ -1507,9 +1480,9 @@ APL LCMTESTSTR( aptr max, aptr* R1, aptr* R2 )	{
 	
 	aptr a = NewAPr( 0,0 );
 	aptr b = NewAPr( 0,0 );
-	for (FreeAP(a), a = CopyAP( AP0 ); CmpAP( a,max )<=1; INC(a) )
-		for (FreeAP(b), b = CopyAP( AP0 ); CmpAP( b,max )<=1; INC(b) )
-			if ( CmpAP( R1[str2int(a->integer)],R2[str2int(b->integer)] )==0 )
+	for (FreeAP(a), a = CopyAP( AP0 ); CmpAP_abs( a,max )<=1; INC(a) )
+		for (FreeAP(b), b = CopyAP( AP0 ); CmpAP_abs( b,max )<=1; INC(b) )
+			if ( CmpAP_abs( R1[str2int(a->integer)],R2[str2int(b->integer)] )==0 )
 				return a;
 			
 	return b;
@@ -1696,7 +1669,7 @@ void flipSign( APL A )	{
 
 char TT_ADD( APL A, APL B )	{
 	
-	signed int a = CmpAP(A,B);
+	signed int a = CmpAP_abs(A,B);
 	
 	if( (getSign(A)=='+') && (getSign(B)=='+') ) // x2, A < B, A > B
 		return '+';
@@ -1791,13 +1764,13 @@ char peek( large c, char* _ ){
 // clearly, char at str[0] is considered digit "1"
 return _[c - 1];}
 
-// scint CmpAP( APL, APL )
-scint CmpAP( APL A, APL B )	{
+// scint CmpAP_abs( APL, APL )
+scint CmpAP_abs( APL A, APL B )	{
 	
 	if( A->integer == NULL )
-		printf( "Warning. Arg A in CmpAP is NULLptr.\n" );
+		printf( "Warning. Arg A in CmpAP_abs is NULLptr.\n" );
 	if( B->integer == NULL )
-		printf( "Warning. Arg B in CmpAP is NULLptr.\n" );
+		printf( "Warning. Arg B in CmpAP_abs is NULLptr.\n" );
 	
 	APP Ac, Bc;
 	

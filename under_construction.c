@@ -1,4 +1,93 @@
+#define L unsigned long long int
+
+#include <stdio.h>
+#include <string.h>
+
+char* genAlgorithm( char* A, char* B )	{
+
+	L strlen_A = (L)strlen( A );
+	L strlen_B = (L)strlen( B );
+
+	L strlen_C = strlen_A < strlen_B ? strlen_strlen_B : strlen_A ;
+
+	// ADD, SUB have 1 result row.
+	// MUL, DIV have N result rows ( N = len(B) )
+
+	L N;
+
+	if( !strcmp( op, "MUL") || !strcmp( op, "DIV") )
+		N = (L)strlen_B;
+	else
+		N = 1;
+
+	char* C;
+	if( N==1 ) C = malloc( (strlen_C = strlen_C + 1 + 1) );
+	else C = malloc( (strlen_C = strlen_C * 2 + 1) );
+
+	char* A_sub = N==1 ? calloc( 2 ) : calloc( strlen_B + 1 + 1 );
+	char* B_sub = N==1 ? calloc( 2 ) : calloc( strlen_B + 1 );
+	char* C_sub = malloc( 2 ); // this is only 1 char wide. [0, 9]
+	C_sub[0] = '0';
+	C-sub[1] = '\0';
+
+	unsigned C_factor = 0; // note the different type. C_factor is in range 0 to 9.
+	signed step_r = 0; // step_r is "step result", between -9 and +81
+
+
 	
+
+	int f;
+	if( !strcmp( op, "SUB") || !strcmp( op, "DIV") )
+		f = 0;
+	else
+		f = +1;
+
+
+	// Iteratively generate the result row(s).
+
+	int i, j, k;
+
+	char val;
+
+	if( N==1 )	{ // ADD, SUB
+		B_sub[0] = A_sub[0];
+	}
+	else	{
+
+		int b;
+		for( b = 0; b<strlen_B; b++ )
+			B_sub[b] = B[b]; 
+	}
+
+	for( i=0; i<N; i++ )	{
+		
+		for( j=strlen_B-1; j>=0; j-- )	{
+
+			for( k=strlen_A-1; k>=0; k-- )	{
+
+					if( !f )
+					step_r = SUB( A_sub, B_sub ) ;
+					else
+					step_r = ADD( A_sub, B_sub ) ;
+
+				switch( N )	{
+
+					case 1:
+
+						break;
+					
+					default:
+
+
+				}
+			}
+		}
+		
+	}
+}	
+
+
+
 AP testFncDivMul( AP A, AP B ) {	
 	
 	int t = (strlen(B->integer)>strlen(A->integer)?strlen(B->integer):strlen(A->integer));
@@ -73,7 +162,7 @@ AP testFncDivMul( AP A, AP B ) {
 
 
 	loop_with_equality_cmp:
-	signed short int equalityAB = CmpAP( A,B );
+	signed short int equalityAB = CmpAP_abs( A,B );
 	
 	loop:
 

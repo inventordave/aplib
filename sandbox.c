@@ -180,7 +180,7 @@ LARGE searcharray( char** p2p2, char* _, LARGE arraysize ){
 APL OP( char* opcode, APL A, APL B ){
 
 	#define digit char
-	scint equalityAB = CmpAP( A,B );
+	scint equalityAB = CmpAP_abs( A,B );
 	LARGE symbol = searcharray( GetAPSymbols(), opcode, 65535 );	
 	AP P = DefaultPrecision;
 	
@@ -262,7 +262,7 @@ APL OP( char* opcode, APL A, APL B ){
 			
 		case OP_ISNOT:
 			free( C );
-			if( CmpAP( A,AP0 ) )
+			if( CmpAP_abs( A,AP0 ) )
 			return CopyAP( AP1 );
 			else
 			return CopyAP( AP0 );

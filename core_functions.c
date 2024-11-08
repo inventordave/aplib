@@ -311,7 +311,7 @@ APL ADDP( APL A, APL B, AP P )	{
 		
 	//SubtrAct the smAller Absolute value from the lArger Absolute value And give the Answer the sAme sign As the number with the lArger Absolute value
 		char tsign;
-		if( CmpAP(A,B)==-1 )	{
+		if( CmpAP_abs(A,B)==-1 )	{
 			
 			tsign = B->sign;
 			
@@ -354,7 +354,7 @@ AP SUB( APL A, APL B )	{ return SUBP( A, B, DefaultPrecision ); }
 APL SUBP( APL A, APL B, AP P )	{
 	
 
-	if( (A->sign=='+') && (B->sign=='+') && (CmpAP(A,B)>=1) ){
+	if( (A->sign=='+') && (B->sign=='+') && (CmpAP_abs(A,B)>=1) ){
 
 		int i, j, k, valA, valB, valC;
 		APL C = NewAPr(strlen(A->integer),0);
@@ -541,7 +541,7 @@ AP DIVP( APL A, APL B, APL P )  {
 		v->integer[0] = '0';
 		
 		temp = MUL( B,v );
-		while( CmpAP( temp,Remainder ) < 1 )	{
+		while( CmpAP_abs( temp,Remainder ) < 1 )	{
 			
 			v2 = ADD(v, inc);
 			free( v->integer );
@@ -590,7 +590,7 @@ AP DIVP( APL A, APL B, APL P )  {
 
 		if( fractional )	{
 			
-			if( CmpAP( Remainder,AP0 ) == 0 )	{
+			if( CmpAP_abs( Remainder,AP0 ) == 0 )	{
 				break;
 			}
 		}
@@ -613,7 +613,7 @@ AP DIVP( APL A, APL B, APL P )  {
 		
 		fractional = 1;
 
-		if( CmpAP( C,AP0 )==0 )
+		if( CmpAP_abs( C,AP0 )==0 )
 			--C->integer;
 		
 		//integer = strdup( C->integer );
@@ -622,7 +622,7 @@ AP DIVP( APL A, APL B, APL P )  {
 	offset = 0;
 	Dropdown->integer[0] = '0';
 	
-	if( CmpAP( Remainder,AP0 ) == 1 )
+	if( CmpAP_abs( Remainder,AP0 ) == 1 )
 		goto loop;
 	
 	maxiterations: // Upper-bound for precision of calculation reached.
@@ -749,7 +749,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 			
 		++length;
 		
-		if( CmpAP(Check,t)<= 0 )
+		if( CmpAP_abs(Check,t)<= 0 )
 			flag = 0;
 	} 
 	
@@ -858,7 +858,7 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 		AP t = NewAP(1,0);
 		t->integer[0] = '0';
 		
-		if( CmpAP(input2,t)==0 )
+		if( CmpAP_abs(input2,t)==0 )
 			flag = 0;
 		
 		FreeAP( input2 );
@@ -1126,8 +1126,8 @@ APL APLCM( APL A, APL B ){
 	AP APMAXITER = NewAP( strlen(maxiter),0 );
 	setPartW( APMAXITER, maxiter );
 	
-	while( !CmpAP(Match,AP0) ){		
-	if( CmpAP( inc,APMAXITER ) ){
+	while( !CmpAP_abs(Match,AP0) ){		
+	if( CmpAP_abs( inc,APMAXITER ) ){
 	printf("Overflow error: More than %d iterations required.\n", MAX_ITER);
 	exit(1);}
 
@@ -1257,7 +1257,7 @@ void flipSign( APL A )	{
 
 char TT_ADD( APL A, APL B )	{
 	
-	signed int a = CmpAP(A,B);
+	signed int a = CmpAP_abs(A,B);
 	
 	if( (getSign(A)=='+') && (getSign(B)=='+') ) // x2, A < B, A > B
 		return '+';
@@ -1365,7 +1365,7 @@ A = _;
 
 return -1; }
 
-scint CmpAP_ws( APL A, APL B )	{
+scint CmpAP_abs_ws( APL A, APL B )	{
 	
 	if( A->sign=='+' && B->sign=='-' ) return  1;
 	if( A->sign=='-' && B->sign=='+' ) return -1;

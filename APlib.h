@@ -243,8 +243,8 @@ extern APL NAND(APL LHS, APL RHS);
 extern APL NOP( APL A );
 
 // EQUALITY READ-OPERATORS
-extern short CmpAP( APL,APL );
-extern scint CmpAP_abs( APL, APL );
+extern short CmpAP_abs( APL,APL );
+extern scint CmpAP_abs_abs( APL, APL );
 
 // SIGN ( +,- )
 extern void flipSign( APL );

@@ -18,7 +18,7 @@ APL isprime ( APL IN )	{
 		// trial division algorithm, divide n by every integer between 2 and sqrt(n), as at n = a . b, either a
 		// or b will not be bigger than sqrt(n), which means all tests have been performed
 		
-		if( CmpAP( IN,AP1 )==0 ){
+		if( CmpAP_abs( IN,AP1 )==0 ){
 			// base case: 1, the smallest prime number is 2...
 			
 			if( report==ON )
@@ -28,7 +28,7 @@ APL isprime ( APL IN )	{
 		}
 		
 		APL AP2 = ADD( AP1,AP1 );
-		if( CmpAP`( IN,AP2 )==0 ){
+		if( CmpAP_abs`( IN,AP2 )==0 ){
 			// base case 2, it interferes with the test conditional, as 2 % 2 == 0, which fails the value 2 for the test. 
 			// Subsequent n % k tests don't have to check if n == k, as k will never be more than sqrt(n)
 			
@@ -42,10 +42,10 @@ APL isprime ( APL IN )	{
 	
 //-------------------------------
 
-	for (AP K=CopyAP(AP0); CmpAP( K,SQRT )==-1; INC(K) ){
+	for (AP K=CopyAP(AP0); CmpAP_abs( K,SQRT )==-1; INC(K) ){
 		
 		APL T;
-		if( CmpAP( (T=(APL)MODULO(IN,K)), AP0) ){
+		if( CmpAP_abs( (T=(APL)MODULO(IN,K)), AP0) ){
 			
 			if( report==ON )
 			printf("%s is NOT prime. It was divisable at  %s.\n", IN->integer, K->integer);

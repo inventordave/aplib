@@ -31,12 +31,12 @@ AP operator-( AP A, AP B ){ return SUB( A,B ); }
 AP operator*( AP A, AP B ){ return MUL( A,B ); }
 AP operator/( AP A, AP B ){ return DIV( A,B ); }
 AP operator|( AP A, AP B ){ return OR( A,B ); }
-AP operator==( AP A, AP B ){ return !CmpAP( A,B ); }
-AP operator!=( AP A, AP B ){ return CmpAP( A,B ); }
-AP operator>=( AP A, AP B ){ return (CmpAP(A,B)>=0); }
-AP operator<=( AP A, AP B ){ return (CmpAP(A,B)<=0); }
-AP operator> ( AP A, AP B ){ return (CmpAP(A,B)>0);  }
-AP operator< ( AP A, AP B ){ return (CmpAP(A,B)<0);  }
+AP operator==( AP A, AP B ){ return !CmpAP_abs( A,B ); }
+AP operator!=( AP A, AP B ){ return CmpAP_abs( A,B ); }
+AP operator>=( AP A, AP B ){ return (CmpAP_abs(A,B)>=0); }
+AP operator<=( AP A, AP B ){ return (CmpAP_abs(A,B)<=0); }
+AP operator> ( AP A, AP B ){ return (CmpAP_abs(A,B)>0);  }
+AP operator< ( AP A, AP B ){ return (CmpAP_abs(A,B)<0);  }
 AP operator===(AP A ,AP B ){ return (&A == &B);      }
 AP operator! ( AP A      ){ return NOT( AP A );		 }
 AP operator& ( AP A, AP B ){ return AND( A,B );		 }
