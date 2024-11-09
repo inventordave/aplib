@@ -11,6 +11,17 @@ int main( int argc, char** argv ){
 	printf( "Begin...\n" );
 	fflush( stdout );
 
+	//ActivateColorConsole();
+	colorMode();
+
+	// Test colourization output.
+
+	printf( "%s%sThis text should be yellow on black.%s\n", FG_BRIGHT_YELLOW, BG_BLACK, NORMAL );
+	printf( "If the above text is not colourized as expected, ANSI/VT support is not available.\n\n");
+	
+	//
+
+
 	//INIT()
 	AP0 = NewAPr( 1,1 );
 	AP1 = CopyAP( AP0 );
@@ -19,7 +30,7 @@ int main( int argc, char** argv ){
 	printf( "Trying to run Unit tests...\n\n" );
 
 	
-	int result = unitTests( );
+	int result = unitTests_MUL( );
 
 	printf( "Number of Unit tests succeeded: %d\n", result );
 

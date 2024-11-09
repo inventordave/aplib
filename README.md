@@ -6,7 +6,7 @@ developed by "Dave" (sometimes known as "RickyBobby170*").
 # -/-------
 
 
-Makefile assumes GCC Make, targeting GCC C.
+Makefile assumes GCC Make, targeting GCC or CLANG C.
 "colour" assumes Windows for the console device handle, but implements ANSI/VT in the control-code implementation part.
 
 

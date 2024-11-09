@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-#include <windows.h>
+// #include <windows.h>
 #include "lib.h"
 #include "colour.h"
 #include "stringy.h"
@@ -152,7 +152,7 @@ struct AVTC* ActivateColorConsole(){
 	
 	if( ANSI->is!=ANSI_IS ){
 		
-		printf( "ANSI Env Variable not initialised! Initialising...\n" );
+		// printf( "ANSI Env Variable not initialised! Initialising...\n" );
 		ANSI_init();
 	}
 	
@@ -247,133 +247,146 @@ char* SetVT( char* fg, char* bg )	{
 
 void Init_ANSIVT_CTABLE(){
 
-if( ANSI->is != ANSI_IS ){
-printf( "ANSI VT System not Initialised! Initialising...\n" );
-ANSI_init();}
+	if( ANSI->is != ANSI_IS ){
+		
+		printf( "ANSI VT System not Initialised! Initialising...\n" );
+		ANSI_init();
+	}
 
-char** ANSIVT_CTABLE/*64*2*/ = (char**)malloc( (64*2) * sizeof(char*) );
+	char** ANSIVT_CTABLE/*64*2*/ = (char**)malloc( (64*2) * sizeof(char*) );
 
-uint32_t i=0;
-//FG
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" ); // BASE + (i*4) + (0*4)
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLACK;
+	uint32_t i=0;
+	//FG
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" ); // BASE + (i*4) + (0*4)
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_RED;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_GREEN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_YELLOW;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLUE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_MAGENTA;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_CYAN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_WHITE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_WHITE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLACK;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_RED;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_GREEN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_YELLOW;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLUE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_MAGENTA;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_CYAN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
-*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_WHITE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= FG_BRIGHT_WHITE;
 
-// BG
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLACK;
+	// BG
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "black" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_RED;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "red" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_GREEN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "green" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_YELLOW;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "yellow" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLUE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "blue" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_MAGENTA;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "magenta" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_CYAN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "cyan" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_WHITE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "white" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_WHITE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLACK;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_black" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLACK;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_RED;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_red" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_RED;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_GREEN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_green" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_GREEN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_YELLOW;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_yellow" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_YELLOW;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLUE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_blue" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_BLUE;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_MAGENTA;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_magenta" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_MAGENTA;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_CYAN;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_cyan" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_CYAN;
 
-*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
-*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_WHITE;
+	*(ANSIVT_CTABLE + (i*4) + 0)= getstring( "bright_white" );
+	*(ANSIVT_CTABLE + (i*4) + 4)= BG_BRIGHT_WHITE;
 
-// RESET
-*(ANSIVT_CTABLE + (i*4) + 0) = getstring( "default" );
-*(ANSIVT_CTABLE + (i*4) + 4) = NORMAL;
+	// RESET
+	*(ANSIVT_CTABLE + (i*4) + 0) = getstring( "default" );
+	*(ANSIVT_CTABLE + (i*4) + 4) = NORMAL;
 
-// i contains a count of all the colour codes. Should be 33.
-ANSI->c->ANSIVT_CTABLE = ANSIVT_CTABLE;
-ANSI->c->fg( "white" );
-ANSI->c->bg( "black" );
+	// i contains a count of all the colour codes. Should be 33.
+	ANSI->c->ANSIVT_CTABLE = ANSIVT_CTABLE;
+	ANSI->c->fg( "white" );
+	ANSI->c->bg( "black" );
 
-return;  }
+	return; 
+}
 
 void colorMode()	{
+
+	int color;
+
+	#ifdef windows
 
 	#define STD_OUTPUT_HANDLE ((DWORD)-11)
 	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 
 	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
 	
-	BOOL color = SetConsoleMode(
+	color = (int) SetConsoleMode(
 		StdHandle,
 		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
 	);
+
+	#else
+		color = 1;
+		// Assuming Linux is the target architecture instead.
+	#endif
+
 
 	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
 	//print( msg_str );

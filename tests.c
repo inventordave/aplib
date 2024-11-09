@@ -19,7 +19,174 @@ char* genRndDStr( int len )	{
 	return _;
 }
 
-int unitTests( void )	{
+int unitTests_MUL( void )	{
+
+	int count = 0;
+	
+	AP A = NewAP(0,0);
+	AP B = NewAP(0,0);
+	AP C;
+
+	#define OPERAND_ARGS A->sign, A->integer, B->sign, B->integer, C->sign, C->integer
+
+	char* _A;
+	char* _B;
+
+	// Tests 1-12, ADD( A,B )
+
+	// A_abs == B_abs
+
+	_A = genRndDStr( 5 );
+	setPartW( A, _A );
+	setPartW( B, _A );
+
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_abs > B_abs
+
+	_A = genRndDStr( 8 );
+	setPartW( A, _A );
+	
+	_B = genRndDStr( 5 );
+	setPartW( B, _B );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+	C = ADD( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_abs < B_abs
+
+	_A = genRndDStr( 5 );
+	setPartW( A, _A );
+
+	_B = genRndDStr( 8 );
+	setPartW( B, _B );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_abs > B_abs
+
+	_A = genRndDStr( 8 );
+	setPartW( A, _A );
+
+	_B = genRndDStr( 5 );
+	setPartW( B, _B );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = +, B_sign = +
+	setSign( A, '+' );
+	setSign( B, '+' );
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = +, B_sign = -
+	setSign( B, '-' );
+
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = +
+	setSign( A, '-' );
+	setSign( B, '+' );
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+	// A_sign = -, B_sign = -
+	setSign( A, '-' );
+	setSign( B, '-' );
+	C = MUL( A, B );
+	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
+	count++;
+
+	return count;
+
+}
+
+
+int unitTests_ADD( void )	{
 
 	int count = 0;
 	

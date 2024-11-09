@@ -54,28 +54,23 @@ L setPart( AP A, char * digits, L part )	{
 		return FAIL;
 	}
 
-	char * _;
-	
-	if( part==1 )
+	char* _ = NULL;
+	if( part==PartW )
 		_ = A->integer;
 	else
 		_ = A->fractional;
-	
-	if( _==NULL )	{
-		_ = (char*)malloc(2);
-		_[0] = '0';
-	}
-	if( strlen(_) < strlen(digits) )
-		_ = (char *)realloc(_, strlen(digits)+1);
 
-	
-	large i;
-	for( i=0; i<strlen(digits); i++ )
-		_[i] = digits[i];
-	
-	_[i] = '\0';
-	
-	return i;
+	if( _!=NULL )
+		free( _ );
+
+	_ = getstring( digits );
+
+	if( part==PartW )
+		A->integer = _;
+	else
+		A->fractional = _;
+
+	return strlen( _ );
 }
 
 
@@ -268,22 +263,24 @@ AP NOP( AP A ){
 
 // CORE ARITHMETIC OPERATORS
 
-int INC( AP A ){
+int INC( AP A )	{
 
-AP _;
-_ = ADD( A,AP1 );
-free( A );
-A = _;
+	AP _;
+	_ = ADD( A,AP1 );
+	free( A );
+	A = _;
 
-return 1; }
-int DEC( AP A ){
+	return 1;
+}
+int DEC( AP A )	{
 
 AP _;
 _ = SUB( A,AP1 );
 free( A );
 A = _;
 
-return -1; }
+return -1;
+}
 
 AP ADD( AP A, AP B )	{ return ADDP( A, B, DefaultPrecision ); }
 AP ADDP( AP A, AP B, AP P )	{
@@ -379,7 +376,105 @@ AP SUBP( AP A, AP B, AP P )	{
 	return result;
 }
 AP MUL( AP A, AP B )	{ return MULP( A, B, DefaultPrecision ); }
-AP MULP( AP A, AP B, AP P )  {
+
+AP MULP( AP A, AP B, AP P )	{
+
+	// 1. Multiply each digit of A with each digit of B. For each digit of B, a result row is generated.
+	// 2. Then add those result rows together.
+
+	AP C = CopyAP( AP0 );
+
+	L NUM_ROWS = strlen( B->integer );
+	L strlen_A = strlen( A->integer );
+	
+	L max_len_row = strlen_A + 1 + (NUM_ROWS-1);
+
+
+	char** ResultRows = (char**) malloc( sizeof(char*) * NUM_ROWS );
+	char* result_row = (char*) malloc( max_len_row + 1 );
+	result_row[max_len_row] = '\0';
+
+	int A_;
+	int B_;
+	int C_;
+	int D_;
+	int overflow;
+	int value;
+
+	int i, n;
+	int c = max_len_row-1;
+	int t;
+	for( i=0; i<NUM_ROWS; i++ )	{
+
+		t = 0;
+		overflow = 0;
+
+		while( (t++)<i )
+			result_row[c-t] = '0'; // trailing zeroes in each successive result row.
+
+
+		B_ = '0' - B->integer[NUM_ROWS-1-i];
+
+		for( n=strlen_A-1; n>=0; n-- )	{
+
+
+			A_ = '0' - A->integer[n];
+			C_ = (A_+overflow) * B_;
+
+			if( C_>9 )	{
+
+				value = C_ % 10;
+				D_ = C_;
+
+				while( ((D_=D_-10) > 9 ) )
+					overflow++;
+			}
+			else{
+
+				overflow = 0;
+			}
+			
+			result_row[c-(t++)] = value + '0';
+
+		}
+
+		while( (c-t) >= 0 )
+			result_row[ c-(t++) ] = '0';
+
+		ResultRows[i] = getstring( result_row );
+	}
+
+	AP R = CopyAP( AP0 );
+	AP _;
+
+	for( n=i; n>=0; n-- )	{
+
+		//free( R->integer );
+
+		setPartW( R, ResultRows[n] );
+
+		_ = CopyAP( C );
+		FreeAP( C );
+
+		C = ADD( _, R );
+
+		FreeAP( _ );
+	}
+
+	// When multiplying two numbers with the same sign,
+	// the product is positive. When multiplying two numbers with
+	// unlike signs, the product is negative.
+
+	if( A->sign==B->sign )
+		C->sign = '+';
+	else
+		C->sign = '-';
+
+	return C;
+
+}
+
+AP MULP_old( AP A, AP B, AP P )  {
 
 	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
