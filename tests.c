@@ -24,10 +24,10 @@ int unitTests( void )	{
 	int count = 0;
 	
 	AP A = NewAP(0,0);
-
 	AP B = NewAP(0,0);
-
 	AP C;
+
+	#define OPERAND_ARGS A->sign, A->integer, B->sign, B->integer, C->sign, C->integer
 
 	char* _A;
 	char* _B;
@@ -45,27 +45,27 @@ int unitTests( void )	{
 	setSign( B, '+' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_abs > B_abs
 
@@ -76,7 +76,7 @@ int unitTests( void )	{
 	setPartW( B, _B );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	
 	// A_sign = +, B_sign = +
@@ -84,28 +84,28 @@ int unitTests( void )	{
 	setSign( B, '+' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_abs < B_abs
 
@@ -116,34 +116,34 @@ int unitTests( void )	{
 	setPartW( B, _B );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
 
 		C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_abs > B_abs
 
@@ -154,31 +154,31 @@ int unitTests( void )	{
 	setPartW( B, _B );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = +, B_sign = +
 	setSign( A, '+' );
 	setSign( B, '+' );
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = +
 	setSign( A, '-' );
 	setSign( B, '+' );
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = -
 	setSign( A, '-' );
 	setSign( B, '-' );
 	C = ADD( A, B );
-	printf( "(%c)%s + (%c)%s = (%c)%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
+	printf( "(%c)%s + (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 
 	return count;
@@ -335,47 +335,47 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 	
 	NL;
 	
-	aP a, B, C;
-	a = NewAP( 10, 0 );
+	AP A, B, C;
+	A = NewAP( 10, 0 );
 	B = NewAP( 10, 0 );
 	
-	// arg a
-	parseaP(&a, argv[1]);
+	// arg A
+	parseAP(&A, argv[1]);
 	
 	// arg B
-	parseaP(&B, argv[2]);
+	parseAP(&B, argv[2]);
 	
 	
-	printf( "values Entered:\na = %c%s\nb = %c%s\n", a.sign, a.integer, B.sign, B.integer );
+	printf( "Values Entered:\nA = %c%s\nB = %c%s\n", A->sign, A->integer, B->sign, B->integer );
 	
 	NL;
 	
-	// aD
-	C = ADD(a, B);
-	printf( "%c%s + %c%s = %c%s", a.sign, a.integer, B.sign, B.integer, C.sign, C.integer );
+	// ADD
+	C = ADD(A, B);
+	printf( "%c%s + %c%s = %c%s", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
 	
 	NL;
 	
 	// SUB
-	C = SUB(a, B);
-	printf( "%c%s %s-%s %c%s = %c%s", a.sign, a.integer, FG_BRIGHT_GREEN, NORMaL, B.sign, B.integer, C.sign, C.integer );
+	C = SUB(A, B);
+	printf( "%c%s %s-%s %c%s = %c%s", A->sign, A->integer, FG_BRIGHT_GREEN, NORMAL, B->sign, B->integer, C->sign, C->integer );
 	
 	NL;
 
 	// MUL
-	C = MUL(a, B);
-	printf( "%c%s MUL %c%s = %c%s", a.sign, a.integer, B.sign, B.integer, C.sign, C.integer );
+	C = MUL(A, B);
+	printf( "%c%s MUL %c%s = %c%s", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
 	
 	NL;
 	
 	// EXP
 	printf( "The EXP operator may take a while with a larger exponent. Please be patient...\n" );
-	C = EXP(a, B);
-	if( C.sign=='-' )
-		B.sign='+';
+	C = EXP(A, B);
+	if( C->sign=='-' )
+		B->sign='+';
 	
 	
-	printf( "%c%s EXP %c%s = %c%s\n", a.sign, a.integer, B.sign, B.integer, C.sign, C.integer );
+	printf( "%c%s EXP %c%s = %c%s\n", A->sign, A->integer, B->sign, B->integer, C->sign, C->integer );
 	
 	printf( "\nCompleted." );
 	

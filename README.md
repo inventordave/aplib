@@ -103,16 +103,15 @@ The codebase is not very large, so anyone with basic experience should be able t
 look inside the given function body, and see how I've approached this subsystem.
 
 
-#CURRENT TO-DO
+# CURRENT TO-DO
 I am integrating my ANSI/VT lightweight colourization library ("colour") into the APLIB suite, to provide an APLIB pretty-printer,
-for displaying the operands and results from the APLIB arithmetic operations to the console (stdout) in ANSI/VT colourization.
+for displaying the operands and results from the APLIB arithmetic operations to the console (stdout) in ANSI/VT colourization. The "colour" library needs the teeniest of tweaks to compile for a Linux target (my code currently assumes win32, and uses uses win32 data objects).
 
-I have Bison/Flex sample programs I wrote, which are a simple but flexible calculator, and skeletal expression evaluator (not yet using APlib, but it will, thus the files are in this repo).
+I have Bison/Flex sample programs I wrote, which are a simple but flexible calculator, and a skeletal expression evaluator (they are not yet using APlib, but they will, thus the files are in this repo).
 I also have (not on GitHub) a term re-writer function, so if I have enough time in front of me, I could bring all these subsystems together,
 and we would eventually have a pretty great arbitrary-precision suite of front-end and back-end components.
 
-I've written my own Lexer and Parser before any, without using YACC/Lex tools, so a modified version of C, C- that supports AP literal strings,
-might be a fun endgame...
+I've written my own Lexer and Parser before anyway, without using YACC/Lex tools, and a modified version of C, C--, that supports AP literal strings, might be a fun subroutine...
 
 
 I hope my coding of this library so far hasn't been too sh^t. Also in there are a smattering of lightweight but useful general helper functions.

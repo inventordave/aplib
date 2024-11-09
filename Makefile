@@ -1,15 +1,32 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the AP Engine Code is.
 
+
+compiler=gcc
+target=win32
+flag1=null
+
+build=debug
+flag2=null
+
+
+
+
 aplib: aplib.c aplib.h colour.c colour.h io.c io.h
-	gcc -Wall -gdwarf-2 aplib.c colour.c io.c -lstd -c aplib.o
+	if [ $(build)=="debug" ] \
+		[ flag2 = "-g -DDEBUG" ]; \
+	fi
 
-# testFnc.c testFnc.h tests.c tests.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
+	if [ $(target)=="win32" ] \
+		[ flag1="-mconsole" ]; \
+	fi
 
-test:
-	gcc -Wall -gdwarf-2 stringy.c aplib.c i754.c lib.c io.c tests.c testFnc.c -o test.exe
+	@ $(compiler) -Wall $(flag2) aplib.c colour.c io.c -lstd -c aplib.o
+
+test: aplib
+	$(compiler) -Wall -g -DDEBUG stringy.c aplib.c i754.c lib.c io.c tests.c testFnc.c -o test.exe
 
 sandbox: sandbox.c sandbox.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
-	gcc -Wall -mconsole -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe
+	gcc -Wall $(flag1) -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
@@ -24,7 +41,7 @@ fpcalc:
 	bison -d fpcalc.y
 	flex fpcalc.l
 	
-	gcc fpcalc.tab.c lex.yy.c -o fpcalc.exe
+	$(compiler) fpcalc.tab.c lex.yy.c -o fpcalc.exe
 	
 cleancalc:
 	rm -f fpcalc.exe 

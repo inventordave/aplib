@@ -9,9 +9,6 @@
 // HELPER TYPES
 extern int maxLoopsSet;
 
-typedef struct TEST_ENTRY;
-typedef struct _TESTS;
-
 typedef struct TEST_ENTRY {
 	
 	void (*addr)(int argc, char **argv);

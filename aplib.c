@@ -288,16 +288,24 @@ return -1; }
 AP ADD( AP A, AP B )	{ return ADDP( A, B, DefaultPrecision ); }
 AP ADDP( AP A, AP B, AP P )	{
 	
-	signed sign_A = A->sign=='+' ? +1 : -1;
-	signed sign_B = B->sign=='+' ? +1 : -1;
-	
+	char sign_A = A->sign;
+	char sign_C = '.';
+
+	/*
+	1. If the signs are the same, add the numbers and keep the sign.
+	2. If the signs are different, subtract the numbers and take the sign of the bigger* number.
+	*/
+
+	if( sign_A == B->sign )
+		sign_C = sign_A;
+
 	large strlen_a = strlen(A->integer);
 	large strlen_b = strlen(B->integer);
 
 	int AorB = CmpAP_abs( A,B );
 
 	large size = ( !AorB ? strlen_b : strlen_a );
-	AP C = NewAPr( size+1,0 );
+	AP C = NewAP( size+1,0 );
 
 	signed value;
 	signed valA, valB, valC;
@@ -311,120 +319,58 @@ AP ADDP( AP A, AP B, AP P )	{
 			valA = A->integer[i] - '0';
 		else
 			valA = 0;
-		
-		valA *= sign_A;
 
 		if(j>=0)
 			valB = B->integer[j] - '0';
 		else
 			valB = 0;
 
-		valB *= sign_B;
-		
-		//valC = (C->integer[k] - '0');	
+		if( sign_C == '.' )
+			valB *= -1;
 		
 		valA += valC;
 
-		loop:
+		valC = 0;
 
 		value = valA + valB;
 
-		if( value<0 )	{
-
-			value = 10 - value;
-			valC = -1; // nuanced issue here, my method is in my notebook
-			// but basicaly the issue is if Asub and Bsub are both negative, the normative method of a carry doesn't work properly
-
-			// if value < -9 (-10 to -18), also causes problems.
-			// 
-			goto loop;
-
-			//C->integer[k-1] -= 1;
+		if( sign_C==sign_A ){
+			if( value>9 )	{
+				
+				value = value - 10;
+				valC = +1;
+			}
 		}
 
-		if( value>9 )	{
-			
-			value = value - 10;
+		else	{ //if( sign_C=='.' ) // A->sign != B->sign
 
-			valC = +1;
+			if( value<0 )	{
 
-			//C->integer[k-1] += 1;
+				value = ( 10 + valA ) + valB;
+				valC = -1;
+			}
 		}
-		
+
 		C->integer[k] = '0' + value;
 	}
-	
-	char sign_C = '+';
-	if( C->integer[0] < '0' ){
 
-		sign_C = '-';
-		C->integer[0] = '0';
+	if( sign_C==sign_A )
+		C->sign = sign_C;
+	else{
 
-		printf( "New operator method test @ %s:%d\n", __FILE__, __LINE__ );
-		goto ret_result;
-
+		if( AorB < 0 ){
+			C->sign = B->sign;
+		}
+		else
+			C->sign = A->sign;
 	}
-
-
-	switch( AorB )	{
-
-		case 0:
-			if( (A->sign=='-') && (B->sign=='+') )
-				sign_C = '+';
-			
-			else{
-			if( (A->sign=='-') && (B->sign=='-') )
-				sign_C = '-';
-			
-			else{
-			if( (A->sign=='+') && (B->sign=='-') )
-				sign_C = '+';
-			}}
-
-			break;
-
-		case -1:
-			if( (A->sign=='-') && (B->sign=='+') )
-				sign_C = '+';
-			
-			else{
-			if( (A->sign=='-') && (B->sign=='-') )
-				sign_C = '-';
-			
-			else{
-			if( (A->sign=='+') && (B->sign=='-') )
-				sign_C = '-';
-			}}
-
-			break;
-
-		case +1:
-			if( (A->sign=='-') && (B->sign=='-') )
-				sign_C = '-';
-
-			else{
-			if( (A->sign=='+') && (B->sign=='-') )
-				sign_C = '+';
-			
-			else{
-			if( (A->sign=='-') && (B->sign=='+') )
-				sign_C = '-';
-			}}
-
-			break;
-
-	};
-
-	ret_result:
-
-	C->sign = sign_C;
 
 	return C;
 }
 AP SUB( AP A, AP B )	{ return SUBP( A, B, DefaultPrecision ); }
 AP SUBP( AP A, AP B, AP P )	{
 
-	// Alt. SUB Algorithm:
+	// SUB Algorithm:
 	// The subtraction of a real number (the subtrahend [B]) from another (the minuend [A]) can be defined as the addition of the minuend [A] and the additive inverse of the subtrahend [B].
 	flipSign(B);
 	AP result = ADD(A, B);
