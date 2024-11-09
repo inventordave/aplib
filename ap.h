@@ -4,6 +4,7 @@
 
 // CUSTOM INC'S
 #include "aplib.h"
+#include <stdint.h>
 
 // HELPER TYPES
 extern int maxLoopsSet;

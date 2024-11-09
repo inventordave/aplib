@@ -6,7 +6,7 @@
 #include <math.h>
 #include <error.h>
 #include <stdint.h>
-#include <windows.h>
+// #include <windows.h>
 
 // LIB INC'S
 #include "ap.h"

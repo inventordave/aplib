@@ -8,11 +8,16 @@
 
 int main( int argc, char** argv ){
 
+	printf( "Begin...\n" );
+	fflush( stdout );
+
 	//INIT()
 	AP0 = NewAPr( 1,1 );
 	AP1 = CopyAP( AP0 );
-	INC( AP1 );
+	setPartW( AP1, "1" );
 	
+	printf( "Trying to run Unit tests...\n\n" );
+
 	
 	int result = unitTests( );
 

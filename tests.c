@@ -3,7 +3,6 @@
 #include "tests.h"
 #include "aplib.h"
 #include "ap.h"
-#include "i754.h"
 #include "ap_io.h"
 
 
@@ -12,8 +11,8 @@ char* genRndDStr( int len )	{
 	char* _ = malloc( len+1 );
 
 	int i;
-	for( i=0; i<len; i++ )	{
-		_[i] = rand()%10;
+	for( i=0; i<len; i++ )
+		_[i] ='0' + (rand()%10);
 
 	_[i] = '\0';
 
@@ -24,8 +23,9 @@ int unitTests( void )	{
 
 	int count = 0;
 	
-	AP A;
-	AP B;
+	AP A = NewAP(0,0);
+
+	AP B = NewAP(0,0);
 
 	AP C;
 
@@ -36,7 +36,7 @@ int unitTests( void )	{
 
 	// A_abs == B_abs
 
-	_A = genRndDStr( 20 );
+	_A = genRndDStr( 5 );
 	setPartW( A, _A );
 	setPartW( B, _A );
 
@@ -69,10 +69,10 @@ int unitTests( void )	{
 	count++;
 	// A_abs > B_abs
 
-	_A = genRndDStr( 25 );
+	_A = genRndDStr( 8 );
 	setPartW( A, _A );
 	
-	_B = genRndDStr( 20 );
+	_B = genRndDStr( 5 );
 	setPartW( B, _B );
 
 	C = ADD( A, B );
@@ -109,10 +109,10 @@ int unitTests( void )	{
 	count++;
 	// A_abs < B_abs
 
-	_A = genRndDStr( 20 );
+	_A = genRndDStr( 5 );
 	setPartW( A, _A );
 
-	_B = genRndDStr( 25 );
+	_B = genRndDStr( 8 );
 	setPartW( B, _B );
 
 	C = ADD( A, B );
@@ -147,10 +147,10 @@ int unitTests( void )	{
 	count++;
 	// A_abs > B_abs
 
-	_A = genRndDStr( 25 );
+	_A = genRndDStr( 8 );
 	setPartW( A, _A );
 
-	_B = genRndDStr( 20 );
+	_B = genRndDStr( 5 );
 	setPartW( B, _B );
 
 	C = ADD( A, B );

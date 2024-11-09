@@ -303,7 +303,8 @@ AP ADDP( AP A, AP B, AP P )	{
 	signed valA, valB, valC;
 
 	signed int i, j, k;
-		
+	
+	valC = 0;
 	for( i=strlen_a-1, j=strlen_b-1, k=size; k>0; i--, j--, k--)	{
 	
 		if(i>=0)
@@ -320,22 +321,50 @@ AP ADDP( AP A, AP B, AP P )	{
 
 		valB *= sign_B;
 		
-		valC = (C->integer[k] - '0');	
+		//valC = (C->integer[k] - '0');	
 		
 		valA += valC;
 
+		loop:
+
 		value = valA + valB;
 
-		if( value>=10 )	{
+		if( value<0 )	{
+
+			value = 10 - value;
+			valC = -1; // nuanced issue here, my method is in my notebook
+			// but basicaly the issue is if Asub and Bsub are both negative, the normative method of a carry doesn't work properly
+
+			// if value < -9 (-10 to -18), also causes problems.
+			// 
+			goto loop;
+
+			//C->integer[k-1] -= 1;
+		}
+
+		if( value>9 )	{
 			
-			value -= 10;
-			C->integer[k-1] += 1;
+			value = value - 10;
+
+			valC = +1;
+
+			//C->integer[k-1] += 1;
 		}
 		
 		C->integer[k] = '0' + value;
 	}
 	
 	char sign_C = '+';
+	if( C->integer[0] < '0' ){
+
+		sign_C = '-';
+		C->integer[0] = '0';
+
+		printf( "New operator method test @ %s:%d\n", __FILE__, __LINE__ );
+		goto ret_result;
+
+	}
+
 
 	switch( AorB )	{
 
@@ -386,7 +415,10 @@ AP ADDP( AP A, AP B, AP P )	{
 
 	};
 
+	ret_result:
+
 	C->sign = sign_C;
+
 	return C;
 }
 AP SUB( AP A, AP B )	{ return SUBP( A, B, DefaultPrecision ); }
@@ -692,6 +724,9 @@ struct _APLIB* Init_APLIB(){
 
 	struct _APLIB* APLIB = (struct _APLIB*)malloc( sizeof(struct _APLIB) );
 	
+	/**
+	// Temp commenting-out
+
 	// Add the OPERATORS to the APLIB global.
 	APLIB->NOP = NOP;
 	APLIB->ADD = ADD;
@@ -741,6 +776,7 @@ struct _APLIB* Init_APLIB(){
 	ResetAnsiVtCodes(1);
 	colorMode();
 
+	*/
 	return APLIB;
 	
 }
@@ -749,7 +785,9 @@ void setSign( AP A,char S ){
 
 	if( S!='+' ){
 		if( S!='-' )
-		A->sign='+';}
+		A->sign='+';
+		else
+		A->sign='-';}
 	else
 		A->sign = S;
 }
