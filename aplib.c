@@ -377,7 +377,7 @@ AP SUBP( AP A, AP B, AP P )	{
 }
 AP MUL( AP A, AP B )	{ return MULP( A, B, DefaultPrecision ); }
 
-AP MULP( AP A, AP B, AP P )	{
+AP MULP_new( AP A, AP B, AP P )	{ // seems to be multiplying each row to 1/2 it's intended value
 
 	// 1. Multiply each digit of A with each digit of B. For each digit of B, a result row is generated.
 	// 2. Then add those result rows together.
@@ -391,6 +391,12 @@ AP MULP( AP A, AP B, AP P )	{
 
 
 	char** ResultRows = (char**) malloc( sizeof(char*) * NUM_ROWS );
+	if( ResultRows==NULL )	{
+
+		printf(" Unable to allocate memory in file '%s' at line number %d.\n" ,__FILE__, __LINE__ );
+		exit( 1 );
+	}
+
 	char* result_row = (char*) malloc( max_len_row + 1 );
 	result_row[max_len_row] = '\0';
 
@@ -413,26 +419,29 @@ AP MULP( AP A, AP B, AP P )	{
 			result_row[c-t] = '0'; // trailing zeroes in each successive result row.
 
 
-		B_ = '0' - B->integer[NUM_ROWS-1-i];
+		B_ = B->integer[NUM_ROWS-1-i] - '0';
 
 		for( n=strlen_A-1; n>=0; n-- )	{
 
 
-			A_ = '0' - A->integer[n];
-			C_ = (A_+overflow) * B_;
+			A_ = A->integer[n] - '0';
+			C_ = (A_+ overflow) * B_;
+
+			overflow = 0;
 
 			if( C_>9 )	{
 
 				value = C_ % 10;
 				D_ = C_;
 
-				while( ((D_=D_-10) > 9 ) )
-					overflow++;
-			}
-			else{
+				while( D_ > 9  )	{
 
-				overflow = 0;
+					overflow++;
+					D_ -= 10;
+				}
 			}
+			else
+				value = C_;
 			
 			result_row[c-(t++)] = value + '0';
 
@@ -441,12 +450,15 @@ AP MULP( AP A, AP B, AP P )	{
 		while( (c-t) >= 0 )
 			result_row[ c-(t++) ] = '0';
 
+		
+
 		ResultRows[i] = getstring( result_row );
 	}
 
 	AP R = CopyAP( AP0 );
 	AP _;
 
+	--i;
 	for( n=i; n>=0; n-- )	{
 
 		//free( R->integer );
@@ -474,7 +486,7 @@ AP MULP( AP A, AP B, AP P )	{
 
 }
 
-AP MULP_old( AP A, AP B, AP P )  {
+AP MULP( AP A, AP B, AP P )  {
 
 	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
@@ -527,9 +539,10 @@ AP MULP_old( AP A, AP B, AP P )  {
 	}
 
 
-	AP C = NewAP( 10,0 );
+	AP C = NewAP( 1,0 );
 	AP D = NewAP( 1,0 );
-	
+	AP _;
+
 	for( int t = 0; t < q; t++ )	{
 		
 		char * result_row = ResultArray[t];
@@ -541,10 +554,9 @@ AP MULP_old( AP A, AP B, AP P )  {
 		
 		D->integer = strdup(result_row);
 		
-		AP _ = (APL)malloc( sizeof( APP ) );
-		*_ = *C;
-		free( C->fractional	);
-		free ( C );
+		_ = CopyAP( C );
+		
+		FreeAP( C );
 		
 		C = ADD( _,D );
 		FreeAP( _ );
@@ -1696,13 +1708,13 @@ APTR OCTAL_2_BIN( APTR A ){
 
 void FreeAP( AP A )	{
 	
-	//if( A->integer!=NULL )
+	if( A->integer!=NULL )
 	free( A->integer );
 
-	//if( A->fractional!=NULL )
+	if( A->fractional!=NULL )
 	free( A->fractional );
 
-	//if( A!=NULL )
+	if( A!=NULL )
 	free( A );
 	
 	return;

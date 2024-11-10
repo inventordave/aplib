@@ -27,12 +27,12 @@ int unitTests_MUL( void )	{
 	AP B = NewAP(0,0);
 	AP C;
 
-	#define OPERAND_ARGS A->sign, A->integer, B->sign, B->integer, C->sign, C->integer
+	
 
 	char* _A;
 	char* _B;
 
-	// Tests 1-12, ADD( A,B )
+	// Tests 1-12, MUL( A,B )
 
 	// A_abs == B_abs
 
@@ -90,7 +90,7 @@ int unitTests_MUL( void )	{
 	// A_sign = +, B_sign = -
 	setSign( B, '-' );
 
-	C = ADD( A, B );
+	C = MUL( A, B );
 	printf( "(%c)%s * (%c)%s = (%c)%s\n", OPERAND_ARGS );
 	count++;
 	// A_sign = -, B_sign = +

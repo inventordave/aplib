@@ -4,6 +4,9 @@
 #define DAVE_TESTS_H
 
 
+#define OPERAND_ARGS A->sign, A->integer, B->sign, B->integer, C->sign, C->integer
+#define OPERAND_ARGS_MULTISELECT A->integer, opsym, B->integer, C->integer
+
 // TEST FUNCTION DECLS
 
 int unitTests_ADD( void );

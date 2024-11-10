@@ -1,10 +1,16 @@
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "stringy.h"
 #include "colour.h"
 #include "aplib.h"
 #include "testFnc.h"
 #include "tests.h"
+
+void flushBuffer() {
+    int ch;
+    while (((ch = getchar()) != EOF) && (ch != '\n'));
+}
 
 int main( int argc, char** argv ){
 
@@ -26,20 +32,86 @@ int main( int argc, char** argv ){
 	AP0 = NewAPr( 1,1 );
 	AP1 = CopyAP( AP0 );
 	setPartW( AP1, "1" );
-	
-	printf( "Trying to run Unit tests...\n\n" );
 
-	
-	int result = unitTests_MUL( );
+	AP (*fnc)( AP A, AP B );
 
-	printf( "Number of Unit tests succeeded: %d\n", result );
+	AP A = NewAP( 0,0 );
+	AP B = NewAP( 0,0 );
+	AP C = NewAP( 0,0 );
 
-	/**
-	char* test= getstring( "192" );
+	//printf( "Trying to run Unit tests...\n\n" );
+
+	printf( "Select from the following Unit Tests:\n\n" );
+
+	printf( "%s1. ADD +%s\n", FG_BRIGHT_GREEN, NORMAL );
+	printf( "%s2. SUB +%s\n", FG_BRIGHT_BLUE, NORMAL );
+
+	printf( "%s3. MUL *%s\n", FG_BRIGHT_RED, NORMAL );
+	printf( "%s4. DIV *%s\n", FG_BRIGHT_YELLOW, NORMAL );
+
+	char opsym;
+	char c = getchar();
+
+	switch( c-'0' )	{
+
+		case 1:
+			fnc = ADD;
+			opsym = '+';
+			break;
+
+		case 2:
+			fnc = SUB;
+			opsym = '-';
+			break;
+
+		case 3:
+			fnc = MUL;
+			opsym = '*';
+			break;
+
+		case 4:
+			fnc = DIV;
+			opsym = '/';
+			break;
+
+		default:
+			printf( "Key pressed: %c\n", c );
+			fflush( stdout );
+			break;
+	}
+
+	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
+
+	char* a = NULL;
+	char* b = NULL;
+	long unsigned int len = 1024;
+	int read;
+
+	read = getline(&a, &len, stdin);
+
+	if( read==-1 )
+		exit(1);
+
+	if ( a[ strlen(a)-1 ] == '\n' ) a[ strlen(a)-1] = '\0';
+
+	fflush( stdin );
 	
-	char* _ = DEC_2_BIN( test, 1 );
-	printf( "Input DEC = %s,\nOutput BIN= %s\n", test, _ );
-	*/
+	read = getline(&b, &len, stdin);
+
+	if( read==-1 )
+		exit(1);
+
+	if ( b[ strlen(b)-1 ] == '\n' ) b[ strlen(b)-1] = '\0';
+
+	setPartW( A, a );
+	setPartW( B, b );
+	printf( "A: %s\nB: %s\n", A->integer, B->integer );
+
+
+	C = fnc( A,B );
+
+	printf( "Result of %s %c %s = %s\n", OPERAND_ARGS_MULTISELECT );	
+
 
 	return 0;
 }
