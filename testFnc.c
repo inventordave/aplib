@@ -80,38 +80,30 @@ int main( int argc, char** argv ){
 			break;
 	}
 
-	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
 
-	char* a = NULL;
-	char* b = NULL;
-	long unsigned int len = 1024;
-	int read;
+	char** _ = (char**)calloc( sizeof(char*) * 2 );
+	*_ = (char*)malloc( 1024 );
+	*(++_) = (char*)malloc( 1024 );
+	_--;
+    
+    	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
+    
+	for (i = 0; i < 2; i++) {
+        	scanf("%s", *(_+i) );
+    	}
 
-	read = getline(&a, &len, stdin);
+	setPartW( A, *_ );
+	setPartW( B, *(_+1) );
 
-	if( read==-1 )
-		exit(1);
-
-	if ( a[ strlen(a)-1 ] == '\n' ) a[ strlen(a)-1] = '\0';
-
-	fflush( stdin );
+	free( *_ );
+	free( *(_+1) );
+	free( _ );
 	
-	read = getline(&b, &len, stdin);
-
-	if( read==-1 )
-		exit(1);
-
-	if ( b[ strlen(b)-1 ] == '\n' ) b[ strlen(b)-1] = '\0';
-
-	setPartW( A, a );
-	setPartW( B, b );
 	printf( "A: %s\nB: %s\n", A->integer, B->integer );
-
 
 	C = fnc( A,B );
 
 	printf( "Result of %s %c %s = %s\n", OPERAND_ARGS_MULTISELECT );	
-
 
 	return 0;
 }
