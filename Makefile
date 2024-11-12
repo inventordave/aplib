@@ -1,10 +1,10 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
-aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h
+aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
 	gcc -Wall -g -DDEBUG stringy.c aplib.c io.c -lstd -c aplib.o
 
-test:	testmain.c testmain.h aplib tests.c tests.h
-	gcc -Wall -g -DDEBUG aplib.o lib.c tests.c testmain.c -o test.exe
+test:	testmain.c testmain.h aplib.c aplib.h tests.c tests.h
+	gcc -Wall -g -DDEBUG io.c stringy.c colour.c tests.c testmain.c -o test.exe
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
