@@ -3,7 +3,7 @@
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
 	gcc -Wall -g -DDEBUG stringy.c aplib.c io.c -lstd -c aplib.o
 
-test:	testmain.c testmain.h aplib.c aplib.h tests.c tests.h
+test:	testmain.c testmain.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h
 	gcc -Wall -g -DDEBUG io.c stringy.c colour.c tests.c aplib.c testmain.c -o test.exe
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
