@@ -4,8 +4,8 @@
 aplib: aplib.c aplib.h io.c io.h
 	gcc -Wall -g -DDEBUG aplib.c io.c -lstd -c aplib.o
 
-test:
-	gcc -Wall -g -DDEBUG stringy.c colour.c aplib.c i754.c lib.c io.c tests.c testFnc.c -o test.exe
+test:	testmain.c testmain.h aplib tests.c tests.h
+	gcc -Wall -g -DDEBUG aplib.o stringy.c colour.c aplib.c i754.c lib.c tests.c testmain.c -o test.exe
 
 sandbox: sandbox.c sandbox.h aplib.c aplib.h i754.c i754.h stringy.c stringy.h colour.c colour.h lib.c lib.h io.c io.h
 	gcc -Wall -g -DDEBUG aplib.c i754.c stringy.c colour.c lib.c io.c sandbox.c -o s.exe
