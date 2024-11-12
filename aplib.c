@@ -26,42 +26,48 @@ AP NLOGP( AP x, AP epsilon )	{
 	// double ln(double x, double epsilon)
 	
 	AP yn = SUB( x,AP1 ); // using the first term of the taylor series as initial-value
-	AP yn1 = yn;
-	char sign_yn;
-	char sign_yn1;
-	AP abs_diff = NewAP( 0,0 );
+	AP yn1 = CopyAP( yn );
+	AP diff = NewAP( 0,0 );
+	AP AP2 = ADD( AP1,AP1 );
 	
 	do
 	{
-		FreeAP( abs_diff );
-
+		FreeAP( diff );
 		FreeAP( yn );
+		
 		yn = CopyAP( yn1 );
-
 		FreeAP( yn1 );
+
 		// pow(v) should be in c stdlib, calculates the value of Euler's constant (irrational, approx 2.71828) raised to power v.
 		// powAP(v) is a
 
 		AP gParam = powAP( yn );
 		AP dParam = SUB( x,gParam );
+		FreeAP( gParam );
+		
 		AP fParam = powAP( yn );
 		AP eParam = ADD( x,fParam );
+		FreeAP( fParam );
+		
 		AP cParam = DIV( dParam, eParam );
+		FreeAP( dParam );
+		FreeAP( eParam );
 		
 		AP bParam = MUL( AP2, cParam );
-		yn1 = ADD( yn, bParam ); 
-
-		sign_yn = yn->sign;
-		sign_yn1 = yn1->sign;
-
-		yn->sign = '+';
-		yn1->sign = '+';
-		abs_diff = SUB(yn,yn1);
-		yn->sign = sign_yn;
-		yn1->sign = sign_yn1;		
+		FreeAP( cParam );
 		
-	} while ( CmpAP( abs_diff, epsilon )>0 );
+		yn1 = ADD( yn, bParam ); 
+		FreeAP( bParam );
 
+		diff = SUB(yn,yn1);
+
+	} while ( CmpAP_abs( diff, epsilon )>0 );
+
+	FreeAP( yn );
+	FreeAP( yn1 );
+	FreeAP( diff );
+	FreeAP( AP2 );
+	
 	return yn1;
 }
 
@@ -71,7 +77,7 @@ AP LOGb( AP A, AP base )	{
 	return LOGb_( A, base_ );
 }
 
-// logn(x) = ln(x)/ln(n).
+// log_b(x) = ln(x)/ln(b).
 AP LOGb_( AP A, int base )	{
 
 	AP Base = NewAP( 0,0 );
@@ -119,22 +125,32 @@ AP ConvertAPBase_( AP, int base );
 char* ConvertBase( char* A, int prev_base, int new_base ); // This stub is also to remind me to do alt. implementations.
 // A lot of calls to operators are not going to require full AP structures, just digitstrings.
 
-//the logarithmic identities for rational numbers:
-//logB(x/y) = logB(x) - logB(y)
-// This is computationally only useful for quick calculation of a log of a rational. It won't increase DIV(x,y) speed in APlib.
-// APlib still provides functions for calculating natural logs NL(x) and LOGb(x), logs in a defined base b for X.
+// NB:
 //
-// Also, if	"AP logb_x_div_y = LOGb( DIV(x,y) );", is quicker than
-//			"AP logb_x_div_y = LOGb(x) - LOGb(y);"
+//the logarithmic identities for rational numbers:
+//
+//logB(x/y) = logB(x) - logB(y)
+//
+// This is computationally only useful for quick calculation of a log of a rational (N/M, or "divisor-form").
+// It won't increase z=DIV(x,y) speed in APlib, by indirection through z=(x/y)=b_exp(log_b(x/y))
+// APlib still provides functions for calculating natural logs y=NLOG(x) and y=LOGb(x), an exponent y in a defined base b for scalar x.
+//
+// Also, if	"AP logb_x_div_y = LOGb( DIV(x,y) );"
+// is quicker than
+//		"AP logb_x_div_y = LOGb(x) - LOGb(y);"
 //
 // then the logarithmic identity for rational numbers has little implementation benefit in APlib, except for convenience.
 //
 // A macro would therefore suffice:
+//
 // #define LOGb_xy( x,y,b ) SUB( LOGb(x,b)-LOGb(y,b) )
+//
 // where [OP_CLASS]_xy naming convention indicates an input of a rational x/y, in form of 2 parameters notionally called x and y.
 //
 // An alt macro for LOGb as so:
-// #define alt_LOGb( x,b ) DIV( NLOG(x),NLOG(b) ) 
+// #define alt_LOGb( x,b ) ( { AP xt=(NLOG(x));AP bt=(NLOG(b)); AP rt=(DIV(xt,bt)); FreeAP(xt);FreeAP(bt); (rt); } )
+// NOTE TO SELF: I need to test the above macro, and if it works, see if I can remove the block-level delimiters.
+// 		I have placed a note in my TODO List.
 
 struct _APLIB APLIB;
 
