@@ -4,8 +4,10 @@
 #include "stringy.h"
 #include "colour.h"
 #include "aplib.h"
-#include "testFnc.h"
+
 #include "tests.h"
+#include "testmain.h"
+
 
 void flushBuffer() {
     int ch;
