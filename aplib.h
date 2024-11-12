@@ -63,7 +63,8 @@ APP {
 	// base2, base10, base16
 	small base;
 
-	// The offset where a floating-point would be correctly positioned under the assumption that the digit-string (ASCII numeric alphabet glyphs, beginning at ASCII offset 68
+	// The offset where a floating-point would be correctly positioned under the assumption that the
+	// digit-string (ASCII numeric alphabet glyphs, beginning at ASCII offset 68)
 	L fp; 
 	
 	// Level of precision.
@@ -72,8 +73,9 @@ APP {
 } APP;
 
 // AP Value reference. These (pointer) types have to be instantiated.
-typedef APP* APL;
+
 typedef APP* AP;
+#define APL AP
 #define ap AP
 
 typedef struct
@@ -106,7 +108,7 @@ typedef APExpC* complex;
 #define complexexpression CEX
 #define cexp CEX
 #define complexexp CEX
-	#
+
 typedef struct
 APExpC_2	{ // (APExpC OP APExpC)
 
@@ -118,13 +120,21 @@ APExpC_2	{ // (APExpC OP APExpC)
 }
 APExpC_2;
 
+// APLIB SYSTEM INTRINSICS
+extern AP AP0;
+extern AP AP1;
+extern AP DefaultPrecision;
+extern large MAX_LENGTH;
+
 typedef struct
 _APLIB	{
 	
 	AP (*RESET0)( AP );
 	AP (*RESET1)( AP );
 
-	
+	AP AP0;
+	AP AP1;
+
 	AP (*NOP)( AP );
 	AP (*ADD)( APL,AP );
 	AP (*ADDP)( APL,APL, AP );
@@ -169,11 +179,7 @@ _APLIB	{
 }
 _APLIB;	
 
-// APLIB SYSTEM INTRINSICS
-extern AP AP0;
-extern AP AP1;
-extern AP DefaultPrecision;
-extern large MAX_LENGTH;
+
 
 // INIT()
 extern struct _APLIB* Init_APLIB();
@@ -223,6 +229,10 @@ extern AP DIVBY2(AP A);
 #define SUBDIVIDE DIVIDE
 #define SUBDIVIDEP DIVIDEP
 #define D2 DIVBY2
+
+extern AP NLOG( AP A );
+extern AP LOGb( AP A, unsigned int base );
+
 extern AP RECIPROCAL( AP A );
 extern AP RECIPROCAL2( AP A, AP B );
 #define N1 RECIPROCAL
