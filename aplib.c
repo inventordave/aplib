@@ -14,36 +14,127 @@ AP DefaultPrecision;
 
 // LOG OPERATOR DEV
 
-AP NLOG( AP A )	{
+AP NLOG( AP x )	{
 
+	return NLOGP( x, DefaultPrecision );
+}
+
+AP NLOGP( AP x, AP epsilon )	{
+	
+	// Using Newton's method, the iteration simplifies to (implementation) 
+	// which has cubic convergence to ln(x).
+	// double ln(double x, double epsilon)
+	
+	AP yn = SUB( x,AP1 ); // using the first term of the taylor series as initial-value
+	AP yn1 = yn;
+	char sign_yn;
+	char sign_yn1;
+	AP abs_diff = NewAP( 0,0 );
+	
+	do
+	{
+		FreeAP( abs_diff );
+
+		FreeAP( yn );
+		yn = CopyAP( yn1 );
+
+		FreeAP( yn1 );
+		// pow(v) should be in c stdlib, calculates the value of Euler's constant (irrational, approx 2.71828) raised to power v.
+		// powAP(v) is a
+
+		AP gParam = powAP( yn );
+		AP dParam = SUB( x,gParam );
+		AP fParam = powAP( yn );
+		AP eParam = ADD( x,fParam );
+		AP cParam = DIV( dParam, eParam );
+		
+		AP bParam = MUL( AP2, cParam );
+		yn1 = ADD( yn, bParam ); 
+
+		sign_yn = yn->sign;
+		sign_yn1 = yn1->sign;
+
+		yn->sign = '+';
+		yn1->sign = '+';
+		abs_diff = SUB(yn,yn1);
+		yn->sign = sign_yn;
+		yn1->sign = sign_yn1;		
+		
+	} while ( CmpAP( abs_diff, epsilon )>0 );
+
+	return yn1;
 }
 
 AP LOGb( AP A, AP base )	{
 
 	int base_ = str2int( base->integer );
-
-	return 
+	return LOGb_( A, base_ );
 }
 
+// logn(x) = ln(x)/ln(n).
 AP LOGb_( AP A, int base )	{
 
+	AP Base = NewAP( 0,0 );
+	
+	char* t = int2str( base );
+	char* _ = getstring( t );
+	setPartW( Base, _ );
+	
+	free( t );
+	free( _ );
+	
+	AP nlA = NLOG( A );
+	AP nlN = NLOG( Base );
+
+	FreeAP( Base );
+	
+	AP result = DIV( nlA, nlN );
+
+	FreeAP( nlA );
+	FreeAP( nlN );
+
+	return result;
 }
+
+// logn(x) = ln(x)/ln(n).
+char* LOGb_raw( char* A, int base )	{
+
+	char* nlA = NLOG_str( A );
+		char* base_str = int2str( base );
+	char* nlN = NLOG_str( base_str );
+	
+	char* result = DIV_str( nlA, nlN );
+
+	free( base_str );
+	free( nlA );
+	free( nlN );
+
+	return result;
+}
+
+
+AP ConvertAPBase( AP, AP base );
+AP ConvertAPBase_( AP, int base );
+
+char* ConvertBase( char* A, int prev_base, int new_base ); // This stub is also to remind me to do alt. implementations.
+// A lot of calls to operators are not going to require full AP structures, just digitstrings.
 
 //the logarithmic identities for rational numbers:
 //logB(x/y) = logB(x) - logB(y)
-
-AP QuickDiv( AP A, AP B )	{
-
-	AP A_base, AP B_base;
-
-	
-	AP log_a_div_b = LOGb_( A, A->base
-}
-
-// -- 
-
-
-
+// This is computationally only useful for quick calculation of a log of a rational. It won't increase DIV(x,y) speed in APlib.
+// APlib still provides functions for calculating natural logs NL(x) and LOGb(x), logs in a defined base b for X.
+//
+// Also, if	"AP logb_x_div_y = LOGb( DIV(x,y) );", is quicker than
+//			"AP logb_x_div_y = LOGb(x) - LOGb(y);"
+//
+// then the logarithmic identity for rational numbers has little implementation benefit in APlib, except for convenience.
+//
+// A macro would therefore suffice:
+// #define LOGb_xy( x,y,b ) SUB( LOGb(x,b)-LOGb(y,b) )
+// where [OP_CLASS]_xy naming convention indicates an input of a rational x/y, in form of 2 parameters notionally called x and y.
+//
+// An alt macro for LOGb as so:
+// #define alt_LOGb( x,b ) DIV( NLOG(x),NLOG(b) ) 
 
 struct _APLIB APLIB;
 
