@@ -11,6 +11,40 @@ AP AP0;
 AP AP1;
 AP DefaultPrecision;
 
+
+// LOG OPERATOR DEV
+
+AP NLOG( AP A )	{
+
+}
+
+AP LOGb( AP A, AP base )	{
+
+	int base_ = str2int( base->integer );
+
+	return 
+}
+
+AP LOGb_( AP A, int base )	{
+
+}
+
+//the logarithmic identities for rational numbers:
+//logB(x/y) = logB(x) - logB(y)
+
+AP QuickDiv( AP A, AP B )	{
+
+	AP A_base, AP B_base;
+
+	
+	AP log_a_div_b = LOGb_( A, A->base
+}
+
+// -- 
+
+
+
+
 struct _APLIB APLIB;
 
 char* MUL_SYM = "*";
