@@ -12,6 +12,26 @@ AP AP1;
 AP DefaultPrecision;
 
 
+void parseAP(char * str)	{
+
+	AP A = NewAP( 0,0 );
+	
+	if( str[0] == '-' )	{
+
+		A->sign = '-';
+		++str;
+	}
+	else if( str[0] == '+' )
+		++str;
+	else	{
+
+		A->integer = strdup(str);
+		A->sign = '+';
+	}
+
+	return;
+}
+
 // LOG OPERATOR DEV
 
 AP NLOG( AP x )	{
