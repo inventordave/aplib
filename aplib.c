@@ -696,12 +696,14 @@ AP MULP(AP A, AP B, AP P) {
 
   char **ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
   int q = 0;
-
+  int curr_row_length;
+  int rev_offset_B;
+  
   for (int k = strlen(B->integer) - 1; k >= 0; k--) {
 
-    int rev_offset_B = strlen(B->integer) - 1 - k;
+    rev_offset_B = strlen(B->integer) - 1 - k;
 
-    int curr_row_length = strlen(A->integer) + 1 + rev_offset_B;
+    curr_row_length = strlen(A->integer) + 1 + rev_offset_B;
     char *curr_row = (char *)malloc(curr_row_length + 1);
     curr_row[curr_row_length] = '\0';
     PackTrailingZeroes(curr_row, curr_row_length, rev_offset_B);
@@ -864,21 +866,22 @@ loop:
 
     CONCAT(Remainder->integer, Dropdown->integer);
 
-    // if( fractional && !CmpAP_abs(Remainder,AP0) )
-    //	break;
+    if( fractional && !CmpAP_abs(Remainder,AP0) )
+      break;
 
-    /*
-                    #define report printf
-                    int r;
-                    if( (r = cmp_dstr( Remainder->integer, B->integer )) >=0 )
-       {
+    
+    #define report printf
+    int r;
+    if( (r = cmp_dstr( Remainder->integer, B->integer )) >=0 )
+    {
 
-                            report( "Remainder = %s\nDivisor = %s\nLOOPS = %d\nC
-       = %s.%s\n", Remainder->integer, B->integer ,LOOPS, C->integer,
-       C->fractional ); fflush( stdout ); char ch; if( (ch = getchar())=='q' )
-                                    exit(0);
-                    }
-    */
+      report( "Remainder = %s\nDivisor = %s\nLOOPS = %d\nC = %s.%s\n", Remainder->integer, B->integer ,LOOPS, C->integer, C->fractional );
+      fflush( stdout );
+      char ch;
+      if( (ch = getchar())=='q' )
+        exit(0);
+    }
+
     ++offset;
   }
 
