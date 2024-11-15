@@ -1,6 +1,7 @@
 // GC_C
 
 #include <stdlib.h>
+#include <stdio.h>
 #include "gc.h"
 
 static volatile struct GC* gc;
@@ -41,6 +42,8 @@ volatile struct GC* build_gc_struct( int c )	{
 
 	gc->c = c;
 	gc->v = 0;
+	gc->_v_ = 0;
+	gc->_delquote_ = 0;
 
 	return gc;
 }
@@ -60,30 +63,68 @@ int setGC( volatile struct GC* _ )	{
 	return 0;
 }
 
+int freeRef( void* ref )	{
+
+	int k;
+	for( k=0; k<gc->v; k++ )	{
+
+		if( gc->_[k] == ref )	{
+
+			free( gc->_[k] );
+			gc->_[k] = NULL;
+			gc->_v_--;
+			gc->_delquote_++;
+			return k;
+		}
+	}
+
+	return -1;
+}
+
 int freeGC( volatile struct GC* gc )	{
 
 	if( gc==NULL )
 		return 0;
 
 	if( gc->_!=NULL )
-		free( gc->_ );
+		freeRef( gc->_ );
 
+	int t = gc->_v_;
 	free( (struct GC*) gc );
 
-	return 1;
+	return t;
 }
 
 void* g( void* ref )	{
 
-	if( gc->c > gc->v )
-		gc->_[gc->v++] = ref;
-	else	{
+	#ifndef report
+	#define report printf
+	#endif
+	
+	loop:
+	
+		if( gc->c > gc->v )	{
+			gc->_[gc->v++] = ref;
+			gc->_v_++;
+			return ref;
+		}
+		
 
-		return NULL;
-	}
+	
+		report( "The GC object (ref '%p') has been exhausted. Increasing to x2 size (current size = %d, new size = %d).\n", gc, gc->c, gc->c*2 );
+	
+		int i;
+		if( (i = realloc_gc( gc, gc->c*2 ))<+1 )	{
+	
+			report( "Reallocation failed (status code '%d'). Exiting.\n", i );
+			exit( 1 );
+		}
+	
+		goto loop;
 
-	//--z;
-
+	report( "If you can see this message, the GC has not caught a reference allocation. For assistance "
+					"the reference address & is '%p'.\n", ref );
+	
 	return ref;
 }
 
@@ -111,6 +152,7 @@ int realloc_gc( volatile struct GC* gc_, int c2 )	{
 		gc_ = gc;
 
 	int c = gc_->c;
+	int _v_ = gc->_v_;
 
 	if( c2 == c )
 		return 0;
@@ -135,6 +177,12 @@ int realloc_gc( volatile struct GC* gc_, int c2 )	{
 	for( i=0; i < t; i++ )
 		gc_->_[i] = _[i];
 
+
+	
+	gc_->v = i;
+	gc_->_v_ = _v_;
+
+	
 	if( i < c )	{
 
 		free( _ );
@@ -145,27 +193,20 @@ int realloc_gc( volatile struct GC* gc_, int c2 )	{
 		gc_->_[i] = (void*)calloc( 1, sizeof(void*) );
 
 	gc_->c = i;
-	gc_->v = 0;
 
 	free( _ );
 
 	return +1;
 }
 
-int cleanUp( )	{
+struct gc_report cleanUp( )	{
 
-	int i=0, v = gc->v;
+	int total = gc->_delquote_;
+	int remaining = freeGC( gc );
 
-	while( i<(gc->c) )	{
-
-		if( gc->_[i]!=NULL )
-			free( gc->_[i] );
-
-		i++;
-	}
-
-	free( (struct GC*) gc );
-
-	return v;
+	struct gc_report _;
+	_.totalDeleted = total+remaining;
+	_.v = remaining;
+	return _;
 }
 

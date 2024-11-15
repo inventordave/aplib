@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "./gcollect/gc.h"
 #include "stringy.h"
 #include "colour.h"
 #include "aplib.h"
@@ -83,9 +84,9 @@ int main( int argc, char** argv ){
 	}
 
 
-	char** _ = (char**)calloc( 2, sizeof(char*) * 2  );
-	*_ = (char*)malloc( 1024 );
-	*(++_) = (char*)malloc( 1024 );
+	char** _ = (char**) g( calloc( 2, sizeof(char*) * 2  ) );
+	*_ = (char*) g( malloc( 1024 ) );
+	*(++_) = (char*) g( malloc( 1024 ) );
 	_--;
     
     	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
@@ -98,9 +99,9 @@ int main( int argc, char** argv ){
 	setPartW( A, *_ );
 	setPartW( B, *(_+1) );
 
-	free( *_ );
-	free( *(_+1) );
-	free( _ );
+	freeRef ( *_ );
+	freeRef ( *(_+1) );
+	freeRef ( _ );
 	
 	printf( "A: %s\nB: %s\n", A->integer, B->integer );
 

@@ -1,9 +1,10 @@
 // APLIB_C
 
+#include "./gcollect/gc.h"
 #include "lib.h"
 #include "stringy.h"
 // #include "colour.h"
-#include "./gcollect/gc.h
+
 #include "aplib.h"
 
 #include "stringy.h"
@@ -160,8 +161,8 @@ AP LOGb_(AP A, unsigned int base) {
   char *_ = getstring(t);
   setPartW(Base, _);
 
-  free(t);
-  free(_);
+  freeRef(t);
+  freeRef(_);
 
   AP nlA = NLOG(A);
   AP nlN = NLOG(Base);
@@ -185,9 +186,9 @@ char *LOGb_raw(char *A, int base) {
 
   char *result = DIV_str(nlA, nlN);
 
-  free(base_str);
-  free(nlA);
-  free(nlN);
+  freeRef(base_str);
+  freeRef(nlA);
+  freeRef(nlN);
 
   return result;
 }
@@ -366,7 +367,7 @@ AP OR(AP LHS, AP RHS) {
   B = RHS->integer;
   int len = (strlen(A) >= strlen(B) ? strlen(A) : strlen(B));
 
-  char *b_str = (char *)malloc(len + 1);
+  char *b_str = (char *) g( malloc(len + 1) );
   b_str[len] = '\0';
 
   // both binary string Are the sAme length.
@@ -472,7 +473,7 @@ int INC(AP A) {
 
   AP _;
   _ = ADD(A, AP1);
-  free(A);
+  FreeAP(A);
   A = _;
 
   return 1;
@@ -481,7 +482,7 @@ int DEC(AP A) {
 
   AP _;
   _ = SUB(A, AP1);
-  free(A);
+  FreeAP(A);
   A = _;
 
   return -1;
@@ -599,7 +600,7 @@ AP MULP_new(
 
   L max_len_row = strlen_A + 1 + (NUM_ROWS - 1);
 
-  char **ResultRows = (char **)malloc(sizeof(char *) * NUM_ROWS);
+  char **ResultRows = (char **) g( malloc(sizeof(char *) * NUM_ROWS) );
   if (ResultRows == NULL) {
 
     printf(" Unable to allocate memory in file '%s' at line number %d.\n",
@@ -607,7 +608,7 @@ AP MULP_new(
     exit(1);
   }
 
-  char *result_row = (char *)malloc(max_len_row + 1);
+  char* result_row = (char*) g( malloc(max_len_row + 1) );
   result_row[max_len_row] = '\0';
 
   int A_;
@@ -695,7 +696,7 @@ AP MULP(AP A, AP B, AP P) {
       (strlen(A->integer) > strlen(B->integer) ? strlen(A->integer)
                                                : strlen(B->integer));
 
-  char **ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
+  char **ResultArray = (char **) g( calloc(MAX_NUM_MUL_ROWS, sizeof(char *)) );
   int q = 0;
   int curr_row_length;
   int rev_offset_B;
@@ -754,7 +755,7 @@ AP MULP(AP A, AP B, AP P) {
     if (result_row == NULL)
       assert(result_row);
 
-    free(D->integer);
+    freeRef (D->integer);
 
     D->integer = strdup(result_row);
 
@@ -968,7 +969,7 @@ struct _APLIB *Init_APLIB() {
   DefaultPrecision = AP0; // Sets default precision to indicate the length of
                           // the largest string between the 2 operands.
 
-  struct _APLIB *APLIB = (struct _APLIB *)malloc(sizeof(struct _APLIB));
+  struct _APLIB *APLIB = (struct _APLIB *) g( malloc(sizeof(struct _APLIB)) );
 
   /**
   // Temp commenting-out
@@ -1044,10 +1045,11 @@ AP RECIPROCALP(AP A, AP DefaultPrecision) { return DIV(AP1, A); }
 AP RECIPROCAL2P(AP A, AP B, AP DefaultPrecision) { return DIV(B, A); }
 
 // BASE CONVERSION FNCS
-char *BIN_2_DEC(
-    char *bin) { /** Converts base2 (binary) string to base10 (decimal) string.
+char *BIN_2_DEC( char *bin ) {
+  
+  /** Converts base2 (binary) string to base10 (decimal) string.
 
-*/
+  */
 
   AP dec = NewAP(strlen(bin) + 1, 0);
   AP mult = NewAP(strlen(bin) + 1, 0);
@@ -1075,7 +1077,7 @@ char *BIN_2_DEC(
   FreeAP(_2);
   FreeAP(_j);
 
-  char *result = (char *)malloc(strlen(dec->integer) + 1);
+  char *result = (char *) g( malloc(strlen(dec->integer) + 1) );
   result = strdup(dec->integer);
 
   FreeAP(dec);
@@ -1100,7 +1102,7 @@ char *DEC_2_BIN(char *input, L packed) {
   AP t = CopyAP(AP0);
 
   AP Check = NewAPr(0, 0);
-  free(Check->integer);
+  freeRef(Check->integer);
   Check->integer = getstring(input);
 
   while (flag) {
@@ -1111,7 +1113,7 @@ char *DEC_2_BIN(char *input, L packed) {
     FreeAP(Check);
 
     Check = CopyAP(temp);
-    free(temp);
+    FreeAP(temp);
 
     if (DIVBY2_PRINT_ROWS == 1)
       printf("\t%c%s\n", Check->sign, Check->integer);
@@ -1123,8 +1125,8 @@ char *DEC_2_BIN(char *input, L packed) {
   }
 
   const L strlen_input = strlen(input);
-  AP *stack = (AP *)calloc(sizeof(AP), strlen_input);
-  char *binary_stack = (char *)calloc(length + 1, 1);
+  AP *stack = (AP*) g( calloc(sizeof(AP), strlen_input) );
+  char *binary_stack = (char*) g( calloc(length + 1, 1) );
 
   length = (L)strlen(input);
 
@@ -1176,7 +1178,7 @@ char *DEC_2_BIN(char *input, L packed) {
 
         AP __ = CopyAP(AP0);
         result->fractional = getstring(__->integer);
-        free(__);
+        FreeAP(__);
       }
 
       PackTrailingZeroes(result->integer, length, (length - i - 1));
@@ -1192,7 +1194,7 @@ char *DEC_2_BIN(char *input, L packed) {
 
     input[0] = '0';
     AP input2 = NewAPr(0, 0);
-    free(input2->integer);
+    freeRef (input2->integer);
     input2->integer = getstring(input);
 
     AP input3;
@@ -1205,7 +1207,7 @@ char *DEC_2_BIN(char *input, L packed) {
       FreeAP(input3);
     }
 
-    free(input);
+    freeRef(input);
     input = getstring(input2->integer);
 
     length = strlen(input);
@@ -1217,16 +1219,13 @@ char *DEC_2_BIN(char *input, L packed) {
 
     PackTrailingZeroes(A->integer, length, length);
 
-    AP t = NewAP(1, 0);
-    t->integer[0] = '0';
-
-    if (CmpAP_abs(input2, t) == 0)
+    if (CmpAP_abs(input2, AP0) == 0)
       flag = 0;
 
     FreeAP(input2);
   }
 
-  char *b_str = (char *)malloc(bs_pointer + 1);
+  char *b_str = (char *) g( malloc(bs_pointer + 1) );
 
   int k;
   for (k = 0; k < bs_pointer; k++) {
@@ -1251,7 +1250,7 @@ char *DEC_2_BIN(char *input, L packed) {
     } else
       extra = 8 - extra;
 
-    char *padding = (char *)malloc(extra + 1);
+    char *padding = (char *) g( malloc(extra + 1) );
 
     int i;
     for (i = 0; i < extra; i++)
@@ -1259,7 +1258,7 @@ char *DEC_2_BIN(char *input, L packed) {
 
     padding[i] = '\0';
 
-    char *temp = (char *)malloc(strlen(b_str) + extra + 1);
+    char *temp = (char *) g( malloc(strlen(b_str) + extra + 1) );
 
     strcpy(temp, padding);
     strcat(temp, b_str);
@@ -1334,7 +1333,7 @@ char *unpack(char *_) {
   char t;
 
   L i, j;
-  char *_U = (char *)calloc(1, (strlen__ >> 2) + 1);
+  char *_U = (char*) g( calloc(1, (strlen__ >> 2) + 1) );
   for (i = 0, j = 0; i < strlen__; i++) {
 
     t = _[i] & BITMASK_LOWER;
@@ -1361,7 +1360,7 @@ char *pack(char *_) {
 
   L strlen__ = strlen(_);
 
-  char *_P = (char *)calloc(1, (strlen__ >> 1) + 2);
+  char *_P = (char *) g( calloc(1, (strlen__ >> 1) + 2) );
   char t;
 
   L i, j;
@@ -1458,16 +1457,17 @@ char *ACCUMULATE(char *apstr) {
   // init.
   L strlen_apstr = strlen(apstr);
 
-  char *_ = (char *)malloc(strlen_apstr + 2);
+  char *_ = (char *) g( malloc(strlen_apstr + 2) );
 
-  {
+  
+    AP bkp;
 #if ACC_COPY == 1
-    AP bkp = NewAP(strlen_apstr, 0);
+    bkp = NewAP(strlen_apstr, 0);
     _ = bkp->integer;
 #else
     _ = apstr;
 #endif
-  }
+  
   _[0] = apstr[0];
 
   char c;
@@ -1502,6 +1502,7 @@ char *ACCUMULATE(char *apstr) {
   if (_[0] == '0') // this is digit zero, not the nullchar.
     ++_;
 
+  FreeAP( bkp );
   return _;
 }
 
@@ -1632,7 +1633,7 @@ L DSTRING2LARGE(AP A) {
   char *_ = A->integer;
   L e = strlen(_) - 1;
 
-  char *d = (char *)malloc(2);
+  char *d = (char *) g( malloc(2) );
   d[0] = _[e];
   d[1] = '\0';
 
@@ -1654,8 +1655,8 @@ AP APLCM( AP A, AP B ){
         #define MAX_ITER 4096
         // It is AP pointers stored in the memory, because it is pointers
 allocated by the Operator functions that are passed. AP R1[MAX_ITER] =
-(APL)calloc( sizeof(APL), MAX_ITER ); AP R2[MAX_ITER] = (APL)calloc(
-sizeof(APL), MAX_ITER );
+(AP) g( calloc( sizeof(AP), MAX_ITER ) ); AP R2[MAX_ITER] = (AP) g( calloc(
+sizeof(AP), MAX_ITER ) );
 
         AP val = CopyAP( AP1 );
         AP inc = CopyAP( AP0 );
@@ -1687,12 +1688,12 @@ AP LCM(AP A, AP B) {
 
   AP M1;
   AP M2;
-#define MAX_ITER 4096
-  APL *R1 = (APL *)calloc(sizeof(APL), MAX_ITER);
-  APL *R2 = (APL *)calloc(sizeof(APL), MAX_ITER);
+  #define MAX_ITER 4096
+  AP *R1 = (AP *) g( calloc(sizeof(AP), MAX_ITER) );
+  AP *R2 = (AP *) g( calloc(sizeof(AP), MAX_ITER) );
 
   AP AP_MAX_ITER = NewAP(0, 0);
-  free(AP_MAX_ITER->integer);
+  freeRef (AP_MAX_ITER->integer);
   AP_MAX_ITER->integer = int2str(MAX_ITER);
 
   AP val = ADD(AP1, AP1), inc = CopyAP(AP0), match = CopyAP(AP0);
@@ -1752,11 +1753,11 @@ AP lcm_example(int argc, char **argv) {
   AP a;
   AP b;
   a = NewAPr(0, 0);
-  free(a->integer);
+  freeRef (a->integer);
   a->integer = argv[1];
 
   b = NewAPr(0, 0);
-  free(b->integer);
+  freeRef (b->integer);
   b->integer = argv[2];
 
   AP lcm = LCM(a, b);
@@ -1785,9 +1786,9 @@ AP NewAP(large integer_length, large fractional_length) {
   if (fractional_length > MAX_LENGTH_AP_PART)
     fractional_length = MAX_LENGTH_AP_PART;
 
-  AP result = (AP)malloc(sizeof(APP));
-  result->integer = (char *)malloc(integer_length + 1);
-  result->fractional = (char *)malloc(fractional_length + 1);
+  AP result = (AP) g( malloc(sizeof(APP)) );
+  result->integer = (char *) g( malloc(integer_length + 1) );
+  result->fractional = (char *) g( malloc(fractional_length + 1) );
 
   if ((result->integer == NULL) || (result->fractional == NULL)) {
 
@@ -1813,10 +1814,10 @@ AP NewAP(large integer_length, large fractional_length) {
 
 AP CopyAP(AP A) {
 
-  AP _ = NewAP(strlen(A->integer), strlen(A->fractional));
+  AP _ = (APP*) g( malloc(sizeof(APP)) );
 
-  strcpy(_->integer, A->integer);
-  strcpy(_->fractional, A->fractional);
+  _->integer = getstring( A->integer );
+  _->fractional = getstring( A->fractional );
 
   if (A->sign)
     _->sign = A->sign;
@@ -1853,13 +1854,13 @@ APTR OCTAL_2_BIN(APTR A) { aplibstdreturn(2); }
 void FreeAP(AP A) {
 
   if (A->integer != NULL)
-    free(A->integer);
+    freeRef (A->integer);
 
   if (A->fractional != NULL)
-    free(A->fractional);
+    freeRef (A->fractional);
 
   if (A != NULL)
-    free(A);
+    freeRef (A);
 
   return;
 }
@@ -1931,8 +1932,7 @@ AP RECIPROCAL(AP A) {
 // GENERAL HELPER FNCS
 char **GetAPSymbols() {
 
-  char **symbols = (char **)malloc(
-      sizeof(char *) * 655536); // this implies up to 64k symbols in list.
+  char **symbols = (char **) g( malloc(sizeof(char *) * 655536) ); // this implies up to 64k symbols in list.
 
   symbols[DELIMITERS] = getstring("([{}])");
   symbols[OP_UNKNOWN] = getstring("UNKNOWN");
@@ -2100,7 +2100,7 @@ signed int OverFlow(AP C, int result, signed k) {
 
   if ((k - 1) < 0) {
 
-    char *_ = (char *)malloc(strlen(C->integer) + 1 + 1);
+    char *_ = (char *) g( malloc(strlen(C->integer) + 1 + 1) );
     assert(_);
 
     _[0] = '0';
@@ -2110,7 +2110,7 @@ signed int OverFlow(AP C, int result, signed k) {
       _[x + 1] = C->integer[x];
     _[x + 1] = 0;
 
-    free(C->integer);
+    freeRef (C->integer);
     C->integer = _;
   }
 

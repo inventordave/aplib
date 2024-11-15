@@ -1,7 +1,7 @@
 // ap_io.c
 #include <stdlib.h>
 #include <string.h>
-
+#include "./gcollect/gc.h"
 #include "ap_io.h"
 
 char * formatSign(char sign)	{
@@ -16,7 +16,7 @@ char * formatBinary(char *bin_string)	{
 	char * _1 = "1";
 	char * _0 = "0";
 	
-	char * str = (char *)malloc( bin_string_length + 50 + 1 );
+	char * str = (char*) g( malloc( bin_string_length + 50 + 1 ) );
 	int str_length = bin_string_length + 50;
 	
 	int flag = 0;
@@ -59,7 +59,7 @@ char * formatBinary(char *bin_string)	{
 
 char * formatAP(AP A)	{
 	
-	char * str = (char *)malloc( strlen(A->major)+1+1+(8*3) );
+	char * str = (char*) g( malloc( strlen(A->major)+1+1+(8*3) ) );
 	
 	strcpy( str, formatSign(A->sign) );
 	str[ strlen(str) ] = A->sign;
@@ -87,7 +87,7 @@ void normal()	{
 
 char * c(char * str, char * col)	{
 
-	char * str2 = (char *)malloc( strlen(str) + 16 + 1);
+	char * str2 = (char*) g( malloc( strlen(str) + 16 + 1) );
 	sprintf( str2, "%s%s%s", col, str, NORMAL );
 	return str2;
 }

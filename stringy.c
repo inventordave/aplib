@@ -3,6 +3,7 @@
 
 // INC'S
 #include <stdarg.h>
+#include "./gcollect/gc.h"
 #include "stringy.h"
 
 
@@ -82,7 +83,7 @@ return 0; }
 // SANITIZESTR: General method for pre-processing of an input c-string (safety).
 char* sanitizeStr( char* A )	{
 	
-	char * B = (char *)malloc( strlen(A)+1 );
+	char * B = (char *) g( malloc( strlen(A)+1 ) );
 	char * _ = B;
 	
 	while((*A) != '\0')	{
@@ -241,7 +242,7 @@ void PrintASCIITable(char start, char end)	{
 char* itoad(int v)	{
 	
 	// snprintf (buff, sizeof(buf), "%d",n); // print int 'n' into the char[] buffer
-	char * _ = (char*)malloc(16);
+	char * _ = (char*) g( malloc(16) );
 	
 	snprintf ( _, 16, "%d", v );
 	
@@ -255,10 +256,9 @@ char* itoad(int v)	{
 char * cat(int c, char * s, ...)	{
 	
 	va_list ap;
-	char * _ = (char *)malloc(4096);
-	_[4095] = '\0';
-	
-	strcpy(_, s);
+
+	char * _;	
+	_ = getstring( s );
 
 	va_start(ap, s);
 	for(scint i=0; i<c; i++)	{
@@ -273,7 +273,7 @@ char * cat(int c, char * s, ...)	{
 
 char* int2str(int v)	{
 	
-	char* _ = (char*)malloc( (sizeof(int)*8)+1 );
+	char* _ = (char*) g( malloc( (sizeof(int)*8)+1 ) );
 	sprintf( _, "%d", v );
 	
 	return _;
@@ -309,7 +309,7 @@ void addnult( char* _, unsigned long long int i ){
 char* getstring( char* in ){
 	
 	unsigned long long int str_length = strlen( in );
-	char* _ = (char*)malloc( str_length+1 );
+	char* _ = (char*) g( malloc( str_length+1 ) );
 	
 	unsigned long long int i;
 	for( i=0; i<str_length; i++ )
@@ -359,21 +359,15 @@ char * safecat( char* s, char* rhs )	{
 
 	} while (ch != '\0' || chr != '\0');
 	
-	char * _ = (char *)malloc( strlen(s) + strlen(rhs) +1 );
-	if( _ == NULL )
-		return (char *)NULL;
+	char* _;
 	
-	strcpy(_, s);
+	_ = getstring( s );
 	strcat(_, rhs);
 	
-	free(s);
-	s = malloc(strlen(_) + 1);
-	if( s == NULL )
-		return (char *)NULL;
+	freeRef(s);
+	s = getstring( _ );
 	
-	strcpy(s, _);
-	
-	free(_);
+	freeRef(_);
 	// Do safety check on composite string _, before returning the cstring pointer to the caller.
 	// ... 1. remove any non-alphabetical control codes, though printable.
 

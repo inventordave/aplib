@@ -1,5 +1,6 @@
 // T£STS.c
 #include <stdlib.h>
+#include "./gcollect/gc.h"
 #include "tests.h"
 #include "aplib.h"
 #include "ap.h"
@@ -8,7 +9,7 @@
 
 char* genRndDStr( int len )	{
 
-	char* _ = malloc( len+1 );
+	char* _ = g( malloc( len+1 ) );
 
 	int i;
 	for( i=0; i<len; i++ )
@@ -403,8 +404,8 @@ void orTest(int argc, char ** argv)	{
 	int a_or_b = (len_a>=len_b)?1:0;
 	int diff = a_or_b?(len_a-len_b):(len_b-len_a);
 	
-	char * buf = (char *)malloc(diff + 1);
-	char * dummy = (char *)malloc(1);
+	char * buf = (char*) g( malloc(diff + 1) );
+	char * dummy = (char*) g( malloc(1) );
 	dummy[0] = '\0';
 	
 	buf[0] = '\0';
@@ -418,8 +419,8 @@ void orTest(int argc, char ** argv)	{
 	printf( "%s%s\n", a_or_b?buf:dummy, b );
 	printf( "%s\n", formatBinary(c) );
 	
-	free( buf );
-	free( dummy );
+	freeRef( buf );
+	freeRef( dummy );
 	
 	return;
 }
@@ -450,8 +451,8 @@ void andTest(int argc, char **argv)	{
 	int a_or_B = (len_a>=len_B)?1:0;
 	int diff = a_or_B?(len_a-len_B):(len_B-len_a);
 	
-	char * buf = (char *)malloc(diff + 1);
-	char * dummy = (char *)malloc(1);
+	char * buf = (char *) g( malloc(diff + 1) );
+	char * dummy = (char*) g( malloc(1) );
 	dummy[0] = '\0';
 	
 	buf[0] = '\0';
@@ -465,8 +466,8 @@ void andTest(int argc, char **argv)	{
 	printf( "%s%s\n", a_or_B?buf:dummy, formatBinary(b) );
 	printf( "%s\n", formatBinary(c) );
 	
-	free( buf );
-	free( dummy );
+	freeRef( buf );
+	freeRef( dummy );
 	
 	return;
 }
@@ -476,10 +477,10 @@ void test2kMax(int argc, char **argv)	{
 	int temp = DIVBY2_PRINT_ROWS;
 	DIVBY2_PRINT_ROWS = 0;
 	
-	aP input;
-	parseaP(&input, argv[1]);
+	AP input;
+	ParseAP(input, argv[1]);
 	
-	char * _ = input.integer;
+	char * _ = input->integer;
 	
 	int a = Max2K(input);
 	DIVBY2_PRINT_ROWS = temp;
@@ -507,10 +508,10 @@ void basicTest(int argc, char **argv)	{ // aD, SUB, MUL, EXP
 	B = NewAP( 10, 0 );
 	
 	// arg A
-	parseAP(&A, argv[1]);
+	ParseAP(A, argv[1]);
 	
 	// arg B
-	parseAP(&B, argv[2]);
+	ParseAP(B, argv[2]);
 	
 	
 	printf( "Values Entered:\nA = %c%s\nB = %c%s\n", A->sign, A->integer, B->sign, B->integer );
@@ -553,17 +554,21 @@ void dec_2_Bin_2_dec(int argc, char **argv)	{ // DEC->BIN->DEC	(DEC_2_BIN / BIN_
 	
 	char * decimal = "543212362746234636432864963483264873264932649823649";
 	
-	AP a = NewAP( strlen(decimal), 0 );
-	a.integer = strdup( decimal );
+	AP A = NewAP( strlen(decimal), 0 );
+	A->integer = strdup( decimal );
 	
-	char * binary = DEC_2_BIN(a, 1);
+	char * binary = DEC_2_BIN(A, 1);
 	
 	char * ret_decimal = BIN_2_DEC(binary);
 	
 	printf( "decimal = %s\n", decimal );
 	printf( "binary = %s\n", binary );
 	printf( "back again = %s\n", ret_decimal );
-	
+
+	freeRef( ret_decimal );
+	freeRef( binary );
+
+	FreeAP( A );
 	return;
 }
 
@@ -590,7 +595,7 @@ void fs_test1(int argc, char **argv)	{
 	printf( "Float->exponent = %d\n", a->exponent );
 	printf( "Float->significand = %d\n", a->significand );
 
-	free( a );
+	freeRef( a );
 
 	NL;
 	

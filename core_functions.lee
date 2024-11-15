@@ -1,9 +1,10 @@
-// APLIB_C
+// APIB_C
 
+#include "./gcollect/gc.h"
 #include "lib.h"
 #include "stringy.h"
 #include "colour.h"
-#include "aplib.h"
+#include "APib.h"
 
 #include "stringy.h"
 
@@ -11,7 +12,7 @@ AP AP0;
 AP AP1;
 AP DefaultPrecision;
 
-struct _APLIB APLIB;
+struct _APIB APIB;
 
 char* MUL_SYM = "*";
 char* ADD_SYM = "+";
@@ -136,7 +137,7 @@ AP AND( AP LHS, AP RHS )	{
 AP NOT(AP v)	{
 	
 	
-	APLS _v = v->integer;
+	APS _v = v->integer;
 	L strlen_v = strlen( _v );
 	register char* _ = (char*)malloc( strlen_v+1 );
 	LARGE i;
@@ -151,7 +152,7 @@ AP NOT(AP v)	{
 		
 	_[i] = '\0';
 	
-	AP _2 = (APL)malloc( sizeof( APP ) );
+	AP _2 = (AP)malloc( sizeof( APP ) );
 	_2->integer = _;
 	return _2;
 }
@@ -251,7 +252,7 @@ AP XOR( AP LHS, AP RHS )	{
 
 	assert( k==-1 );
 	
-	AP _ = (APL)malloc( sizeof(APP) );
+	AP _ = (AP)malloc( sizeof(APP) );
 	_->integer = bstr;
 	return _;
 }
@@ -412,7 +413,7 @@ AP MULP( AP A, AP B, AP P )  {
 
 	int MAX_NUM_MUL_ROWS = ( strlen(A->integer)>strlen(B->integer) ? strlen(A->integer) : strlen(B->integer) );
 	
-	char ** ResultArray = (char **)calloc(MAX_NUM_MUL_ROWS, sizeof(char *));
+	char ** ResultArray = (char **) g( calloc(MAX_NUM_MUL_ROWS, sizeof(char *)) );
 	int q = 0;
 
 	for( int k = strlen(B->integer)-1; k>=0; k-- )	{
@@ -475,7 +476,7 @@ AP MULP( AP A, AP B, AP P )  {
 		
 		D->integer = strdup(result_row);
 		
-		AP _ = (APL)malloc( sizeof( APP ) );
+		AP _ = (AP)malloc( sizeof( APP ) );
 		*_ = *C;
 		free( C->fractional	);
 		free ( C );
@@ -754,8 +755,8 @@ In other words, 127 would be "01111111" insteAd of "1111111". An Argument of 0 m
 	} 
 	
 	const L strlen_input = strlen(input);
-	AP* stack = (AP*)calloc( sizeof(AP), strlen_input );
-	char binary_stack = (char*)calloc( length+1, 1 );
+	AP* stack = (AP*) g( calloc( sizeof(AP), strlen_input ) );
+	char binary_stack = (char*) g( calloc( length+1, 1 ) );
 
 	length = (L)strlen(input);
 
@@ -1016,7 +1017,7 @@ AP DIVBY2( AP A )	{
 	int overflow = 0;
 	int value;
 	L strlen_a = strlen( A->integer );
-	AP _ = (APL)malloc( sizeof(APP) );
+	AP _ = (AP)malloc( sizeof(APP) );
 	_->integer = zmem( strlen_a );
 	_->fractional = getstring( "0" );
 	LARGE i;
@@ -1114,8 +1115,8 @@ AP APLCM( AP A, AP B ){
 	
 	#define MAX_ITER 4096
 	// It is AP pointers stored in the memory, because it is pointers allocated by the Operator functions that are passed.
-	AP R1[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
-	AP R2[MAX_ITER] = (APL)calloc( sizeof(APL), MAX_ITER );
+	AP R1[MAX_ITER] = (AP) g( calloc( sizeof(AP), MAX_ITER ) );
+	AP R2[MAX_ITER] = (AP) g( calloc( sizeof(AP), MAX_ITER ) );
 	
 	AP val = CopyAP( AP1 );
 	AP inc = CopyAP( AP0 );
@@ -1145,7 +1146,7 @@ AP APLCM( AP A, AP B ){
 
 AP NewAPr( large integer_range, large fractional_range )	{
 
-	AP _ = (APL)malloc( sizeof(AP) );
+	AP _ = (AP)malloc( sizeof(AP) );
 	_ = NewAP( integer_range,fractional_range );
 	return _;
 }
@@ -1301,7 +1302,7 @@ AP RECIPROCAL( AP A )	{
 
 
 // GENERAL HELPER FNCS
-char** getaplibsymbols(){
+char** getAPibsymbols(){
 	
 char** symbols = (char**)malloc( sizeof( char* )*655536 ); // this implies up to 64k symbols in list.
 

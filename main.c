@@ -31,12 +31,14 @@ int main( int argc, char** argv ){
 	
 	//
 
-	volatile struct GC* gc = initGC( 1024 );
+	volatile struct GC* gc = initGC( 10 );
 
+	
 	//INIT()
-	AP0 = NewAPr( 1,1 );
-	AP1 = CopyAP( AP0 );
-	setPartW( AP1, "1" );
+	AP0 = NewAP( 1,0 );
+	AP0->integer[0] = '0';
+	AP1 = NewAP( 1,0 );
+	AP1->integer[0] = '1';
 
 	AP (*fnc)( AP A, AP B );
 
@@ -86,9 +88,9 @@ int main( int argc, char** argv ){
 	}
 
 
-	char** _ = (char**)calloc( 2, sizeof(char*) * 2  );
-	*_ = (char*)malloc( 1024 );
-	*(++_) = (char*)malloc( 1024 );
+	char** _ = (char**) g( calloc( 2, sizeof(char*) * 2  ) );
+	*_ = (char*) g( malloc( 1024 ) );
+	*(++_) = (char*) g( malloc( 1024 ) );
 	_--;
     
     	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
@@ -101,16 +103,23 @@ int main( int argc, char** argv ){
 	setPartW( A, *_ );
 	setPartW( B, *(_+1) );
 
-	free( *_ );
-	free( *(_+1) );
-	free( _ );
+	freeRef( *_ );
+	freeRef( *(_+1) );
+	freeRef ( _ );
 	
 	printf( "A: %s\nB: %s\n", A->integer, B->integer );
 
 	C = fnc( A,B );
 
-	printf( "Result of %s %c %s = %s\n", OPERAND_ARGS_MULTISELECT );	
+	printf( "Result of %s %c %s = %s\n\n", OPERAND_ARGS_MULTISELECT );	
 
+	struct gc_report gc_result = cleanUp();
+
+	#ifndef report
+	#define report printf
+	#endif
+
+	report( "GC has cleaned-up %d references, for a process-lifetime total of %d.\n", gc_result.v, gc_result.totalDeleted  );
 	return 0;
 }
 
