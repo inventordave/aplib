@@ -83,13 +83,14 @@ int main( int argc, char** argv ){
 	}
 
 
-	char** _ = (char**)calloc( sizeof(char*) * 2 );
+	char** _ = (char**)calloc( 2, sizeof(char*) * 2  );
 	*_ = (char*)malloc( 1024 );
 	*(++_) = (char*)malloc( 1024 );
 	_--;
     
     	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
-    
+
+	int i;
 	for (i = 0; i < 2; i++) {
         	scanf("%s", *(_+i) );
     	}
