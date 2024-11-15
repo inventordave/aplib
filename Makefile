@@ -3,11 +3,17 @@
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
 	gcc -Wall -g -DDEBUG stringy.c aplib.c io.c -lstd -c aplib.o
 
-test:	main.c testmain.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
-	gcc -Wall -O0 -g -DDEBUG lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o test.exe
+GC:
+	make -C ./gcollect/ gcd
+	
+test:	GC main.c testmain.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
+	
+	gcc -Wall -O -g -DDEBUG ./gcollect/gcd.o lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o test.exe
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
+
+	rm -f ./gcollect/*.o
 	rm -f test.exe
 	rm -f *stackdump
 

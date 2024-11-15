@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "./gcollect/gc.h"
 #include "stringy.h"
 #include "colour.h"
 #include "aplib.h"
@@ -16,6 +17,7 @@ void flushBuffer() {
 
 int main( int argc, char** argv ){
 
+	
 	printf( "Begin...\n" );
 	fflush( stdout );
 
@@ -29,6 +31,7 @@ int main( int argc, char** argv ){
 	
 	//
 
+	volatile struct GC* gc = initGC( 1024 );
 
 	//INIT()
 	AP0 = NewAPr( 1,1 );

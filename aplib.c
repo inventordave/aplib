@@ -3,6 +3,7 @@
 #include "lib.h"
 #include "stringy.h"
 // #include "colour.h"
+#include "./gcollect/gc.h
 #include "aplib.h"
 
 #include "stringy.h"
@@ -771,6 +772,7 @@ AP MULP(AP A, AP B, AP P) {
 AP DIV(AP A, AP B) { return DIVP(A, B, DefaultPrecision); }
 AP DIVP(AP A, AP B, AP P) {
 
+    int count = 0;
   int fractional = 0;
 
   AP C = NewAP(0, 0);
@@ -847,8 +849,8 @@ loop:
 
 #define CONCAT(__A, __B) strcat(__A, __B)
 
-    // printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
-    //++count;
+    printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
+    ++count;
     CONCAT(Cc, v->integer);
 
     if (fractional) {
