@@ -31,7 +31,7 @@ int main( int argc, char** argv ){
 	
 	//
 
-	volatile struct GC* gc = initGC( 10 );
+	aplib_gc = initGC( 10 );
 
 	
 	//INIT()

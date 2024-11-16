@@ -13,10 +13,19 @@ typedef unsigned long long int large;
 #define L large
 #define LARGE large
 
+// MAX_LOOPS : 
+extern L MAX_LOOPS;
+
+// GC structure.
+extern volatile struct GC* aplib_gc;
 
 // CUSTOM INC'S
 #include "lib.h"
 #include "colour.h"
+
+
+
+
 
 // STATIC DEF'S
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.

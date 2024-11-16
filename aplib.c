@@ -1,6 +1,14 @@
 // APLIB_C
 
 #include "./gcollect/gc.h"
+
+// MAX_LOOPS
+
+L MAX_LOOPS = 100;
+
+// GC structure.
+volatile struct GC* aplib_gc;
+
 #include "lib.h"
 #include "stringy.h"
 // #include "colour.h"
@@ -100,8 +108,7 @@ AP NLOGP(AP x, AP epsilon) {
   // which has cubic convergence to ln(x).
   // double ln(double x, double epsilon)
 
-  AP yn =
-      SUB(x, AP1); // using the first term of the taylor series as initial-value
+  AP yn = SUB(x, AP1); // using the first term of the taylor series as initial-value
   AP yn1 = CopyAP(yn);
   AP diff = NewAP(0, 0);
   AP AP2 = ADD(AP1, AP1);
@@ -771,165 +778,305 @@ AP MULP(AP A, AP B, AP P) {
   return C;
 }
 AP DIV(AP A, AP B) { return DIVP(A, B, DefaultPrecision); }
-AP DIVP(AP A, AP B, AP P) {
+
+AP DIVP( AP A, AP B, AP P )  {
+
+    // 1. subsequence(A) >= B * v
+    // 2. C_offset = v [0,9]
+    // 3. remainder = subsequence(A) - B * v [0, subsequence(A) )
+
+    L calculating = 0;
+    int v = 0;
+    int extra = 0;
+
+    L strlen_B = strlen(B->integer);
+    L strlen_A = strlen(A->integer);
+    L carat_offset =  strlen_B - 1;
+
+    AP V = NewAP( 1,0 );
+    AP subtrahendAP = NewAP( 0,0 );
+    char* subtrahend = subtrahendAP->integer;
+    AP subsequenceAP = NewAP( strlen_B + 2,0 );
+    char* subsequence = subsequenceAP->integer;
+
+    L strlen_C = strlen_B + 10;
+    AP C = NewAP( strlen_C,0 );
+    char* c = C->integer;
+
+    L i;
+    for( i=0; i<=carat_offset; i++ )
+      c[i] = '0';
+
+    c[i] = '\0';
+
+
+    for( i=0; i<= carat_offset; i++ )  {
+  
+      subsequence[i] = A->integer[i];
+    }
+    if( cmp_dstr( subsequence, B->integer ) >= 0 )
+      subsequence[i] = '\0';
+    else {
+  
+        carat_offset++;
+        subsequence[i++] = A->integer[i];
+        subsequence[i] = '\0';
+    }
+
+    while( calculating++  )  {
+
+       if( calculating == MAX_LOOPS )
+         break;
+      
+        // set AP V to [0, 9]
+        for( v=0; v<10; v++ )  {
+          
+            V->integer[0] = '0' + v;
+            subtrahendAP = MUL( B, V );
+
+            if( cmp_dstr( subtrahend, subsequence ) > 0 )  {
+              
+                v--;
+                FreeAP( subtrahendAP );
+                break;
+            }
+
+            FreeAP( subtrahendAP );
+        }
+
+        if( v > 9 )  {
+
+            printf( "Error: subsequence := '%s', subtrahend := '%s', carat := '%d', A := '%s', B:= '%s', v := '%d'\n", subsequence, subtrahend, (int)carat_offset, A->integer, B->integer, v );
+
+            assert(0);
+
+            // leave 'calculating' flag as 1.
+            // calculating = 0;
+            break;
+        }
+
+        c[carat_offset++] = '0' + v;
+
+        // interim_result = interim_result - subtrahend;
+      //   interim_result .= A[carat_offset];
+
+        AP _;
+        _ = SUB( subsequenceAP, subtrahendAP );
+        FreeAP( subsequenceAP );
+        subsequenceAP = _;
+
+        
+        if( carat_offset <= strlen_A )
+            V->integer[0] = A->integer[carat_offset];
+        else  {
+
+            if( cmp_dstr( subsequence, "0" ) == 0 )  {
+
+              calculating = 0;
+              break;
+            }
+          
+            V->integer[0] = 0;
+        }
+
+
+        // concat dropdown to subsequence
+        #define CONCAT( l,r ) strcat( l,r )
+        CONCAT( subsequence,V->integer );
+  
+        
+        extra++;
+        if( extra==10 )  {
+
+          char* _;
+
+          int c_ref = getRef( c );
+
+          void* c_ref_ptr = aplib_gc->_[c_ref];
+
+          _ = realloc( c,(strlen_C += 10) );
+
+          if( _!= c_ref_ptr )  {
+
+            // stdlib realloc() free'd old ptr for c.
+            aplib_gc->_[c_ref] = NULL;
+            g( _ );
+          }
+
+          c = _;
+          extra = 0;
+        }
+    }
+
+    if( calculating )  {
+
+      // Must be an Error, as calculating flag should be switched to 0.
+
+      printf( "Max number of LOOPs (%d) reached.  Calculating flag should be switched to 0.\n", MAX_LOOPS );
+    }
+
+  return C;
+}
+
+AP DIVP_old(AP A, AP B, AP P) {
 
     int count = 0;
-  int fractional = 0;
-
-  AP C = NewAP(0, 0);
-  char *Cc = C->integer;
-  large offset = strlen(B->integer) - 1;
-  AP Remainder = NewAP(strlen(B->integer), 0);
-
-  large i;
-  for (i = 0; i < strlen(B->integer); i++)
-    Remainder->integer[i] = A->integer[i];
-
-  Remainder->integer[i] = '\0';
-
-  AP Dropdown = CopyAP(AP0);
-
-  AP v = CopyAP(AP0);
-  AP inc = CopyAP(AP1);
-
-  AP temp;
-  AP v2;
-  AP result;
-  large strlen_A = strlen(A->integer);
-  // large strlen_minor_A = LSD_OFFSET(A.fractional);
-
-  if (strlen(A->integer) > strlen(B->integer))
-    Dropdown->integer[0] = A->integer[offset + 1];
-  else
-    Dropdown->integer[0] = '0';
-
-  int LOOPS = 0;
-
-  int MAX_LOOPS = 50;
-
-  // int count = 0;
-
-  int loopCount = strlen_A;
-loop:
-  while (offset < loopCount) {
-
-    ++LOOPS;
-    if (LOOPS > MAX_LOOPS)
-      goto maxiterations;
-
-    v->integer[0] = '1';
-
-    temp = MUL(B, v);
-    while (CmpAP_abs(temp, Remainder) < 1) {
-
+    int fractional = 0;
+  
+    AP C = NewAP(0, 0);
+    char *Cc = C->integer;
+    large offset = strlen(B->integer) - 1;
+    AP Remainder = NewAP(strlen(B->integer), 0);
+  
+    large i;
+    for (i = 0; i < strlen(B->integer); i++)
+      Remainder->integer[i] = A->integer[i];
+  
+    Remainder->integer[i] = '\0';
+  
+    AP Dropdown = CopyAP(AP0);
+  
+    AP v = CopyAP(AP0);
+    AP inc = CopyAP(AP1);
+  
+    AP temp;
+    AP v2;
+    AP result;
+    large strlen_A = strlen(A->integer);
+    // large strlen_minor_A = LSD_OFFSET(A.fractional);
+  
+    if (strlen(A->integer) > strlen(B->integer))
+      Dropdown->integer[0] = A->integer[offset + 1];
+    else
+      Dropdown->integer[0] = '0';
+  
+    int LOOPS = 0;
+  
+    int MAX_LOOPS = 50;
+  
+    // int count = 0;
+  
+    int loopCount = strlen_A;
+  loop:
+    while (offset < loopCount) {
+  
+      ++LOOPS;
+      if (LOOPS > MAX_LOOPS)
+        goto maxiterations;
+  
+      v->integer[0] = '1';
+  
+      temp = MUL(B, v);
+      while (CmpAP_abs(temp, Remainder) < 1) {
+  
+        FreeAP(temp);
+  
+        v2 = ADD(v, inc);
+        FreeAP(v);
+        v = CopyAP(v2);
+        FreeAP(v2);
+  
+        temp = MUL(B, v);
+      }
       FreeAP(temp);
-
-      v2 = ADD(v, inc);
+  
+      v2 = SUB(v, inc);
       FreeAP(v);
       v = CopyAP(v2);
       FreeAP(v2);
-
-      temp = MUL(B, v);
-    }
-    FreeAP(temp);
-
-    v2 = SUB(v, inc);
-    FreeAP(v);
-    v = CopyAP(v2);
-    FreeAP(v2);
-
-    result = MUL(B, v);
-
-    //		if( cmp_dstr( result->integer,Remainder->integer )>0 ) ;
-
-    v2 = SUB(Remainder, result);
-    FreeAP(result);
-    FreeAP(Remainder);
-    Remainder = CopyAP(v2);
-    FreeAP(v2);
-
-#define CONCAT(__A, __B) strcat(__A, __B)
-
-    printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
-    ++count;
-    CONCAT(Cc, v->integer);
-
-    if (fractional) {
-      Dropdown->integer[0] = '0';
-    }
-
-    if (!fractional) {
-
-      if ((offset + 1) < strlen_A)
-        Dropdown->integer[0] = A->integer[offset + 1];
-      else {
+  
+      result = MUL(B, v);
+  
+      //		if( cmp_dstr( result->integer,Remainder->integer )>0 ) ;
+  
+      v2 = SUB(Remainder, result);
+      FreeAP(result);
+      FreeAP(Remainder);
+      Remainder = CopyAP(v2);
+      FreeAP(v2);
+  
+  #define CONCAT(__A, __B) strcat(__A, __B)
+  
+      printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
+      ++count;
+      CONCAT(Cc, v->integer);
+  
+      if (fractional) {
         Dropdown->integer[0] = '0';
       }
+  
+      if (!fractional) {
+  
+        if ((offset + 1) < strlen_A)
+          Dropdown->integer[0] = A->integer[offset + 1];
+        else {
+          Dropdown->integer[0] = '0';
+        }
+      }
+  
+      CONCAT(Remainder->integer, Dropdown->integer);
+  
+      if( fractional && !CmpAP_abs(Remainder,AP0) )
+        break;
+  
+      
+      #define report printf
+      int r;
+      if( (r = cmp_dstr( Remainder->integer, B->integer )) >=0 )
+      {
+  
+        report( "Remainder = %s\nDivisor = %s\nLOOPS = %d\nC = %s.%s\n", Remainder->integer, B->integer ,LOOPS, C->integer, C->fractional );
+        fflush( stdout );
+        char ch;
+        if( (ch = getchar())=='q' )
+          exit(0);
+      }
+  
+      ++offset;
     }
-
-    CONCAT(Remainder->integer, Dropdown->integer);
-
-    if( fractional && !CmpAP_abs(Remainder,AP0) )
-      break;
-
-    
-    #define report printf
-    int r;
-    if( (r = cmp_dstr( Remainder->integer, B->integer )) >=0 )
-    {
-
-      report( "Remainder = %s\nDivisor = %s\nLOOPS = %d\nC = %s.%s\n", Remainder->integer, B->integer ,LOOPS, C->integer, C->fractional );
-      fflush( stdout );
-      char ch;
-      if( (ch = getchar())=='q' )
-        exit(0);
+  
+    // fractional overflow
+    if (!fractional) {
+  
+      if (CmpAP_abs(Remainder, AP0) != 0) {
+  
+        fractional = 1;
+        Cc[strlen(Cc)] = '\0';
+        Cc = C->fractional;
+        // offset = 0;
+        loopCount = MAX_LOOPS + 1;
+        goto loop;
+      }
     }
-
-    ++offset;
-  }
-
-  // fractional overflow
-  if (!fractional) {
-
-    if (CmpAP_abs(Remainder, AP0) != 0) {
-
-      fractional = 1;
-      Cc[strlen(Cc)] = '\0';
-      Cc = C->fractional;
-      // offset = 0;
-      loopCount = MAX_LOOPS + 1;
-      goto loop;
-    }
-  }
-
-maxiterations: // Upper-bound for precision of calculation reached.
-  // RESULT COMPUTED.
-  Cc[strlen(Cc)] = '\0';
-
-  if (cmp_dstr(C->integer, AP0->integer))
-    printf("%s", C->integer);
-  else
-    printf("0");
-
-  if (cmp_dstr(C->fractional, AP0->integer))
-    printf(".%s", C->fractional);
-  NL;
-
-  /**
-  for( i=0; i<strlen_A; i++ )
-          printf( "%c", C->integer[i] );
-
-  printf( "." );
-
-  for( ; i<strlen(C->integer); i++ )
-          printf( "%c", C->integer[i] );
-  */
-  NL;
-
-  // printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
-  // pause();
-
-  return C;
+  
+  maxiterations: // Upper-bound for precision of calculation reached.
+    // RESULT COMPUTED.
+    Cc[strlen(Cc)] = '\0';
+  
+    if (cmp_dstr(C->integer, AP0->integer))
+      printf("%s", C->integer);
+    else
+      printf("0");
+  
+    if (cmp_dstr(C->fractional, AP0->integer))
+      printf(".%s", C->fractional);
+    NL;
+  
+    /**
+    for( i=0; i<strlen_A; i++ )
+            printf( "%c", C->integer[i] );
+  
+    printf( "." );
+  
+    for( ; i<strlen(C->integer); i++ )
+            printf( "%c", C->integer[i] );
+    */
+    NL;
+  
+    // printf( "\n\nSystem paused. Press any (sensible) key to continue..." );
+    // pause();
+  
+    return C;
 }
 
 // SKELETON FNC'S FOR FUTURE OPERATO

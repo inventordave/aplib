@@ -44,6 +44,11 @@ extern char* gcchar( void* );
 // GC_* build_gc_struct(int);
 extern int freeGC( volatile struct GC* gc );
 
+
+int getRef( void* );
+
+
+
 // self-explanatory.
 // Searches the Active GC Context.
 int freeRef( void* );

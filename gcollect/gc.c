@@ -63,6 +63,20 @@ int setGC( volatile struct GC* _ )	{
 	return 0;
 }
 
+int getRef( void* ref )	{
+
+	int k;
+	for( k=0; k<gc->v; k++ )	{
+
+		if( gc->_[k] == ref )	{
+			return k;
+		}
+	}
+
+	return -1;
+}
+
+
 int freeRef( void* ref )	{
 
 	int k;
@@ -117,6 +131,7 @@ void* g( void* ref )	{
 		if( (i = realloc_gc( gc, gc->c*2 ))<+1 )	{
 	
 			report( "Reallocation failed (status code '%d'). Exiting.\n", i );
+			fflush( stdout );
 			exit( 1 );
 		}
 	
