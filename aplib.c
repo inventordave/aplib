@@ -817,15 +817,16 @@ AP DIVP( AP A, AP B, AP P )  {
       subsequence[i] = A->integer[i];
     }
 
-    subsequence[i] = '\0';
+    //subsequence[i] = '\0';
   
     if( cmp_dstr( subsequence, B->integer ) >= 0 )
       subsequence[i] = '\0';
     else {
   
         carat_offset++;
-        subsequence[i++] = A->integer[i];
-        subsequence[i] = '\0';
+        subsequence[i] = A->integer[i];
+        
+        subsequence[i+1] = '\0';
     }
 
     do  {
@@ -1610,13 +1611,12 @@ char *ACCUMULATE(char *apstr) {
   char *_ = (char *) g( malloc(strlen_apstr + 2) );
 
   
-    AP bkp;
-#if ACC_COPY == 1
-    bkp = NewAP(strlen_apstr, 0);
-    _ = bkp->integer;
-#else
-    _ = apstr;
-#endif
+    AP bkp  = NewAP(strlen_apstr, 0);;
+    #if ACC_COPY == 1
+      _ = bkp->integer;
+    #else
+      _ = apstr;
+    #endif
   
   _[0] = apstr[0];
 

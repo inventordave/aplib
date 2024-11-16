@@ -3,7 +3,7 @@
 # vars
 
 compiler= gcc
-flags= -g -DDEBUG
+flags= -ggdb -DDEBUG -Wall -Wextra
 output= lexer.o
 
 # targets
@@ -14,15 +14,24 @@ davio: davio.c davio.h
 simplelexer: lexer.c lexer.h
 	$(compiler) $(flags) lexer.c -c -o simplelexer.o
 
-aplib:
-	make -C ../ aplib
+wregex:
+	make -C ../regex_w/ libd
 	
-test: lexertest.c lexertest.h aplib davio simplelexer
-	ar r slarc.a davio.o simplelexer.o  "../aplib.o"
+aplib:
+	make -C ../ aplib_pkg
 
-	$(compiler) $(flags) slarc.a lexertest.c -o lextest.exe
+lexertest: lexertest.c lexertest.h
+	$(compiler) $(flags) lexertest.c -c -o lexertest.o
+	
+test: aplib simplelexer lexertest  davio  wregex
+	ar r -p  slarc.a ../aplibarc.a simplelexer.o "../regex_w/regexd.o" davio.o  lexertest.o       
+
+	$(compiler) $(flags) slarc.a -o lextest.exe
 
 clean:
 	rm -f *.o
 	rm -f *.exe
+
+	make -C ../regex_w/ clean
+	make -C ../ clean
 

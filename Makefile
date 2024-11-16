@@ -1,7 +1,18 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
-	gcc -Wall -g -DDEBUG stringy.c aplib.c colour.c io.c -lstd -c aplib.o
+	gcc -Wall -g -DDEBUG aplib.c -lstd -c -o aplib.o
+
+stringy: stringy.c stringy.h
+	gcc -Wall -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
+
+colour: colour.c colour.h
+	gcc -Wall -ggdb -DDEBUG colour.c -lstd -c -o colour.o
+
+
+aplib_pkg: aplib stringy colour
+	ar r -p aplibarc.a aplib.o colour.o stringy.o
+
 
 GC:
 	make -C ./gcollect/ gcd
@@ -13,6 +24,7 @@ test:	GC main.c main.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colou
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
 
+	rm -f *.a
 	rm -f ./gcollect/*.o
 	rm -f test.exe
 	rm -f *stackdump

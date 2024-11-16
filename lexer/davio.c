@@ -9,8 +9,8 @@ struct FileContext readFile( char* filename )	{
 	struct FileContext fc;
 
 	char * buffer = 0;
-	long length;
-	long actual_length;
+	long length = 0;
+	long actual_length = 0;
 	FILE * f = fopen (filename, "r");
 
 	if (f)	{

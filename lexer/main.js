@@ -27,7 +27,6 @@ STRING: "'" CHARSET_NSQ "'" | "\"" CHARSET_NDQ "\""
 LITERAL: NUM | STRING | OBJ_LITERAL
 */
 
-
 function wollfereast()	{
 // Nabbed from a poster on Stackoverflow.com called "Wollfer-East" at https://stackoverflow.com/questions/5989315/regex-for-match-replacing-javascript-comments-both-multiline-and-inline
 
@@ -60,10 +59,6 @@ changed_text = code_to_test.replace(ADW_GLOBALS.regex_of_doom, function(match, $
 	
 }
 
-
-
-
-
 function initYR( yaccfile )	{
 
 	var YRFileContents = yaccfile.split( "\n" );
@@ -83,7 +78,6 @@ function initYR( yaccfile )	{
 
 	return;
 }
-
 
 function get( NTT )	{
 	
