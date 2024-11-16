@@ -7,7 +7,7 @@
 #include "aplib.h"
 
 #include "tests.h"
-#include "testmain.h"
+#include "main.h"
 
 
 void flushBuffer() {

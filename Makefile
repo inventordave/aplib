@@ -6,7 +6,7 @@ aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
 GC:
 	make -C ./gcollect/ gcd
 	
-test:	GC main.c testmain.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
+test:	GC main.c main.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
 	
 	gcc -Wall -O -g -DDEBUG ./gcollect/gcd.o lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o test.exe
 

@@ -2,9 +2,7 @@
 
 #include "./gcollect/gc.h"
 
-// MAX_LOOPS
 
-L MAX_LOOPS = 100;
 
 // GC structure.
 volatile struct GC* aplib_gc;
@@ -14,6 +12,10 @@ volatile struct GC* aplib_gc;
 // #include "colour.h"
 
 #include "aplib.h"
+
+// MAX_LOOPS
+
+L MAX_LOOPS = 100;
 
 #include "stringy.h"
 
@@ -814,6 +816,9 @@ AP DIVP( AP A, AP B, AP P )  {
   
       subsequence[i] = A->integer[i];
     }
+
+    subsequence[i] = '\0';
+  
     if( cmp_dstr( subsequence, B->integer ) >= 0 )
       subsequence[i] = '\0';
     else {
@@ -823,7 +828,7 @@ AP DIVP( AP A, AP B, AP P )  {
         subsequence[i] = '\0';
     }
 
-    while( calculating++  )  {
+    do  {
 
        if( calculating == MAX_LOOPS )
          break;
@@ -834,7 +839,7 @@ AP DIVP( AP A, AP B, AP P )  {
             V->integer[0] = '0' + v;
             subtrahendAP = MUL( B, V );
 
-            if( cmp_dstr( subtrahend, subsequence ) > 0 )  {
+            if( cmp_dstr( subsequence, subtrahend  ) > 0 )  {
               
                 v--;
                 FreeAP( subtrahendAP );
@@ -846,9 +851,9 @@ AP DIVP( AP A, AP B, AP P )  {
 
         if( v > 9 )  {
 
-            printf( "Error: subsequence := '%s', subtrahend := '%s', carat := '%d', A := '%s', B:= '%s', v := '%d'\n", subsequence, subtrahend, (int)carat_offset, A->integer, B->integer, v );
+          printf( "Error: subsequence := '%s', subtrahend := '%s', carat := '%d', A := '%s', B:= '%s', v := '%d'\n", subsequence, subtrahend, (int)carat_offset, A->integer, B->integer, v );
 
-            assert(0);
+          assert(0);
 
             // leave 'calculating' flag as 1.
             // calculating = 0;
@@ -906,16 +911,17 @@ AP DIVP( AP A, AP B, AP P )  {
           c = _;
           extra = 0;
         }
-    }
+    } while( calculating++ );
 
     if( calculating )  {
 
       // Must be an Error, as calculating flag should be switched to 0.
 
-      printf( "Max number of LOOPs (%d) reached.  Calculating flag should be switched to 0.\n", MAX_LOOPS );
+      printf( "Max number of LOOPs (%d) reached.  Calculating flag should be switched to 0.\n", (int)MAX_LOOPS );
     }
 
   return C;
+  
 }
 
 AP DIVP_old(AP A, AP B, AP P) {
