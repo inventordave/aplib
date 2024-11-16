@@ -5,6 +5,8 @@
 #include <string.h>
 #include "davio.h"
 #include "lexer.h"
+#include "../stringy.h"
+
 
 int lex( struct LexInstance lexInstance )	{
 
@@ -19,6 +21,8 @@ struct LexInstance initLex( char* sc, char* lr )	{
 
 	// GENERATE LEXER INSTANCE STATE.
 	struct LexInstance lexInstance;
+	lexInstance.TOK_TYPE = 0;
+	lexInstance.TOK_REGEX = 1;
 
 	lexInstance.lexRulesFileName = lr;
 	lexInstance.tokenRules = initRuleSetArray( fc_lex.lineCount );
@@ -47,13 +51,13 @@ struct LexInstance initLex( char* sc, char* lr )	{
 			return lexInstance;
 		}
 		else
-			tokenRules[i][lexInstance.TOK_TYPE] = getstring( found );
+			lexInstance.tokenRules[i][lexInstance.TOK_TYPE] = getstring( found );
 
 		offset = strlen( found );
 		free( found );
 		
 		line += offset;
-		tokenRules[i][lexInstance.TOK_REGEX] = getstring( line );
+		lexInstance.tokenRules[i][lexInstance.TOK_REGEX] = getstring( line );
 
 		line -= offset; // need to reset ptr to allocated location before freeing.
 		free( line );

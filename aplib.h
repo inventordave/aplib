@@ -28,7 +28,10 @@ extern volatile struct GC* aplib_gc;
 
 
 // STATIC DEF'S
-#define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
+#define MAX_LENGTH_AP_PART 1023
+// Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
+
+#define CONCAT( l,r ) strcat( l,r )
 
 #define APLS char*
 #define scint signed short int

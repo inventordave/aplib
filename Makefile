@@ -1,7 +1,7 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
-	gcc -Wall -g -DDEBUG stringy.c aplib.c io.c -lstd -c aplib.o
+	gcc -Wall -g -DDEBUG stringy.c aplib.c colour.c io.c -lstd -c aplib.o
 
 GC:
 	make -C ./gcollect/ gcd

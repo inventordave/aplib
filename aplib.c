@@ -884,12 +884,9 @@ AP DIVP( AP A, AP B, AP P )  {
             V->integer[0] = 0;
         }
 
-
         // concat dropdown to subsequence
-        #define CONCAT( l,r ) strcat( l,r )
         CONCAT( subsequence,V->integer );
-  
-        
+
         extra++;
         if( extra==10 )  {
 
@@ -1001,7 +998,7 @@ AP DIVP_old(AP A, AP B, AP P) {
       Remainder = CopyAP(v2);
       FreeAP(v2);
   
-  #define CONCAT(__A, __B) strcat(__A, __B)
+  
   
       printf( "Row %d:\t'%s' + '%s'\n", count, C->integer, v->integer );
       ++count;

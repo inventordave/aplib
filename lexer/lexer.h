@@ -5,14 +5,14 @@
 // GLOBALS
 typedef struct LexInstance	{
 
-	const int TOK_TYPE = 0;
-	const int TOK_REGEX = 1;
+	int TOK_TYPE;
+	int TOK_REGEX;
 
 	char* lexRulesFileName;
 	char*** tokenRules;
 	int numRules;
 
-	char* sorceCodeFileName;
+	char* sourceCodeFileName;
 	char* sourceCode;
 	int strlen_sourceCode;
 

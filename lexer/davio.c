@@ -10,6 +10,7 @@ struct FileContext readFile( char* filename )	{
 
 	char * buffer = 0;
 	long length;
+	long actual_length;
 	FILE * f = fopen (filename, "r");
 
 	if (f)	{
@@ -20,13 +21,14 @@ struct FileContext readFile( char* filename )	{
 		buffer = malloc (length);
 
 		if (buffer)
-			fread (buffer, 1, length, f);
+			actual_length = fread (buffer, 1, length, f);
 
 		fclose (f);
 	}
 
+	
 	fc.fileContents = buffer;
-	fc.length = length-1;
+	fc.length = actual_length;
 
 	return fc;
 }
