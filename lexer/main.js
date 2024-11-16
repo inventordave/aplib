@@ -61,6 +61,9 @@ changed_text = code_to_test.replace(ADW_GLOBALS.regex_of_doom, function(match, $
 }
 
 
+
+
+
 function initYR( yaccfile )	{
 
 	var YRFileContents = yaccfile.split( "\n" );
