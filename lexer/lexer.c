@@ -3,7 +3,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include "davio.h"
+#include "../io.h"
 #include "lexer.h"
 #include "../stringy.h"
 
@@ -36,7 +36,7 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 	
 	if(!r) {
 		
-		fprintf(stderr, "\n[%s:%d] ERROR......: %s\n%s\n%*c\n", lexer->sourceCodeFileName, lexer->carat, wrx_error(e), pattern, ep + 1, '^');
+		fprintf(stderr, "\n[%s:%d] ERROR......(%s): %s\n%s\n%*c(note)\n", lexer->sourceCodeFileName, lexer->carat, "NOTE", wrx_error(e), pattern, ep + 1, '^');
 		
 		exit(EXIT_FAILURE);
 	}

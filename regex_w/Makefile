@@ -11,7 +11,7 @@ LIB_OBJECTS=$(LIB_SOURCES:.c=.o)
 
 ifeq ($(BUILD),debug)
 # Debug
-CFLAGS += -O0 -g
+CFLAGS += -O -g
 LDFLAGS +=
 LIB=regexd.o
 ARFLAGS= r
@@ -26,7 +26,7 @@ endif
 all: test wgrep docs
 
 lib: $(LIB)
-
+	
 libd:
 	make BUILD=debug lib
 

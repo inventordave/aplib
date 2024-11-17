@@ -4,6 +4,9 @@
 #define colouriser colorMode
 #define colourizer colouriser
 
+#include "c_static.h"
+
+
 void colorMode();
 
 extern char* ANSIVT_FG;

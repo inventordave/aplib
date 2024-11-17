@@ -5,14 +5,16 @@
 #include <string.h>
 
 #include "../stringy.h"
-#include "../c_static.h"
 #include "../colour.h"
+#include "../gcollect/gc.h"
+
 #include "lexer.h"
 
 #include "lexertest.h"
 
 int main( int argc, char** argv )	{
 
+	volatile struct GC* gc = initGC( 100 );
 	colorMode();
 	
 	printf( "%s%sTest.%s\n", FG_BRIGHT_RED, BG_BRIGHT_BLUE, NORMAL );

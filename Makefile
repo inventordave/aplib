@@ -1,17 +1,16 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
-aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
+aplib: aplib.c aplib.h io.c io.h
 	gcc -Wall -g -DDEBUG aplib.c -lstd -c -o aplib.o
 
 stringy: stringy.c stringy.h
-	gcc -Wall -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
+	gcc -Wall -g -DDEBUG stringy.c -c -o stringy.o
 
 colour: colour.c colour.h
-	gcc -Wall -ggdb -DDEBUG colour.c -lstd -c -o colour.o
+	gcc -Wall -g -DDEBUG colour.c -c -o colour.o
 
-
-aplib_pkg: aplib stringy colour
-	ar r -p aplibarc.a aplib.o colour.o stringy.o
+io: io.c io.h
+	gcc -Wall -g -DDEBUG io.c -c -o io.o
 
 
 GC:

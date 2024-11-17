@@ -13,6 +13,29 @@
 #define byte char
 #define octet unsigned char
 
+
+// GLOBALS
+typedef struct FileContents	{
+
+	char** 	lines;
+	int		lineCount;
+
+} FileContents;
+
+typedef struct FileContext	{
+
+	char* fileContents;
+	int length;
+
+} FileContext;
+
+// FUNCTIONS
+struct FileContext readFile( char* filename );
+struct FileContents read_f_split( char* fn, char* delim );
+
+
+
+
 byte getbyte( char* );
 
 // MEMORY HELPER FNC'S
