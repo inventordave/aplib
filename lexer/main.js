@@ -430,7 +430,7 @@ class installLexRules	{
 
 		//console.log("TEST2")
 
-		let wrapped_pattern = new RegExp( `^${pattern}\$` )//
+		let wrapped_pattern = new RegExp( `^${pattern}$` )//
 		this.lexer.LexPatterns.push(wrapped_pattern)
 		this.lexer.LexTokens.push(tokenStr)
 		this.lexer.LexTokens_rev[tokenStr] = this.lexer.LexPatterns.length - 1
