@@ -1872,14 +1872,14 @@ AP LCM(AP A, AP B) {
 
   // print( "The LCM for %d And %d is %d.\n", M1, M2, R1[inc-1]);
 
-  return *(R1 + (str2int(inc->integer) - 1) * sizeof(APL));
+  return *(R1 + (str2int(inc->integer) - 1) * sizeof(AP));
 }
 
-#define aptr APL
-AP LCMTESTSTR(aptr max, aptr *R1, aptr *R2) {
+#define aptr *AP
+AP LCMTESTSTR(AP max, aptr *R1, aptr *R2) {
 
-  aptr a = NewAPr(0, 0);
-  aptr b = NewAPr(0, 0);
+  AP a = NewAPr(0, 0);
+  AP b = NewAPr(0, 0);
   for (FreeAP(a), a = CopyAP(AP0); CmpAP_abs(a, max) <= 1; INC(a))
     for (FreeAP(b), b = CopyAP(AP0); CmpAP_abs(b, max) <= 1; INC(b))
       if (CmpAP_abs(R1[str2int(a->integer)], R2[str2int(b->integer)]) == 0)
@@ -1889,16 +1889,6 @@ AP LCMTESTSTR(aptr max, aptr *R1, aptr *R2) {
 }
 
 AP lcm_example(int argc, char **argv) {
-
-  /*
-  int flagSet = 0;
-
-  if((argc == 4) && (argv[3][0] == '-') && (argv[3][1] == 'n'))	{
-
-          //printf("flag set!\n");
-          flagSet = 1;
-  }
-  */
 
   AP a;
   AP b;
