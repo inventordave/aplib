@@ -1,36 +1,32 @@
-# simplelexer Makefile
+# I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
-# vars
+colorMode=1
+nocolour:
+	colorMode=0
+	make aplib
 
-compiler= gcc
-flags= -g -DDEBUG -Wall -Wextra
+aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
+	gcc -Wall -Wextra -ggdb -DDEBUG aplib.c -lstd -c -o aplib.o
 
-# targets
+stringy: stringy.c stringy.h
+	gcc -Wall -Wextra -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
 
-lexertest: lexertest.c lexertest.h
-	$(compiler) $(flags) lexertest.c -c -o lexertest.o
+colour: colour.c colour.h
+	gcc -Wall -Wextra -ggdb -DDEBUG colour.c -lstd -c -o colour.o
 
-simplelexer: lexer.c lexer.h
-	$(compiler) $(flags) lexer.c -c -o simplelexer.o
+aplib_pkg: aplib stringy colour
+	ar r -p aplibarc.a aplib.o colour.o stringy.o
 
-aplib_pkg:
-	make -C ../ aplib
-	make -C ../ stringy
-	make -C ../ colour 
-	make -C ../gcollect/ gcd
-	make -C ../ io
-	make -C ../regex_w libd
+GC:
+	make -C ./gcollect/ gcd
 
-test: aplib_pkg simplelexer lexertest
-	ar r slarc.a "../regex_w/wrx_free.o" "../regex_w/wrx_prnt.o" "../regex_w/wrx_comp.o" "../regex_w/wrx_exec.o" "../regex_w/wrx_err.o" "../aplib.o" "../stringy.o" "../colour.o" "../gcollect/gcd.o" "../io.o"  lexertest.o simplelexer.o
+test:	GC main.c main.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
+	gcc -Wall -Wextra -O -g -DDEBUG ./gcollect/gcd.o lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o test.exe
 
-	$(compiler) $(flags)  slarc.a -o lextest.exe
-
+# For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
-	rm -f *.o
+	rm -f ./gcollect/*.o
 	rm -f *.a
 	rm -f *.exe
-
 	make -C ../regex_w/ clean
-	make -C ../ clean
 
