@@ -327,7 +327,7 @@ class Lexer	{
 	
     installToken(pattern, tokenStr) {
 
-        this.LexPatterns.push(new RegExp(`^${pattern}\$`))
+        this.LexPatterns.push(new RegExp(`^${pattern}$`))
         this.LexTokens.push(tokenStr)
         this.LexTokens_rev[tokenStr] = this.LexPatterns.length - 1
             
