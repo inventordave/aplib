@@ -56,9 +56,12 @@ return _; }
 
 
 char ResetAnsiVtCodes(char f)	{
-	
+
+	int t=0;
 	if(f == 0)	{
 
+		repeat:
+		
 		strcpy((char *)FG_BLACK, "");
 		strcpy((char *)FG_RED, "");
 		strcpy((char *)FG_GREEN, "");
@@ -96,10 +99,16 @@ char ResetAnsiVtCodes(char f)	{
 		strcpy((char *)BG_BRIGHT_WHITE, "");
 
 		strcpy((char *)NORMAL, "");
+
+		if( t==1 )
+			goto ret_stmt;
 	}
 	
 	else if(f == 1)	{
-		
+
+		// cmd-line compile switch -Dcm0
+		// See Makefile target 'nocolour'
+		#ifndef cm0
 		strcpy((char *)FG_BLACK, "[30m");
 		strcpy((char *)FG_RED, "[31m");
 		strcpy((char *)FG_GREEN, "[32m");
@@ -137,8 +146,15 @@ char ResetAnsiVtCodes(char f)	{
 		strcpy((char *)BG_BRIGHT_WHITE, "[107m");
 
 		strcpy((char *)NORMAL, "[0m");
+
+		#else
+		f=0;
+		t=1;
+		goto repeat;
+		#endif
 	}
-	
+
+	ret_stmt:
 	return (ansivt = f);
 }
 
