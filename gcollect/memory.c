@@ -2,6 +2,10 @@
 
 #include "memory.h"
 
+#ifndef L
+#define L unsigned long long int
+#endif
+
 char* strtolower( char* _ )	{
 	
 	L strlen__ = strlen( _ );
