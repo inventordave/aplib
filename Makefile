@@ -1,7 +1,13 @@
 # I'm currently sticking with only a test config build. APLIB.C (APLIB.H) is where the APlib Engine Code is.
 
+colorMode=1
+
+nocolour:
+	colorMode=0
+	make aplib
+
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
-	gcc -Wall -g -DDEBUG aplib.c -lstd -c -o aplib.o
+	gcc -Wall -g  -Dcm$(colorMode) -DDEBUG aplib.c -lstd -c -o aplib.o
 
 stringy: stringy.c stringy.h
 	gcc -Wall -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
