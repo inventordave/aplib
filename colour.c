@@ -1,60 +1,31 @@
+// COLOUR_C
+
+// A lightweight colourization subroutine set.
+// Utilizes ANSI/VT100 control-codes.
+// See function 'char ResetAnsiVtCodes(char f)' below to see how simple the implementation is.
+
+// PLATFORM TARGETS
+#ifdef _WIN32_
+#include <windows.h>
+#endif
+
+// STDLIB INC'S
 #include <stdlib.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <string.h>
-// #include <windows.h>
+
+// DAVELIB INC'S
 #include "lib.h"
+#include "stringy.h"
 #include "colour.h"
-#include "stringy.h"
-#include "c_static.h"
-#include "stringy.h"
 
-char* ANSIVT_FG = (char*)0;
-char* ANSIVT_BG = (char*)0;
+// ANSI/VT Global Refs.
+extern char* ANSIVT_FG;
+extern char* ANSIVT_BG;
+extern struct _ANSI* ANSI;
 
-struct _ANSI* ANSI = (_ANSI*)0;
-
-char* ANSIVT( char* str, char cc[], LARGE offsets[], int _frees ){
-LARGE str_width = strlen(str);
-LARGE width = str_width + (strlen(cc)*VTCODEWIDTH);
-char* _ = mem( width );
-char* bucket = mem( width );
-char* vtcodestr;
-
-
-
-
-
-LARGE q=0;
-LARGE t=0;
-while( t<str_width ){
-
-	LARGE p;
-	for( p=0; p<offsets[q]; p++ ) // offsets are relative.
-		bucket[p] = str[t++];
-	bucket[p] = '\0';
-	
-	safecat( _,bucket );
-	vtcodestr = getVTCodeString( *cc );
-	safecat( _,vtcodestr );
-	
-	free( vtcodestr );
-	
-	++cc;
-	++q;
-	
-	if( *cc == '\0' ){
-		
-		LARGE y = strlen(_);
-		for( LARGE x=t;x<str_width; x++ )
-			_[y++]=str[x];
-		_[y] = '\0';			
-		break;}}
-
-return _; }
-
-
-
+// FUNCTIONS
 char ResetAnsiVtCodes(char f)	{
 
 	int t=0;
@@ -105,10 +76,10 @@ char ResetAnsiVtCodes(char f)	{
 	}
 	
 	else if(f == 1)	{
-
-		// cmd-line compile switch -Dcm0
-		// See Makefile target 'nocolour'
+		
 		#ifndef cm0
+		// Visibility determined by cmd-line compile switch -Dcm0
+		// See Makefile target 'nocolour' for a clue.
 		strcpy((char *)FG_BLACK, "[30m");
 		strcpy((char *)FG_RED, "[31m");
 		strcpy((char *)FG_GREEN, "[32m");
@@ -146,7 +117,6 @@ char ResetAnsiVtCodes(char f)	{
 		strcpy((char *)BG_BRIGHT_WHITE, "[107m");
 
 		strcpy((char *)NORMAL, "[0m");
-
 		#else
 		f=0;
 		t=1;
@@ -160,7 +130,11 @@ char ResetAnsiVtCodes(char f)	{
 
 
 int ANSI_IS(){
-	
+
+	// It's a random Integer greater than 0.
+	// (Yes, it's a particular value, but doesn't
+	// have to be this number, as long as
+	// it's bigger than 0.)
 	return 17179;
 }
 
@@ -194,7 +168,6 @@ char* fg( char* c ){
 	if(c!=0)
 		ANSI->c->SVT( c,(char*)0 );
 	return ANSI->ANSIVT_FG;
-
 }
 
 char* bg( char* c ){
@@ -384,58 +357,49 @@ void Init_ANSIVT_CTABLE(){
 
 void colorMode()	{
 
-	int color;
-
-	#ifdef windows
-
+	int color = 0;
+	#ifdef _WIN32_
+	// Assumes the target OS is Windows.
 	#define STD_OUTPUT_HANDLE ((DWORD)-11)
-	//#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-
+	#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
 	HANDLE StdHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	
 	color = (int) SetConsoleMode(
 		StdHandle,
 		0x0001 | 0x0002 | ENABLE_VIRTUAL_TERMINAL_PROCESSING
 	);
-
 	#else
-		color = 1;
-		// Assuming Linux is the target architecture instead.
+	// Assumes the target OS is Linux.
+	color = 1;	
 	#endif
 
-
-	//sprintf( msg_str, "ResponseCode(SetConsoleMode) := '%s'.\n", (color == 0 ? "FAIL" : "SUCCESS") );
-	//print( msg_str );
+	int x = ( color==0 ? 0 : 1 );
+	#ifdef DAVELIB_VERBOSE
+	if( x==0 )		
+		printf( "ANSI/VT Support Not Available in this Win32-API console process.\n" );
+	#endif
 	
-	if(color == 0)	{
-		
-		printf( "ANSI/VT Support Not Available.\n" );
-		ResetAnsiVtCodes(0);
-	}
-	else
-		ResetAnsiVtCodes(1);
+	ResetAnsiVtCodes(x);
 
-	return;
+	return x;
 }
 
-
-
 AVTC* Init_AVTC(){
-		
-AVTC* _ = (AVTC*)malloc( sizeof(AVTC) );
-
-_->RVC = ResetAnsiVtCodes;
-_->SVT = SetVT;
-_->fg = fg;	
-_->bg = bg;
-//_->f;
-_->ANSIVT_FG = "default";
-
-_-> ANSIVT_CTABLE = (char**)malloc( (FG_COLORS+BG_COLORS+1)*2 * sizeof(char*) );	
-
-	return ( _ ); }
-
-void ANSI_init(){
+			
+	AVTC* _ = (AVTC*)malloc( sizeof(AVTC) );
+	
+	_->RVC = ResetAnsiVtCodes;
+	_->SVT = SetVT;
+	_->fg = fg;	
+	_->bg = bg;
+	//_->f;
+	_->ANSIVT_FG = "default";
+	
+	_-> ANSIVT_CTABLE = (char**)malloc( (FG_COLORS+BG_COLORS+1)*2 * sizeof(char*) );	
+	
+		return ( _ );
+}
+	
+void ANSI_init()	{
 	
 	ANSI = (_ANSI*)malloc( sizeof(struct _ANSI) );
 	ANSIVT_FG = "default";
@@ -446,10 +410,10 @@ void ANSI_init(){
 	ANSI->is = ANSI_IS;
 	ANSI->c = Init_AVTC();
 	ANSI->SetVT = SetVT;
-	
+
+	return;
 }
-
-
+	
 char* getVTCodeString( char cc )	{
 
 	return *(ANSI->c->ANSIVT_CTABLE + (cc*4) + 4);
