@@ -4,9 +4,7 @@
 #include "lib.h"
 #include "stringy.h"
 #include "colour.h"
-#include "APib.h"
-
-#include "stringy.h"
+#include "aplib.h"
 
 AP AP0;
 AP AP1;
