@@ -2,8 +2,6 @@
 
 #include "./gcollect/gc.h"
 
-
-
 // GC structure.
 volatile struct GC* aplib_gc;
 
