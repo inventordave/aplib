@@ -37,7 +37,7 @@ int main( int argc, char** argv )	{
 	
 	printf( "unpacked := \"%s\" (length: %d)\n", unpackedstr, strlen( unpackedstr ) );
 	
-	return strcmp( unpackedstr,packedstr );
+	return strcmp( _,unpackedstr );
 }
 
 
