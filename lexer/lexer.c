@@ -19,59 +19,53 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 
 	char* pattern;
 	char* token_type;
-	
+
 	int x = 0;
-	
-	
-	token_type = lexer->tokenRules[x][0];
-	pattern = lexer->tokenRules[x][1];
-	x++;
+	while( x < lexer->numRules )	{
 
-	if( x == lexer->numRules )	{
+		token_type = lexer->tokenRules[x][0];
+		pattern = lexer->tokenRules[x][1];
 
-		return NULL;
-	}
-	
-	r = wrx_comp(pattern, &e, &ep);
-	
-	if(!r) {
-		
-		fprintf(stderr, "\n[%s:%d] ERROR......(%s): %s\n%s\n%*c(note)\n", lexer->sourceCodeFileName, lexer->carat, "NOTE", wrx_error(e), pattern, ep + 1, '^');
-		
-		exit(EXIT_FAILURE);
-	}
+		r = wrx_comp(pattern, &e, &ep);
 
-	if(r->n_subm > 0) {
-		
-		subm = calloc(sizeof *subm, r->n_subm);
-		if(!subm) {
-			
-			fprintf(stderr, "Error: out of memory (submatches)\n");
-			wrx_free(r);
-			exit(EXIT_FAILURE);
+		if(!r) {
+
+			fprintf(stderr, "\n[%s:%d] ERROR......: %s\n%s\n%*c\n", lexer->sourceCodeFileName, lexer->carat, wrx_error(e), pattern, ep );
+
+			token_type = NULL;
+			break;
 		}
-	}
-	else
-		subm = NULL;
 
-	e = wrx_exec(r, str, &subm, &r->n_subm);
+		if(r->n_subm > 0) {
 
-	if(e < 0)	{
+			subm = calloc(sizeof *subm, r->n_subm);
+			if(!subm) {
+
+				fprintf(stderr, "Error: out of memory (submatches).\n");
+				wrx_free(r);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+			subm = NULL;
+	
+		e = wrx_exec(r, str, &subm, &r->n_subm);
+
+		if(e < 0)
+			fprintf(stderr, "Error: %s\n", wrx_error(e));
 		
-		fprintf(stderr, "Error: %s\n", wrx_error(e));
+		if( e <= 0 )
+			token_type = NULL;
+		else
+			break;
+		
+		free(subm);
+		wrx_free(r);
 
-		return NULL;
+		x++;
 	}
 	
-	free(subm);
-	wrx_free(r);
-
-	if( e==0 )	{
-
-		return NULL;
-	}
-
-	// If we got here, wregex has matched the pattern to the buffer.
+	// If we got here, wregex has either matched the pattern to the rule, or has failed to find a match in the Ruleset.
 	return token_type;
 }
 
