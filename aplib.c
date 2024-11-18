@@ -316,7 +316,8 @@ AP AND(AP LHS, AP RHS) {
   char a = '0';
   char b = '0';
 
-  LARGE t, i, j, k;
+  LARGE t, k;
+  LARGE signed i, j;
   for (i = strlen_a - 1, j = strlen_b - 1, k = len - 1;; i--, j--, k--) {
 
     t = 0;
@@ -431,7 +432,8 @@ AP XOR(AP LHS, AP RHS) {
   char a = '0';
   char b = '0';
 
-  LARGE t, i, j, k;
+  LARGE t;
+  LARGE signed i, j, k;
   for (i = strlen_a - 1, j = strlen_b - 1, k = len - 1;; i--, j--, k--) {
 
     t = 0;
@@ -495,8 +497,11 @@ int DEC(AP A) {
   return -1;
 }
 
-AP ADD(AP A, AP B) { return ADDP(A, B, DefaultPrecision); }
+AP ADD(AP A, AP B) { return ADDP(A, B, NULL); }
 AP ADDP(AP A, AP B, AP P) {
+
+  if( P==NULL )
+    ;
 
   char sign_A = A->sign;
   char sign_C = '.';
@@ -577,8 +582,11 @@ AP ADDP(AP A, AP B, AP P) {
 
   return C;
 }
-AP SUB(AP A, AP B) { return SUBP(A, B, DefaultPrecision); }
+AP SUB(AP A, AP B) { return SUBP(A, B, NULL); }
 AP SUBP(AP A, AP B, AP P) {
+
+  if( P==NULL )
+    ;
 
   // SUB Algorithm:
   // The subtraction of a real number (the subtrahend [B]) from another (the
@@ -590,11 +598,14 @@ AP SUBP(AP A, AP B, AP P) {
 
   return result;
 }
-AP MUL(AP A, AP B) { return MULP(A, B, DefaultPrecision); }
+AP MUL(AP A, AP B) { return MULP(A, B, NULL); }
 
 AP MULP_new(
     AP A, AP B,
     AP P) { // seems to be multiplying each row to 1/2 it's intended value
+
+  if( P==NULL )
+    ;
 
   // 1. Multiply each digit of A with each digit of B. For each digit of B, a
   // result row is generated.
@@ -625,9 +636,9 @@ AP MULP_new(
   int overflow;
   int value;
 
-  int i, n;
-  int c = max_len_row - 1;
-  int t;
+  LARGE i, n;
+  LARGE c = max_len_row - 1;
+  LARGE t;
   for (i = 0; i < NUM_ROWS; i++) {
 
     t = 0;
@@ -655,7 +666,8 @@ AP MULP_new(
           overflow++;
           D_ -= 10;
         }
-      } else
+      }
+      else
         value = C_;
 
       result_row[c - (t++)] = value + '0';
@@ -664,7 +676,7 @@ AP MULP_new(
     while ((c - t) >= 0)
       result_row[c - (t++)] = '0';
 
-    ResultRows[i] = getstring(result_row);
+    ResultRows[i] = getstring( result_row );
   }
 
   AP R = CopyAP(AP0);
@@ -673,7 +685,7 @@ AP MULP_new(
   --i;
   for (n = i; n >= 0; n--) {
 
-    // free( R->integer );
+    freeRef( R->integer );
 
     setPartW(R, ResultRows[n]);
 
@@ -698,6 +710,9 @@ AP MULP_new(
 }
 
 AP MULP(AP A, AP B, AP P) {
+
+  if( P==NULL )
+    ;
 
   int MAX_NUM_MUL_ROWS =
       (strlen(A->integer) > strlen(B->integer) ? strlen(A->integer)
@@ -781,6 +796,9 @@ AP DIV(AP A, AP B) { return DIVP(A, B, DefaultPrecision); }
 
 AP DIVP( AP A, AP B, AP P )  {
 
+    if( P==NULL )
+      ;
+
     // 1. subsequence(A) >= B * v
     // 2. C_offset = v [0,9]
     // 3. remainder = subsequence(A) - B * v [0, subsequence(A) )
@@ -803,27 +821,21 @@ AP DIVP( AP A, AP B, AP P )  {
     AP C = NewAP( strlen_C,0 );
     char* c = C->integer;
 
-    L i;
+    LARGE i;
     for( i=0; i<=carat_offset; i++ )
       c[i] = '0';
 
     c[i] = '\0';
 
-
-    for( i=0; i<= carat_offset; i++ )  {
-  
+    for( i=0; i<= carat_offset; i++ )
       subsequence[i] = A->integer[i];
-    }
-
-    //subsequence[i] = '\0';
   
     if( cmp_dstr( subsequence, B->integer ) >= 0 )
       subsequence[i] = '\0';
     else {
   
-        carat_offset++;
+        ++carat_offset;
         subsequence[i] = A->integer[i];
-        
         subsequence[i+1] = '\0';
     }
 
@@ -850,9 +862,8 @@ AP DIVP( AP A, AP B, AP P )  {
 
         if( v > 9 )  {
 
-          printf( "Error: subsequence := '%s', subtrahend := '%s', carat := '%d', A := '%s', B:= '%s', v := '%d'\n", subsequence, subtrahend, (int)carat_offset, A->integer, B->integer, v );
-
-          assert(0);
+          printf( "Error: subsequence := '%s', subtrahend := '%s', carat := '%d', A := '%s', B:= '%s', v := '%d'\n", \
+           subsequence, subtrahend, (int)carat_offset, A->integer, B->integer, v );
 
             // leave 'calculating' flag as 1.
             // calculating = 0;
@@ -1082,12 +1093,12 @@ AP DIVP_old(AP A, AP B, AP P) {
 }
 
 // SKELETON FNC'S FOR FUTURE OPERATO
-AP CROSS(AP A, AP B) { return CROSSP(A, B, DefaultPrecision); }
+AP CROSS(AP A, AP B) { return CROSSP(A, B, NULL); }
 AP CROSSP(AP A, AP B, AP P) { return CopyAP(AP1); }
-AP DOT(AP A, AP B) { return DOTP(A, B, DefaultPrecision); }
+AP DOT(AP A, AP B) { return DOTP(A, B, NULL); }
 AP DOTP(AP A, AP B, AP P) { return CopyAP(AP1); }
 
-char poke(char *in, char *out, L offset) {
+char poke(char *in, char *out, LARGE offset) {
 
   L c = 0;
   do {
@@ -1098,83 +1109,18 @@ char poke(char *in, char *out, L offset) {
 }
 
 AP RESET0(AP A) {
+
   setPartW(A, AP0->integer);
   setPartF(A, AP0->integer);
   return A;
 }
 AP RESET1(AP A) {
+
   setPartW(A, AP1->integer);
   setPartF(A, AP0->integer);
   return A;
 }
 
-struct _APLIB *Init_APLIB() {
-
-  // Initialise
-  AP0 = NewAP(1, 0);
-  AP0->integer[0] = '0';
-  AP1 = NewAP(1, 0);
-  AP1->integer[0] = '1';
-  DefaultPrecision = AP0; // Sets default precision to indicate the length of
-                          // the largest string between the 2 operands.
-
-  struct _APLIB *APLIB = (struct _APLIB *) g( malloc(sizeof(struct _APLIB)) );
-
-  /**
-  // Temp commenting-out
-
-  // Add the OPERATORS to the APLIB global.
-  APLIB->NOP = NOP;
-  APLIB->ADD = ADD;
-  APLIB->ADDP = ADDP;
-  APLIB->SUB = SUB;
-  APLIB->SUBP = SUBP;
-  APLIB->MUL = MUL;
-  APLIB->MULP = MULP;
-  APLIB->DIV = DIV;
-  APLIB->DIVP = DIVP;
-  APLIB->DIVBY2 = DIVBY2;
-  APLIB->RECIPROCAL = RECIPROCAL;
-  APLIB->RECIPROCAL2 = RECIPROCAL2;
-  APLIB->RECIPROCALP = RECIPROCALP;
-  APLIB->RECIPROCAL2P = RECIPROCAL2P;
-  APLIB->EXP = EXP;
-  APLIB->CROSS = CROSS;
-  APLIB->CROSSP = CROSSP;
-  APLIB->DOT = DOT;
-  APLIB->DOTP = DOTP;
-  APLIB->AND = AND;
-  APLIB->OR = OR;
-  APLIB->XOR = XOR;
-  APLIB->NOT = NOT;
-  APLIB->NAND = NAND;
-
-  APLIB->INC = INC;
-  APLIB->DEC = DEC;
-
-  APLIB->DSTRING2LARGE = DSTRING2LARGE;
-
-
-  APLIB->RESET0 = RESET0;
-  APLIB->RESET1 = RESET1;
-
-  // Add the 'sign' helpers.
-  APLIB->flipSign = flipSign;
-  APLIB->getSign = getSign;
-  APLIB->setSign = setSign;
-
-
-  APLIB->ANSI = ANSI;
-  //APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
-
-  ANSI_init();
-  Init_ANSIVT_CTABLE();
-  ResetAnsiVtCodes(1);
-  colorMode();
-
-  */
-  return APLIB;
-}
 
 void setSign(AP A, char S) {
 
@@ -2065,6 +2011,71 @@ AP RECIPROCAL(AP A) {
 
   return RECIPROCALP(A, DefaultPrecision);
   ;
+}
+
+
+
+
+struct _APLIB *Init_APLIB() {
+
+  // Initialise
+  AP0 = NewAP(1, 0);
+  AP0->integer[0] = '0';
+  AP1 = NewAP(1, 0);
+  AP1->integer[0] = '1';
+  DefaultPrecision = AP0; // Sets default precision to indicate the length of
+                          // the largest string between the 2 operands.
+
+  struct _APLIB *APLIB = (struct _APLIB *) g( malloc(sizeof(struct _APLIB)) );
+
+  // Add the OPERATORS to the APLIB global.
+  APLIB->NOP = NOP;
+  APLIB->ADD = ADD;
+  APLIB->ADDP = ADDP;
+  APLIB->SUB = SUB;
+  APLIB->SUBP = SUBP;
+  APLIB->MUL = MUL;
+  APLIB->MULP = MULP;
+  APLIB->DIV = DIV;
+  APLIB->DIVP = DIVP;
+  APLIB->DIVBY2 = DIVBY2;
+  APLIB->RECIPROCAL = RECIPROCAL;
+  APLIB->RECIPROCAL2 = RECIPROCAL2;
+  APLIB->RECIPROCALP = RECIPROCALP;
+  APLIB->RECIPROCAL2P = RECIPROCAL2P;
+  APLIB->EXP = EXP;
+  APLIB->CROSS = CROSS;
+  APLIB->CROSSP = CROSSP;
+  APLIB->DOT = DOT;
+  APLIB->DOTP = DOTP;
+  APLIB->AND = AND;
+  APLIB->OR = OR;
+  APLIB->XOR = XOR;
+  APLIB->NOT = NOT;
+  APLIB->NAND = NAND;
+
+  APLIB->INC = INC;
+  APLIB->DEC = DEC;
+
+  APLIB->DSTRING2LARGE = DSTRING2LARGE;
+
+  APLIB->RESET0 = RESET0;
+  APLIB->RESET1 = RESET1;
+
+  // Add the 'sign' helpers.
+  APLIB->flipSign = flipSign;
+  APLIB->getSign = getSign;
+  APLIB->setSign = setSign;
+
+  APLIB->ANSI = ANSI;
+  //APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
+
+  ANSI_init();
+  Init_ANSIVT_CTABLE();
+  ResetAnsiVtCodes(1);
+  colorMode();
+
+  return APLIB;
 }
 
 // GENERAL HELPER FNCS
