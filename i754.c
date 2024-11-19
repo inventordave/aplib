@@ -3,6 +3,8 @@
 
 // DEV FOR HARDWARE OPTIMIZATION of aplib
 
+/**
+
 float = 32 bits,
 double = 64 bits,
 
@@ -20,10 +22,50 @@ In (n * m), if m := 2k-form, eg, n*2,n*4,n*8,n*16 etc, then a BIT-SHIFT LEFT wil
 	64 bits is [0, 18446744073709551615], which is 20 digits.
 	128 bits should be 40 digits [0, 340282366920938463463374607431768211455].
 
+range( 32 ) := 4294967296,
+
+signed 32-bit number (so bit 31 is the sign bit) can store [-2147483648 , +2147483647]
 
 1/n = 1/a + 1/b + 1/c + 1/d + 1/e + 1/f .....
 where a + b + c + d + e + f... <= n
 
+**/
+
+uint_32_t ConvertToNativeU32( char* _ )	{
+
+	// ...
+	char* input = _;
+	int strlen_input = strlen( input );
+	
+	if( strlen_input > 10 )
+		return 0;
+	
+	if( cmp_dstr( input, "4294967295" )>0 )	{
+	
+		// Int value is too large to fit in a native 32 bit storage class,
+		// i.e. uint_32 input cannot be > 4294967295.
+	
+		return CANNOT_OPTIMIZE_TO_NATIVE_uint_32_STORAGE_CLASS;
+	}
+	
+	uint_32 v = 0;
+	v = ('0' - input[0]);
+	
+	int order = 1;
+	int i;
+	for( i=strlen_input-2; i>=0; i-- )	{
+	
+		order *= 10;
+		v += ('0' - input[i]) * order;
+	}
+	
+	return v;
+}
+
+
+
+
+/**
 
 
 
@@ -39,7 +81,7 @@ if( y <= 2x	)	{
 		push( y );
 }
 
-
+*/
 
 
 
