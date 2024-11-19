@@ -135,59 +135,89 @@ extra candidate escape sequences
 
 */
 
-char encode( char c )	{
 
-	#define ESCAPECODE '\'
-	#define CODE1 '.'
-	#define CODE2 '\0'
-	#define CODE3 '%'
-	#define CODE4 '*'
-	#define CODE5 '+'
 
-	char _;
+
+#define NULL 0
+#define ESCAPECODE '\'
+#define CODE1 '.'
+#define CODE2 '\0'
+#define CODE3 '%'
+#define CODE4 '*'
+#define CODE5 '+'
+int encode( char inputchar )	{
+
+	unsigned i = (unsigned) inputchar;
+	static c = 0;
 	
-	if( (c>='a')&&(c<='z') )
-		; // alphabet char
+	static unsigned _upper = 0;
+	static unsigned _lower = 0;
+	static signed flip = -1;
 
-	if( c=='\' )
-		; // the escape delimeter
+	static signed wrap = 0;
+	unsigned n = 0;
 
-	switch( c )	{
+	signed test = wrap%8;
+	if( test==0 )	{
+	/**
+		5bits per datum, 8 bits per packet
+  		if counter%8==0, then no overflow from prev inbound size8, thus...
+	*/
+		_upper = i & (128+64+32+16+8)>>3;
+		_lower = i & (4+2+1)<<2;
 
-		break;
-		case CODE1:
+		wrap = +2; // indicates 2 lsb's of _lower are in next size8 input.
+	}
+	else	{ // some wrap-around
 
-			break;
-			
-		break;
-		case CODE2:
+		switch( wrap )	{
 
-			break;
-			
-		break;
-		case CODE3:
-
-			break;
-			
-		break;
-		case CODE4:
-
-			break;
-
-		break;
-		case CODE5:
-			
-			break;
+			case +2:
+				_lower = _lower & ( i & ((128+64)>>6) );
+			case +1:
+				_lower = _lower & ( i & ((128+64)>>5) ); 
+		}
+		// wrap can be from [-4,+4], where negative numbers indicate wrapped _upper, positive numbers indicate wrapped _lower.
 		
-		break;
-		default:
-
-			break;
 	}
 
-	// ... algorithm goes here
 
-	return _;
+	if( (i>='a')&&(i<='z') ) // alphabet char
+		n = (unsigned)i;
+
+	if( i=='\' ) // the escape delimeter
+		n = 1;
+
+	if( n==0 )
+		switch( i )	{
+
+			case CODE5:
+				++n;
+			case CODE4:
+				++n;
+			case CODE3:
+				++n;
+			case CODE2:
+				++n;
+			case CODE1:
+				++n;
+				break;
+
+			break;
+			default:
+				break;
+		}
+
+	if( n==0 )	// invalid encodable-char passed to function!
+		return 0;
+
+	if( n>=7 ) // a-z
+		c = n-(unsigned)'a';
+
+	// Encoding algortithm goes here....
+
+	
+	return +1;
 }
 
 pack5bits( char* _ )	{
