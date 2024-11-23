@@ -21,7 +21,7 @@ nocolour:
 
 # The APLIB object file.
 aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
-	gcc $(warnings) -ggdb -DDEBUG aplib.c -lstd -c -o aplib.o
+	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) aplib.c -lstd -c -o aplib.o
 
 stringy: stringy.c stringy.h
 	gcc $(warnings) -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
@@ -36,7 +36,7 @@ GC:
 	make -C ./gcollect/ gcd
 
 test:	GC main.c main.h tests.c tests.h aplib.c aplib.h stringy.c stringy.h colour.c colour.h lib.c lib.h
-	gcc $(warnings) -O -g -DDEBUG ./gcollect/gcd.o lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o $(outFile)
+	gcc $(warnings) -O -g -DDEBUG -Dcm$(colorMode) ./gcollect/gcd.o lib.c io.c stringy.c colour.c tests.c aplib.c main.c -lm -o $(outFile)
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
