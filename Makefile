@@ -11,7 +11,7 @@ warnings=-Wall -Wextra
 # Simple test of pack() and unpack() method.
 packtest: packtest.c
 	rm -f packtest.exe
-	gcc $(warnings) -ggdb -DDEBUG -O0 packtest.c -o packtest.exe
+	gcc $(warnings) -g -DDEBUG -O0 packtest.c -o packtest.exe
 
 # If you want to compile aplib or the test program with no ANSIVT colour support.
 nocolour:
@@ -24,10 +24,10 @@ aplib: aplib.c aplib.h io.c io.h stringy.c stringy.h colour.c colour.h
 	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) aplib.c -lstd -c -o aplib.o
 
 stringy: stringy.c stringy.h
-	gcc $(warnings) -ggdb -DDEBUG stringy.c -lstd -c -o stringy.o
+	gcc $(warnings) -g -DDEBUG stringy.c -lstd -c -o stringy.o
 
 colour: colour.c colour.h
-	gcc $(warnings) -ggdb -DDEBUG colour.c -lstd -c -o colour.o
+	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) colour.c -lstd -c -o colour.o
 
 aplib_pkg: aplib stringy colour
 	ar r -p aplibarc.a aplib.o colour.o stringy.o
