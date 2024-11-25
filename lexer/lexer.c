@@ -204,3 +204,109 @@ char*** initRuleSetArray(int numRules)	{
 	return _tokenDefPair_Array;
 }
 
+int Parse( struct LexInstance* lexer	)	{
+
+	int x;
+	int flag;
+	char* token;
+	char* tok_type;
+	char** prSegment;
+
+	for( x=0; x<lexer->tokenCount; x++ )	{
+
+		
+		token = lexer->tokens[x][1];
+		tok_type = lexer->tokens[x][0];
+
+		// if the PR entry is a non-terminal, we need to recursively stack (LIFO), until we find a terminal definition.
+		// if that terminal definition matches an entry in a production-rule segment, we need to wait until the full production-rule section
+		// is matched by sequential tokens.
+
+		loop:
+
+		flag = 0;
+		prSegment = getNextProductionRuleSegment( lexer );
+
+		if( prSegment==NULL )	{
+			
+			// out of production rule segments.
+			break;
+		}
+
+		
+		unsigned y=0;
+		char* _ = prSegment[y];
+
+		if( _==NULL )	{
+
+			
+		}
+
+		
+		while( _!=NULL )	{
+
+			if( _ != tok_type )	{
+
+				y++;
+				_ = prSegment[ y ];
+				continue;
+			}
+			else	{
+
+				// token needs to be added to ConcreteSyntaxTree_Node for current segment;
+
+				flag = 1;
+				break;
+			}
+
+		}
+
+		if( flag!=1 )	{	
+			// unable to match to entry (token) in segment.
+			goto loop;
+		}
+
+		// tautological, included for clarity.
+		continue;
+	}
+
+	if( lexer->tokenCount!=x )	{
+
+		fprintf( stderr, "quickparse failed to complete parsing of source file '%s' at token '%d'\n", lexer->sourceFileName, x-1 );
+		return 0;
+	}
+
+printf( "%sHuzzah! Quickparse completed parsing of source file '%s'\n.", lexer->sourceFileName );
+
+	return 1;
+}
+
+char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
+
+	static unsigned x = 0;
+	static unsigned y = 0;
+
+	char** result;
+
+	checkAgain:
+	
+	result = lexer->productionRules[x][y++];
+
+	if( result == NULL )	{
+	// no more production rules to provide a segment from.
+
+		x = 0;
+		y = 0;
+		return result;
+	}
+	
+	if( result[0] == NULL )	{
+
+		x++;
+		y = 0;
+		goto checkAgain;
+	}
+
+	return result;
+}
+
