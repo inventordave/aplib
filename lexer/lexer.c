@@ -41,7 +41,7 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 			subm = calloc(sizeof *subm, r->n_subm);
 			if(!subm) {
 
-				fprintf(stderr, "Error: out of memory (submatches).\n");
+				fprintf(stderr, "Error: out of memory (submatches). Exiting Program.\n");
 				wrx_free(r);
 				exit(EXIT_FAILURE);
 			}
@@ -76,7 +76,7 @@ int lex( struct LexInstance* lexer )	{
 	char c;
 
 	int error = 1;
-	char* _ = (char*) calloc( 100, 1 );
+	char* _ = (char*) calloc( 256, 1 );
 	char* match;
 	
 	for( i=0; i<lexer->strlen_sourceCode; i++ )	{
@@ -96,7 +96,6 @@ int lex( struct LexInstance* lexer )	{
 			
 			k = 0;
 			error = 0;
-
 			push( match, _, lexer );
 		}
 	}
@@ -107,7 +106,7 @@ int lex( struct LexInstance* lexer )	{
 void push( char* token_type, char* literal, struct LexInstance* lexer )	{
 
 	lexer->tokens[lexer->tokensCount][0] = getstring( token_type );
-	lexer->tokens[lexer->tokensCount][0] = getstring( literal );
+	lexer->tokens[lexer->tokensCount][1] = getstring( literal );
 
 	lexer->tokensCount++;
 
@@ -171,6 +170,13 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 }
 char*** initTokenResultsArray( int assumpt )	{
 
+	// Simpler method, now my meds are stabilising my lunatic brain...
+	return (char***) calloc( assumpt, 2 * sizeof(char*) );
+
+	// Below is my stupider, longer method, mainly I originally did it this way, because I'm 
+	// engaging in my annoying habit of not making notes beforehand, and working entirely in my editor.
+	/**
+ 
 	char*** tokenResultsArray = (char***) malloc( assumpt * 2 * sizeof(char*) );
 	char** _tokenMatchPair;
 
@@ -189,31 +195,12 @@ char*** initTokenResultsArray( int assumpt )	{
 	}
 
 	return tokenResultsArray;
+
+	*/
 }
 char*** initRuleSetArray(int numRules)	{
 
-	char*** _tokenDefPair_Array = (char***) malloc( numRules * 2 * sizeof(char*) );
-
-	char** _tokenDefPair;
-	char* tok_type;
-	char* tok_regex;
-
-	int i;
-	for( i=0; i<numRules; i++ )	{
-
-		// 512 is an arbitrary assumption of string length for items in
-		// lex file entry-pairs.
-		tok_type = (char*) malloc( 512 );
-		tok_regex = (char*) malloc( 512 );
-
-		_tokenDefPair = (char**) malloc( 2 * sizeof(char*) );
-
-		_tokenDefPair[0] = tok_type;
-		_tokenDefPair[1] = tok_regex;
-
-		_tokenDefPair_Array[i] = _tokenDefPair;
-	}
-
+	char*** _tokenDefPair_Array = (char***) calloc( numRules, 2 * sizeof(char*) );
 	return _tokenDefPair_Array;
 }
 
