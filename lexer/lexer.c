@@ -186,8 +186,6 @@ char*** initTokenResultsArray( int assumpt )	{
 		_tokenMatchPair[1] = NULL;
 
 		tokenResultsArray[i] = _tokenMatchPair;
-
-		free( _tokenMatchPair );
 	}
 
 	return tokenResultsArray;
