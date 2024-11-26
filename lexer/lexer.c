@@ -120,19 +120,19 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 	struct FileContents fc_lex = read_f_split( lr, "\n" );
 
 	// GENERATE LEXER INSTANCE STATE.
-	struct LexInstance* lexInstance = (struct LexInstance*) calloc( 1, sizeof *lexInstance );
+	struct LexInstance* lexInstance = (struct LexInstance*) calloc( 1, sizeof(LexInstance) );
 	lexInstance->TOK_TYPE = 0;
 	lexInstance->TOK_REGEX = 1;
 
 	lexInstance->lexRulesFileName = lr;
-	lexInstance->tokenRules = initRuleSetArray( fc_lex.lineCount );
+	lexInstance->tokenRules = (char***) calloc( fc_lex.lineCount, 2 * sizeof(char*) );
 	lexInstance->numRules = fc_lex.lineCount;
 	
 	lexInstance->sourceCodeFileName = sc;
 	lexInstance->sourceCode = fc_source.fileContents;
 	lexInstance->strlen_sourceCode = fc_source.length;
 
-	lexInstance->tokens = initTokenResultsArray( lexInstance->strlen_sourceCode );
+	lexInstance->tokens = (char***) calloc( lexInstance->strlen_sourceCode, 2 * sizeof(char*) );
 	lexInstance->tokensCount = 0;
 	lexInstance->lex = lex;
 
@@ -168,65 +168,31 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 	// LEXINSTANCE prepared. Return the Active Lex Instance.
 	return lexInstance;
 }
-char*** initTokenResultsArray( int assumpt )	{
 
-	// Simpler method, now my meds are stabilising my lunatic brain...
-	return (char***) calloc( assumpt, 2 * sizeof(char*) );
-
-	// Below is my stupider, longer method, mainly I originally did it this way, because I'm 
-	// engaging in my annoying habit of not making notes beforehand, and working entirely in my editor.
-	/**
- 
-	char*** tokenResultsArray = (char***) malloc( assumpt * 2 * sizeof(char*) );
-	char** _tokenMatchPair;
-
-	int i;
-	for( i=0; i<assumpt; i++ )	{
-
-		// 512 is an arbitrary assumption of string length for items in
-		// lex file entry-pairs.
-
-		_tokenMatchPair = (char**) malloc( 2 * sizeof(char*) );
-
-		_tokenMatchPair[0] = NULL;
-		_tokenMatchPair[1] = NULL;
-
-		tokenResultsArray[i] = _tokenMatchPair;
-	}
-
-	return tokenResultsArray;
-
-	*/
-}
-char*** initRuleSetArray(int numRules)	{
-
-	char*** _tokenDefPair_Array = (char***) calloc( numRules, 2 * sizeof(char*) );
-	return _tokenDefPair_Array;
-}
 
 int Parse( struct LexInstance* lexer	)	{
 
-	int x;
+	int x, x2;
 	int flag;
 	char* token;
 	char* tok_type;
 	char** prSegment;
 
+	
 	for( x=0; x<lexer->tokenCount; x++ )	{
 
-		
-		token = lexer->tokens[x][1];
-		tok_type = lexer->tokens[x][0];
 
+		tok_type = lexer->tokens[x][0];
+		token = lexer->tokens[x][1];
+		
 		// if the PR entry is a non-terminal, we need to recursively stack (LIFO), until we find a terminal definition.
 		// if that terminal definition matches an entry in a production-rule segment, we need to wait until the full production-rule section
 		// is matched by sequential tokens.
 
-		loop:
+		section_scan:
 
-		flag = 0;
 		prSegment = getNextProductionRuleSegment( lexer );
-
+		
 		if( prSegment==NULL )	{
 			
 			// out of production rule segments.
@@ -235,36 +201,47 @@ int Parse( struct LexInstance* lexer	)	{
 
 		
 		unsigned y=0;
-		char* _ = prSegment[y];
+		char* _ = prSegment[0];
 
 		if( _==NULL )	{
-
 			
+			// This edge case shouldn't arise, but it constitutes a production rule nonterminal/terminal decleration
+			// at the beginning of a production rule section/segment that is NULL.
+			break;
 		}
 
-		
+		x2 = x;
+		flag = 1; // assume match will be found in section/segment.
 		while( _!=NULL )	{
 
 			if( _ != tok_type )	{
 
-				y++;
-				_ = prSegment[ y ];
-				continue;
+				flag = 0; // match not found.
+				break;	  // skip to next section
 			}
 			else	{
 
-				// token needs to be added to ConcreteSyntaxTree_Node for current segment;
+				// token needs to be added
+				// push( token_type, token, 
 
-				flag = 1;
-				break;
+				CSTNode
+
+				_ = prSegment[ ++y ];
+				tok_type = lexer->tokens[++x2][0];
+				token = lexer->tokens[++x2][1];
+						
+				continue;
 			}
-
 		}
-
+		
 		if( flag!=1 )	{	
 			// unable to match to entry (token) in segment.
-			goto loop;
+			goto section_scan;
 		}
+
+		// ELSE, reset PoductionRules' static scanner, and continue anew from next token in stream.
+		prSegment = getNextProductionRuleSegment( NULL );
+		x = x2;
 
 		// tautological, included for clarity.
 		continue;
@@ -276,8 +253,7 @@ int Parse( struct LexInstance* lexer	)	{
 		return 0;
 	}
 
-printf( "%sHuzzah! Quickparse completed parsing of source file '%s'\n.", lexer->sourceFileName );
-
+	printf( "%sHuzzah! Quickparse completed parsing of source file '%s'%s\n.", FG_GREEN, lexer->sourceFileName, NORMAL );
 	return 1;
 }
 
@@ -288,10 +264,19 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 
 	char** result;
 
+	if( lexer==NULL )	{
+		// reset statics.
+		x = 0, y = 0;
+		return NULL;
+	}
+
+	
 	checkAgain:
 	
 	result = lexer->productionRules[x][y++];
+	// char** result /*(production_rule_segment)*/ = (char**) calloc( num_nonterminals_or_terminals, sizeof( char* ) );
 
+	
 	if( result == NULL )	{
 	// no more production rules to provide a segment from.
 
@@ -308,5 +293,30 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 	}
 
 	return result;
+}
+
+
+int extend( void* self )	{
+
+	struct CSTNode* node = (struct CSTNode*) self;
+
+	node->T_NT = realloc( ... );
+
+	if( success )
+		numEntries = newNumOfEntries;
+
+	return success;
+}
+
+struct CSTNode initNode( char* nodeName, int numEntries )	{
+
+	struct CSTNode _ = (struct CSTNode*) calloc( sizeof(struct CSTNode),1 );
+	
+	_->nodeName = getstring( nodeName );
+	_->T_NT = (char**) calloc( sizeof(char*), numEntries );
+	_->numEntries = numEntries;
+	_->extend = extend;
+
+	return _;
 }
 
