@@ -205,8 +205,13 @@ int Parse( struct LexInstance* lexer	)	{
 
 		if( _==NULL )	{
 			
-			// This edge case shouldn't arise, but it constitutes a production rule nonterminal/terminal decleration
-			// at the beginning of a production rule section/segment that is NULL.
+			// This edge case shouldn't arise, but it constitutes a production rule nonterminal/terminal decleration at the
+			// beginning of a production rule section/segment that is NULL.
+
+			fprintf( stderr, "%s%sDEBUG MSG:%s %sAn Edge Case has arisen. A production rule has a NULL nonterminal/terminal decleration \
+				at the beginning of one of it's segments. Rule Name: %s'%s%s%s'%s.\n", BG_GRAY, FG_BRIGHT_YELLOW, NORMAL, FG_BRIGHT_BLUE,\
+				FG_WHITE, FG_BRIGHT_GREEN, *getNextProductionRuleSegment( (void*)1 ), FG_WHITE, NORMAL );
+			
 			break;
 		}
 
@@ -217,14 +222,12 @@ int Parse( struct LexInstance* lexer	)	{
 			if( _ != tok_type )	{
 
 				flag = 0; // match not found.
+				x2 = x;
 				break;	  // skip to next section
 			}
 			else	{
 
-				// token needs to be added
-				// push( token_type, token, 
-
-				CSTNode
+				// token match to token_type in current prSegment.
 
 				_ = prSegment[ ++y ];
 				tok_type = lexer->tokens[++x2][0];
@@ -239,8 +242,23 @@ int Parse( struct LexInstance* lexer	)	{
 			goto section_scan;
 		}
 
-		// ELSE, reset PoductionRules' static scanner, and continue anew from next token in stream.
+		// ELSE, reset PoductionRules' static scanner, set latest PR-type, and continue anew from next token in stream.
 		prSegment = getNextProductionRuleSegment( NULL );
+
+		char** collection = (char**) malloc( sizeof(char*) * (x2-x) );
+		unsigned j;
+		for( j=x; j<x2; j++ )	{
+
+			collection+(j-x) = lexer->tokens[j];
+		}
+
+		prRule = getNextProductionRuleSegment( (void*)1 );
+		
+		pushParserStack( prRule, collection, j+1 );
+
+
+
+		
 		x = x2;
 
 		// tautological, included for clarity.
@@ -261,34 +279,56 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 
 	static unsigned x = 0;
 	static unsigned y = 0;
-
+	static char* prType = NULL;
+	
 	char** result;
 
 	if( lexer==NULL )	{
 		// reset statics.
 		x = 0, y = 0;
+
+		if( prRule != NULL )
+			free( prRule );
+		
+		prRule = getstring( "" );
 		return NULL;
 	}
 
+	if( lexer==1 )	{
+		// return prType;		
+		return &prRule;
+	}
 	
 	checkAgain:
+
+	if( !!strcmp(prRule,lexer->productionRules[x]) )
+		prRule = lexer->productionRules[x];
 	
 	result = lexer->productionRules[x][y++];
-	// char** result /*(production_rule_segment)*/ = (char**) calloc( num_nonterminals_or_terminals, sizeof( char* ) );
-
 	
 	if( result == NULL )	{
 	// no more production rules to provide a segment from.
 
 		x = 0;
 		y = 0;
-		return result;
+
+		if( prRule != NULL )	{
+			
+			free( prRule );
+			prRule = NULL;
+		}
+		
+		return NULL;
 	}
 	
 	if( result[0] == NULL )	{
 
+		if( prRule != NULL )
+			free( prRule );
+
 		x++;
 		y = 0;
+		prRule = lexer->productionRules[x];
 		goto checkAgain;
 	}
 
@@ -300,15 +340,18 @@ int extend( void* self )	{
 
 	struct CSTNode* node = (struct CSTNode*) self;
 
-	node->T_NT = realloc( ... );
+	node->T_NT; // = realloc( ... );
 
+	int success = 0;
+	int numEntries;
+	int newNumOfEntries = 1;
 	if( success )
 		numEntries = newNumOfEntries;
 
 	return success;
 }
 
-struct CSTNode initNode( char* nodeName, int numEntries )	{
+struct CSTNode* initNode( char* nodeName, int numEntries )	{
 
 	struct CSTNode _ = (struct CSTNode*) calloc( sizeof(struct CSTNode),1 );
 	
