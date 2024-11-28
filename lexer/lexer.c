@@ -177,10 +177,8 @@ int Parse( struct LexInstance* lexer	)	{
 	char* token;
 	char* tok_type;
 	char** prSegment;
-
 	
 	for( x=0; x<lexer->tokenCount; x++ )	{
-
 
 		tok_type = lexer->tokens[x][0];
 		token = lexer->tokens[x][1];
@@ -198,7 +196,6 @@ int Parse( struct LexInstance* lexer	)	{
 			// out of production rule segments.
 			break;
 		}
-
 		
 		unsigned y=0;
 		char* _ = prSegment[0];
@@ -256,9 +253,6 @@ int Parse( struct LexInstance* lexer	)	{
 		
 		pushParserStack( prRule, collection, j+1 );
 
-
-
-		
 		x = x2;
 
 		// tautological, included for clarity.
@@ -273,6 +267,41 @@ int Parse( struct LexInstance* lexer	)	{
 
 	printf( "%sHuzzah! Quickparse completed parsing of source file '%s'%s\n.", FG_GREEN, lexer->sourceFileName, NORMAL );
 	return 1;
+}
+
+
+typedef struct GrammarUnit	{
+
+	int num_tokens; // from lexer
+	char** tokens;
+
+} GrammarUnit;
+
+typedef struct ParserStack	{
+
+	struct GrammarUnit* _[65536];
+	int numEntries;
+
+} ParserStack;
+
+void InitParserStack( struct ParserStack* _ )	{
+
+	_->numEntries=0;
+	_->_ = (struct GrammarUnit*) malloc( sizeof(struct GrammarUnit) * 65536 );
+	_->_[0] = (struct GrammarUnit*) NULL; // Presumptively, I can use indice 0 for a custom storage.
+	_->_[1] = (struct GrammarUnit*) NULL;
+}
+
+void PushParserStack( char* prRule, char** collection, int amount )	{
+
+	struct GrammarUnit* _ = (struct GrammarUnit*) malloc( sizeof(struct GrammarUnit) );
+	_->num_tokens = amount;
+	_->tokens = collection;
+
+	parserStack._[ ++parserStack.numEntries ] = _;
+	parserStack._[ (parserStack.numEntries)+1 ] = (struct GrammarUnit*) NULL;
+
+	return;
 }
 
 char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
