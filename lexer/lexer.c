@@ -317,14 +317,14 @@ void PushParserStack( char* prRule, char** collection, int amount )	{
 char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 
 	static unsigned x = 0;
-	static unsigned y = 0;
-	static char* prType = NULL;
+	static unsigned y = 1;
+	static char* prRule = NULL;
 	
-	char** result;
+	char** prSegment;
 
 	if( lexer==NULL )	{
 		// reset statics.
-		x = 0, y = 0;
+		x = 0, y = 1;
 
 		if( prRule != NULL )
 			free( prRule );
@@ -334,22 +334,23 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 	}
 
 	if( lexer==1 )	{
-		// return prType;		
+
+		// return prRule;		
 		return &prRule;
 	}
 	
 	checkAgain:
 
-	if( !!strcmp(prRule,lexer->productionRules[x]) )
-		prRule = lexer->productionRules[x];
+	if( !!strcmp( prRule,lexer->productionRules[x] ) )
+		prRule = lexer->productionRules[x][0][0];
 	
-	result = lexer->productionRules[x][y++];
+	prSegment = lexer->productionRules[x][y++];
 	
 	if( result == NULL )	{
 	// no more production rules to provide a segment from.
 
 		x = 0;
-		y = 0;
+		y = 1;
 
 		if( prRule != NULL )	{
 			
@@ -360,18 +361,20 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 		return NULL;
 	}
 	
-	if( result[0] == NULL )	{
+	if( prSegment[0] == NULL )	{
 
 		if( prRule != NULL )
 			free( prRule );
 
 		x++;
-		y = 0;
-		prRule = lexer->productionRules[x];
+		y = 1;
+		prRule = lexer->productionRules[x][0][0];
+		// Alt. syntax: prRule = *lexer->productionRules[x][0];
+		
 		goto checkAgain;
 	}
 
-	return result;
+	return prSegment;
 }
 
 
