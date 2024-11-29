@@ -21,6 +21,11 @@ typedef struct LexInstance	{
 	char*** tokens;
 	int tokensCount;
 
+	// init :  sizeof(char*) * n * max_num_segments * max_num entries in a segment
+	char**** productionRules; //[][][]
+char* parseRulesFilename;
+	int numProductionRules;
+
 	int (*lex)( struct LexInstance* );
 
 } LexInstance;
