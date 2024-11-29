@@ -1,16 +1,19 @@
 // DAVELIB_LEXER_C
 
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
 #include "../io.h"
-#include "lexer.h"
 #include "../stringy.h"
+#include "../lib.h"
+#include "../colour.h"
+
+// LEXER & PARSER Includes. 
+#include "lexer.h"
+#include "parser.h"
 
 // W STOOP'S REGEX LIBRARY
 #include "../regex_w/wregex.h"
 #include "../regex_w/wrx_prnt.h"
 
+// LEXER::ScanLanguageString : Match substring from start to a regex-defined TOKEN_TYPE.
 char* patternMatch( char* str, struct LexInstance* lexer )	{
 
 	int e, ep;
@@ -69,6 +72,7 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 	return token_type;
 }
 
+// LEXER::LEX() : [in] A pointer to a LexInstance Context.
 int lex( struct LexInstance* lexer )	{
 
 	int i;
@@ -177,6 +181,11 @@ int Parse( struct LexInstance* lexer	)	{
 	char* token;
 	char* tok_type;
 	char** prSegment;
+
+	// INIT
+	getNextProductionRuleSegment( NULL );
+
+	// FOR_EACH lexed token in the Lexer stream.
 	
 	for( x=0; x<lexer->tokenCount; x++ )	{
 
@@ -191,7 +200,7 @@ int Parse( struct LexInstance* lexer	)	{
 
 		prSegment = getNextProductionRuleSegment( lexer );
 		
-		if( prSegment==NULL )	{
+		if( prSegment == NULL )	{
 			
 			// out of production rule segments.
 			break;
@@ -200,7 +209,7 @@ int Parse( struct LexInstance* lexer	)	{
 		unsigned y=0;
 		char* _ = prSegment[0];
 
-		if( _==NULL )	{
+		if( _ == NULL )	{
 			
 			// This edge case shouldn't arise, but it constitutes a production rule nonterminal/terminal decleration at the
 			// beginning of a production rule section/segment that is NULL.
@@ -214,7 +223,7 @@ int Parse( struct LexInstance* lexer	)	{
 
 		x2 = x;
 		flag = 1; // assume match will be found in section/segment.
-		while( _!=NULL )	{
+		while( _ != NULL )	{
 
 			if( _ != tok_type )	{
 
@@ -225,7 +234,6 @@ int Parse( struct LexInstance* lexer	)	{
 			else	{
 
 				// token match to token_type in current prSegment.
-
 				_ = prSegment[ ++y ];
 				tok_type = lexer->tokens[++x2][0];
 				token = lexer->tokens[++x2][1];
@@ -254,14 +262,16 @@ int Parse( struct LexInstance* lexer	)	{
 		pushParserStack( prRule, collection, j+1 );
 
 		x = x2;
+		flag = 0;
 
 		// tautological, included for clarity.
 		continue;
 	}
 
-	if( lexer->tokenCount!=x )	{
+	if( lexer->tokenCount != x )	{
 
-		fprintf( stderr, "quickparse failed to complete parsing of source file '%s' at token '%d'\n", lexer->sourceFileName, x-1 );
+		fprintf( stderr, "%squickparse failed to complete parsing of source file '%s' at token '%d'%s\n", \
+			FG_BRIGHT_RED, lexer->sourceFileName, x-1, NORMAL );
 		return 0;
 	}
 
