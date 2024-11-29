@@ -22,6 +22,11 @@
 
 // CUSTOM TYPES
 #define ascii '0'
+#define large long long int
+#define L large
+#define LARGE large
+
+  
 // 'TOGGLE'
 #define TOGGLE bool
 #define toggle TOGGLE
