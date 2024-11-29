@@ -25,6 +25,10 @@ typedef struct LexInstance	{
 
 } LexInstance;
 
+
+
+// CSTNode for NonTerminals.
+// grammarEntry for Terminals.
 typedef struct GrammarUnit	{
 
 	int num_tokens; // from lexer
@@ -32,12 +36,6 @@ typedef struct GrammarUnit	{
 
 } GrammarUnit;
 
-typedef struct ParserStack	{
-
-	struct GrammarUnit* _[65536];
-	int numEntries;
-
-} ParserStack;
 
 typedef struct CSTNode	{
 
@@ -48,19 +46,38 @@ typedef struct CSTNode	{
 	signed numDescendents;
 
 	struct GrammarUnit** token_groups;
-	signed numTokenGroups;
+	signed numTokenGroups; 
 	
 }	CSTNode;
+
+
+typedef struct ParserStack	{
+
+	struct GrammarUnit* _[65536];
+	int numEntries;
+
+} ParserStack;
+
+
+
 
 struct CSTNode* createNode( char* nodeName )	{
 
 	struct CSTNode* _ = (struct CSTNode*) malloc( sizeof(struct CSTNode) );
-	_->nodeName = nodeName;
-	_->numDescendents = 0;
-	_->numTokenGroups = 0;
 
+	_->nodeName = nodeName;
+	
+	_->ancestor = NULL;
+
+	// FOR CSTNODE NONTERMINALS. EITHER/OR WITH TERMINALS SECTION BELOW.
 	_->descendents = malloc( sizeof( struct CSTNode* ) * (1<<13) );
 	_->descendents[0] = NULL;
+	_->numDescendents = 0;
+
+	// FOR TERMINALS AS ATTACHED LEAF-NODE.
+	_->token_groups = NULL;
+	_->numTokenGroups = 0;
+
 	return _;
 }
 
@@ -77,10 +94,21 @@ void AddNode( struct CSTNode* node, struct CSTNode* ancestor )	{
 	return;
 }
 
+void AddLeaf( struct GrammarUnit* g, struct CSTNode* node )	{
+
+	// Alternatively, the below line of code can be used inline to attach a leaf terminal to a CSTNode.
+	node->token_groups[ ++node->numTokenGroups ] = g;
+
+	return;
+}
 
 typedef struct ParseInstance	{
 
 	struct LexInstance* lexer;
+
+	// Example Potential Usage:
+	// struct ParseInstance parseInstance = newParser( );
+	// int a = parseInstance.parse( &parseInstance );
 	int (*parse)( struct ParseInstance* self );
 
 	char* CFG; // filename of .cfg production rules file.
@@ -95,6 +123,8 @@ typedef struct ParseInstance	{
 
 
 // FUNCTIONS
+
+// INITIALIZATION FUNCTIONS
 struct CSTNode* initNode( char* nodeName, int numEntries );
 void InitParserStack( struct ParserStack* );
 
@@ -103,14 +133,17 @@ int extend( void* _ );
 char*** initRuleSetArray( int numRules );
 char*** initTokenResultsArray( int assumpt );
 
+// LEXER
 struct LexInstance* initLex( char* sc, char* lr );
-char* patternMatch( char* str, struct LexInstance* );
-
 int lex( struct LexInstance* );
+char* patternMatch( char* str, struct LexInstance* );
 void push( char* token_type, char* literal, struct LexInstance* );
 
-// int Parse( struct ParseInstance* );
-// void pushFromParser( struct CSTNode* nodeName, char* literal );
+// PARSER
+int Parse( struct ParseInstance* );
+void AddNode( struct CSTNode*, struct CSTNode* ancestor );
+// The 'leaf' is the GrammarUnit, equivalentlya Terminal.
+void AddLeaf( struct GrammarUnit*, struct CSTNode* );
 
 #endif // DAVELIB_SIMPLE_LEXER_H
 
