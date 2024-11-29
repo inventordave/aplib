@@ -16,7 +16,7 @@ toggle fliptoggle( toggle* t )	{
 	return *t;
 }
 
-// DAVELIB FNC'
+// DAVELIB FNC'S
 
 
 /*
@@ -74,10 +74,17 @@ void pause()	{
 
 // ARG_ASSERT: Custom assert() for the cmd-line args count. Pass the "argc" Env variable to it, with the min number of cmd-line args needed to continue
 // Does not include argv[0], which by system default holds the executable name ,so just the min-count for actual args passed.)
-void arg_assert( int argc, int min ){
-if( (argc-1)<min ){
-//printf( "Not enough cmd-line arguments. %d are required, only %d args passed. Exiting.", min, argc-1 );
-exit(1);}
+void arg_assert( int argc, int min )	{
+	
+	if( (argc-1)<min )	{
 
-return; }
+		#ifdef DAVEDEBUG
+			printf( "%sNot enough cmd-line arguments. %s%d%s are required, only %s%d%s args passed. Exiting.%s\n", \
+				FG_BRIGHT_RED, FG_GREEN, min, FG_BRIGHT_RED, FG_YELLOW, argc-1, FG_BRIGHT_RED, NORMAL );
+		#endif
+		exit(1);
+	}
+
+	return;
+}
 
