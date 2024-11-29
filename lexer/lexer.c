@@ -72,6 +72,81 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 	return token_type;
 }
 
+
+char** getStringList( char* str, char* pattern )	{
+
+	int e, ep;
+	wregex_t *r;
+	wregmatch_t *subm;
+
+	char** stringList;
+
+	int x = 0;
+	while( 1 )	{
+
+		r = wrx_comp(pattern, &e, &ep);
+
+		if(!r) {
+
+			fprintf(stderr,
+				"%sError attempting to generate a WREGEX context:%s\nmsg: '%s',\npattern: '%s',\nep: '%d'\n",
+				FG_BRIGHT_RED,
+				NORMAL,
+				wrx_error(e),
+				pattern,
+				ep );
+
+			stringList = NULL;
+			break;
+		}
+
+		if(r->n_subm > 0) {
+
+			subm = calloc(sizeof *subm, r->n_subm);
+			if(!subm) {
+
+				fprintf(stderr,
+					"Error: out of memory (submatches). Exiting Program at line '%d' in file '%s'.\n",
+					__LINE__,
+					__FILE__ );
+				
+				wrx_free(r);
+				exit(EXIT_FAILURE);
+			}
+		}
+		else
+			subm = NULL;
+	
+		e = wrx_exec(r, str, &subm, &r->n_subm);
+
+		if(e < 0)
+			fprintf(stderr, "Error: %s\n", wrx_error(e));
+		
+		if( e <= 0 )	{
+			
+			stringList[x] = NULL;
+			break;
+		}
+		else	{
+
+			stringList[x] = subm[1];
+			x++;
+			continue;
+		}
+		
+		free(subm);
+		wrx_free(r);
+
+		x++;
+	}
+	
+	// If we got here, wregex has either matched the pattern to the rule, or has failed to find a match in the Ruleset.
+	return token_type;
+}
+
+
+
+
 // LEXER::LEX() : [in] A pointer to a LexInstance Context.
 int lex( struct LexInstance* lexer )	{
 
