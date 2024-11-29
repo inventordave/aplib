@@ -18,12 +18,12 @@ char* strtolower( char* _ )	{
 
 	large v = 0;
 	char* t = _;
-	while( t++ != NULL )
+	while( *t++ != '\0' )
 		v++;
 
 	char* s = (char*)malloc( v + 1 );
-	while( _ != '\0' )
-		( *_>='A' && *_<='Z' ) ? *s++ = (_++) - CASE_DIFF : *s++ = (_++) ;
+	while( *_ != '\0' )
+		( *_>='A' && *_<='Z' ) ? *s++ = (*_++) - CASE_DIFF : *s++ = (*_++) ;
 	
 	*s = '\0';
 
@@ -38,12 +38,12 @@ char* strtoupper( char* _ )	{
 
 	large v = 0;
 	char* t = _;
-	while( t++ != NULL )
+	while( *t++ != '\0' )
 		v++;
 
 	char* s = (char*)malloc( v + 1 );
-	while( _ != '\0' )
-		( *_>='a' && *_<='z' ) ? *s++ = (_++) + CASE_DIFF : *s++ = (_++) ;
+	while( *_ != '\0' )
+		( *_>='a' && *_<='z' ) ? *s++ = (*_++) + CASE_DIFF : *s++ = (*_++) ;
 	
 	*s = '\0';
 
