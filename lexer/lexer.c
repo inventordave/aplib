@@ -140,6 +140,15 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 	lexInstance->tokensCount = 0;
 	lexInstance->lex = lex;
 
+	unsigned max_num_rules = 512;
+	unsigned max_num_segments = 64;
+	unsigned max_num_entries_in_a_segment = 32;
+	
+	lexInstance->productionRules = (char****) calloc( sizeof(char*), max_num_rules * max_num_segments * max_num_entries_in_a_segment );
+	// char**** productionRules; //[][][]
+	// [ruleNum][segmentNum][entryInSegment]
+	
+
 	// POPULATE THE TOKENIZER RULESET.
 	int offset;
 	char* line;
@@ -176,12 +185,53 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 
 int Parse( struct LexInstance* lexer	)	{
 
-	int x, x2;
+	int x, x2, x3, x4;
 	int flag;
 	char* token;
+	char* term;
+	char* line;
+	char* ruleName;
 	char* tok_type;
 	char** prSegment;
 
+	// lexInstance->productionRules = (char****) calloc( sizeof(char*), max_num_rules * max_num_segments * max_num_entries_in_a_segment );
+	// char**** productionRules; //[][][]
+	// [ruleNum][segmentNum][entryInSegment]
+
+	char** terms;
+	x4 = 0;
+	for( x=0; x<max_num_rules; x++ )	{
+
+		line = getline_file( lexer->parseRulesFileName,x );
+		ruleName = match_string( "^([a-zA-Z_0-9]+)\:",  )[0];
+		lexer->productionRules[x][0][0] = getstring( ruleName );
+		free( ruleName );
+
+		char*** segments;
+		
+segments[ x4++ ] = split( line, '$' );
+		
+		
+		for( x2=0; x2<max_num_segments; x2++ )	{
+			
+			//prSegment = (char**) calloc( sizeof(char*), max_num_entries_in_a_segment );
+			
+			terms = segments[ x2 ];
+			
+			for( x3=0; x3<max_num_entries_in_a_segment; x3++ )	{
+
+				term = terms[ x3 ];
+				lexer->productionRules[x][x2][x3] = term;
+				free( term );
+			}
+
+			free( terms );
+
+		}
+
+		free( segments );
+	}
+				
 	// INIT
 	getNextProductionRuleSegment( NULL );
 
@@ -341,8 +391,11 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 	
 	checkAgain:
 
-	if( !!strcmp( prRule,lexer->productionRules[x] ) )
-		prRule = lexer->productionRules[x][0][0];
+	if( !!strcmp( prRule,lexer->productionRules[x][y][ ) )
+		prRule = *lexer->productionRules[x][0];
+
+	// char**** productionRules [n] [segment] [each NT/T type]
+	
 	
 	prSegment = lexer->productionRules[x][y++];
 	
