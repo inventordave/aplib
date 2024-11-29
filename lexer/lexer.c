@@ -13,7 +13,7 @@
 #include "../regex_w/wregex.h"
 #include "../regex_w/wrx_prnt.h"
 
-// LEXER::ScanLanguageString : Match substring from start to a regex-defined TOKEN_TYPE.
+// LEXER:: Match substring from start to a regex-defined TOKEN_TYPE.
 char* patternMatch( char* str, struct LexInstance* lexer )	{
 
 	int e, ep;
@@ -33,7 +33,13 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 
 		if(!r) {
 
-			fprintf(stderr, "\n[%s:%d] ERROR......: %s\n%s\n%*c\n", lexer->sourceCodeFileName, lexer->carat, wrx_error(e), pattern, ep );
+			fprintf(stderr,
+				"\n[%s:%d] ERROR......: %s\n%s\n%*c\n",
+				lexer->sourceCodeFileName,
+				lexer->carat,
+				wrx_error(e),
+				pattern,
+				ep );
 
 			token_type = NULL;
 			break;
@@ -75,28 +81,35 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 
 char** getStringList( char* str, char* pattern )	{
 
-	int e, ep;
+	int e, ep, x;
 	wregex_t *r;
 	wregmatch_t *subm;
 
-	char** stringList;
+	char** stringList = (char**) calloc( sizeof(char*), 32 );
 
-	int x = 0;
+	e = 0;
+	ep = 0;
+	x = 0;
 	while( 1 )	{
+
+		if( (e < 1) || (x == 32) )
+			break;
 
 		r = wrx_comp(pattern, &e, &ep);
 
 		if(!r) {
 
 			fprintf(stderr,
-				"%sError attempting to generate a WREGEX context:%s\nmsg: '%s',\npattern: '%s',\nep: '%d'\n",
+				"%sError attempting to generate a WREGEX context:%s\n\
+				msg: '%s',\n\
+				pattern: '%s',\n\
+				ep: '%d'\n",
 				FG_BRIGHT_RED,
 				NORMAL,
 				wrx_error(e),
 				pattern,
 				ep );
 
-			stringList = NULL;
 			break;
 		}
 
@@ -106,7 +119,7 @@ char** getStringList( char* str, char* pattern )	{
 			if(!subm) {
 
 				fprintf(stderr,
-					"Error: out of memory (submatches). Exiting Program at line '%d' in file '%s'.\n",
+					"Error: out of memory (for storing submatches). Exiting Program at line '%d' in file '%s'.\n",
 					__LINE__,
 					__FILE__ );
 				
@@ -114,37 +127,27 @@ char** getStringList( char* str, char* pattern )	{
 				exit(EXIT_FAILURE);
 			}
 		}
-		else
+else
 			subm = NULL;
 	
 		e = wrx_exec(r, str, &subm, &r->n_subm);
 
-		if(e < 0)
+		if( e > 0 )
+			stringList[x] = subm[1];
+		else if(e < 0)
 			fprintf(stderr, "Error: %s\n", wrx_error(e));
 		
-		if( e <= 0 )	{
-			
-			stringList[x] = NULL;
-			break;
-		}
-		else	{
+		if( subm != NULL )
+			free( subm );
 
-			stringList[x] = subm[1];
-			x++;
-			continue;
-		}
-		
-		free(subm);
-		wrx_free(r);
-
+		wrx_free( r );
+		str += strlen( stringList[x] );
+		str += 1; // (to pass over the delimeter char)
 		x++;
 	}
-	
-	// If we got here, wregex has either matched the pattern to the rule, or has failed to find a match in the Ruleset.
-	return token_type;
+
+	return stringList;
 }
-
-
 
 
 // LEXER::LEX() : [in] A pointer to a LexInstance Context.
@@ -262,36 +265,30 @@ int Parse( struct LexInstance* lexer	)	{
 
 	int x, x2, x3, x4;
 	int flag;
-	char* token;
-	char* term;
+
 	char* line;
+	char** segments;
+	char** terms;
+	char* term;
+	
 	char* ruleName;
-	char* tok_type;
-	char** prSegment;
 
 	// lexInstance->productionRules = (char****) calloc( sizeof(char*), max_num_rules * max_num_segments * max_num_entries_in_a_segment );
 	// char**** productionRules; //[][][]
 	// [ruleNum][segmentNum][entryInSegment]
 
-	char** terms;
-	x4 = 0;
 	for( x=0; x<max_num_rules; x++ )	{
 
 		line = getline_file( lexer->parseRulesFileName,x );
-		ruleName = match_string( "^([a-zA-Z_0-9]+)\:",  )[0];
+		ruleName = match_string( "^([a-zA-Z_0-9]+)\:", line )[1];
 		lexer->productionRules[x][0][0] = getstring( ruleName );
 		free( ruleName );
 
-		char*** segments;
-		
-segments[ x4++ ] = split( line, '$' );
-		
-		
+		segments = split( line, '|' );
+
 		for( x2=0; x2<max_num_segments; x2++ )	{
-			
-			//prSegment = (char**) calloc( sizeof(char*), max_num_entries_in_a_segment );
-			
-			terms = segments[ x2 ];
+
+			terms = split( segments[ x2 ], ' ' );
 			
 			for( x3=0; x3<max_num_entries_in_a_segment; x3++ )	{
 
@@ -301,9 +298,9 @@ segments[ x4++ ] = split( line, '$' );
 			}
 
 			free( terms );
-
 		}
 
+		free( line );
 		free( segments );
 	}
 				
