@@ -13,12 +13,12 @@ simplelexer: lexer.c lexer.h
 	$(compiler) $(flags) lexer.c -c -o simplelexer.o
 
 aplib_pkg:
-	make -C ../ aplib
-	make -C ../ stringy
-	make -C ../ colour 
-	make -C ../gcollect/ gcd
-	make -C ../ io
-	make -C ../regex_w libd
+	make ../ aplib
+	make ../ stringy
+	make ../ colour 
+	make ../gcollect/ gcd
+	make  ../ io
+	make  ../regex_w libd
 
 test: aplib_pkg simplelexer lexertest
 	ar r slarc.a \
@@ -38,7 +38,7 @@ test: aplib_pkg simplelexer lexertest
 	$(compiler) $(flags)  slarc.a -o lextest.exe
 
 clean:
-	rm -f *.o
+rm -f *.o
 	rm -f *.a
 	rm -f *.exe
 
