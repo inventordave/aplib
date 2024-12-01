@@ -23,7 +23,7 @@ typedef struct LexInstance	{
 
 	// init :  sizeof(char*) * n * max_num_segments * max_num entries in a segment
 	char**** productionRules; //[][][]
-char* parseRulesFilename;
+	char* parseRulesFileName;
 	int numProductionRules;
 
 	int (*lex)( struct LexInstance* );
@@ -55,11 +55,14 @@ typedef struct CSTNode	{
 
 typedef struct ParserStack	{
 
-	struct GrammarUnit* _[65536];
+	struct GrammarUnit** _;
 	int numEntries;
 
 } ParserStack;
 
+
+
+char** split( char* line, char delim );
 
 struct CSTNode* createNode( char* nodeName )	{
 
@@ -119,7 +122,7 @@ typedef struct ParseInstance	{
 // FUNCTIONS
 
 // INITIALIZATION FUNCTIONS
-struct CSTNode* initNode( char* nodeName, int numEntries );
+struct CSTNode* initNode( char* nodeName );
 void InitParserStack( struct ParserStack* );
 
 int extend( void* _ );
@@ -136,7 +139,7 @@ char* patternMatch( char* str, struct LexInstance* );
 void push( char* token_type, char* literal, struct LexInstance* );
 
 // PARSER
-int Parse( struct ParseInstance* );
+int Parse( struct LexInstance* );
 void AddNode( struct CSTNode*, struct CSTNode* ancestor );
 // The 'leaf' is the GrammarUnit, equivalentlya Terminal.
 void AddLeaf( struct GrammarUnit*, struct CSTNode* );

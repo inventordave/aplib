@@ -79,6 +79,65 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 }
 
 
+struct FileContents read_f_split( char* fn, char* delim )	{
+
+	FILE* f;
+	f = fopen( fn, "r" );
+	fseek( f, 0, SEEK_END );
+	int flen = ftell( f );
+	fseek( f, 0, SEEK_SET );
+	
+	struct FileContents fc;
+	fc.lineCount = 0;
+	fc.lines = (char**) malloc( sizeof(char*) * (flen+1) );
+	// char** fc->lines
+	// int fc->lineCount
+
+	fseek( f, 0, 
+	char* line = (char*) malloc( 1024 );
+	char c;
+	int x, y;
+	x = 0, y = 0;
+	c = fgetc( f );
+	
+	while( c != EOF )	{
+		
+		
+		if( c==delim[0] )	{
+		
+			line[x] = '\0';
+			x = 0;
+			fc.lines[y] = getstring( line );
+			y++;
+		}
+		else
+			line[x++] = c;
+
+		line[ x ] = '\0';
+		
+		c = fgetc( f );
+	}
+
+	fclose( f );
+
+	return fc;
+}
+
+char* getline_file( char* fn, int lineNum )	{
+
+	// struct FileContents read_f_split( char* fn, char* delim );
+	static struct FileContents fc = NULL;
+	static char* fname = NULL;
+
+	if( strcmp( fn, fname ) != 0 )	{
+
+		fname = getstring( fn );
+		fc = read_f_split( fname, "\n" );
+	}
+	
+	return fc.lines[ lineNum ];
+}
+
 char** getStringList( char* str, char* pattern )	{
 
 	int e, ep, x;
@@ -271,10 +330,18 @@ int Parse( struct LexInstance* lexer	)	{
 	
 	char* ruleName;
 
+	char* prsegment;
+	char* token_type;
+	char* token;
+	
 	// lexInstance->productionRules = (char****) calloc( sizeof(char*), max_num_rules * max_num_segments * max_num_entries_in_a_segment );
 	// char**** productionRules; //[][][]
 	// [ruleNum][segmentNum][entryInSegment]
 
+	int max_num_rules = 512;
+	int max_num_segments = 64;
+	int max_num_entries_in_a_segment = 32;
+	
 	for( x=0; x<max_num_rules; x++ )	{
 
 		line = getline_file( lexer->parseRulesFileName,x );
@@ -309,7 +376,8 @@ int Parse( struct LexInstance* lexer	)	{
 	
 	for( x=0; x<lexer->tokenCount; x++ )	{
 
-		tok_type = lexer->tokens[x][0];
+		
+		token_type = lexer->tokens[x][0];
 		token = lexer->tokens[x][1];
 		
 		// if the PR entry is a non-terminal, we need to recursively stack (LIFO), until we find a terminal definition.
@@ -318,16 +386,16 @@ int Parse( struct LexInstance* lexer	)	{
 
 		section_scan:
 
-		prSegment = getNextProductionRuleSegment( lexer );
+		prsegment = getNextProductionRuleSegment( lexer );
 		
-		if( prSegment == NULL )	{
+		if( prsegment == NULL )	{
 			
 			// out of production rule segments.
 			break;
 		}
 		
 		unsigned y=0;
-		char* _ = prSegment[0];
+		char* _ = prsegment[0];
 
 		if( _ == NULL )	{
 			
@@ -345,7 +413,7 @@ int Parse( struct LexInstance* lexer	)	{
 		flag = 1; // assume match will be found in section/segment.
 		while( _ != NULL )	{
 
-			if( _ != tok_type )	{
+			if( strcmp(_,token_type) )	{
 
 				flag = 0; // match not found.
 				x2 = x;
@@ -354,8 +422,10 @@ int Parse( struct LexInstance* lexer	)	{
 			else	{
 
 				// token match to token_type in current prSegment.
-				_ = prSegment[ ++y ];
-				tok_type = lexer->tokens[++x2][0];
+				_ = prsegment[ ++y ];
+
+
+				token_type = lexer->tokens[++x2][0];		
 				token = lexer->tokens[++x2][1];
 						
 				continue;
@@ -368,13 +438,13 @@ int Parse( struct LexInstance* lexer	)	{
 		}
 
 		// ELSE, reset PoductionRules' static scanner, set latest PR-type, and continue anew from next token in stream.
-		prSegment = getNextProductionRuleSegment( NULL );
+		prsegment = getNextProductionRuleSegment( NULL );
 
-		char** collection = (char**) malloc( sizeof(char*) * (x2-x) );
+		char*** collection = (char**) malloc( sizeof(char*) * (x2-x) * 2 );
 		unsigned j;
 		for( j=x; j<x2; j++ )	{
 
-			collection+(j-x) = lexer->tokens[j];
+			collection[j-x] = lexer->tokens[j];
 		}
 
 		prRule = getNextProductionRuleSegment( (void*)1 );
@@ -388,10 +458,10 @@ int Parse( struct LexInstance* lexer	)	{
 		continue;
 	}
 
-	if( lexer->tokenCount != x )	{
+	if( lexer->tokensCount != x )	{
 
 		fprintf( stderr, "%squickparse failed to complete parsing of source file '%s' at token '%d'%s\n", \
-			FG_BRIGHT_RED, lexer->sourceFileName, x-1, NORMAL );
+			FG_BRIGHT_RED, lexer->sourceCodeFileName, x-1, NORMAL );
 		return 0;
 	}
 
@@ -399,36 +469,71 @@ int Parse( struct LexInstance* lexer	)	{
 	return 1;
 }
 
-typedef struct GrammarUnit	{
 
-	int num_tokens; // from lexer
-	char** tokens;
+char** split( char* line, char delim )	{
 
-} GrammarUnit;
+	int i, k;
 
-typedef struct ParserStack	{
+	char** results = (char**) calloc( sizeof(char*), 32 );
+	int strlen_line = strlen( line );
 
-	struct GrammarUnit* _[65536];
-	int numEntries;
+	int in_quotes = 0;
+	int escaped = 0;
+	k=0; 
+	for( i=0; i<strlen_line; i++ )	{
 
-} ParserStack;
+		if( (line[i] == delim) && (escaped==0) && (in_quotes==0) )			{
+
+			line[i] = '\0';
+			results[k++] = getstring( line );
+			line[i] = delim;
+			line += (i+1);
+			i = 0;
+			strlen_line = strlen( line );
+
+			continue;
+		}
+
+		if( line[i] == '"' &&escaped==0 )
+			in_quotes==0 ? in_quotes=1 : in_quotes=0;
+		
+		if( line[i] == '\'' && escaped==0 && in_single_quotes==1 )
+			in_singlequotes=0;
+		else if( line[i] == '\'' && escaped==0 && in_single_quotes==0 )
+			in_singlequotes=1;
+
+		if( line[i] == '\'' && in_single_quotes==1 )
+				in_single_quotes=0;
+
+		if( escaped==1 )
+			escaped=0;
+		else if( line[i] == '\\' )
+			escaped=1;
+ 
+	}
+
+	return results;
+}
+
+
 
 void InitParserStack( struct ParserStack* _ )	{
 
 	_->numEntries=0;
-	_->_ = (struct GrammarUnit*) malloc( sizeof(struct GrammarUnit) * 65536 );
+	_->_ = (struct GrammarUnit**) malloc( sizeof(struct GrammarUnit) * 65536 );
 	_->_[0] = (struct GrammarUnit*) NULL; // Presumptively, I can use indice 0 for a custom storage.
 	_->_[1] = (struct GrammarUnit*) NULL;
 }
 
-void PushParserStack( char* prRule, char** collection, int amount )	{
+void PushParserStack( char* prRule, char** collection, int amount 
+, struct ParserStack* parserStack )	{
 
 	struct GrammarUnit* _ = (struct GrammarUnit*) malloc( sizeof(struct GrammarUnit) );
 	_->num_tokens = amount;
 	_->tokens = collection;
 
-	parserStack._[ ++parserStack.numEntries ] = _;
-	parserStack._[ (parserStack.numEntries)+1 ] = (struct GrammarUnit*) NULL;
+	parserStack->_[ ++parserStack->numEntries ] = _;
+	parserStack->_[ (parserStack->numEntries)+1 ] = (struct GrammarUnit*) NULL;
 
 	return;
 }
