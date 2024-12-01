@@ -7,17 +7,22 @@
 #include "../stringy.h"
 #include "../colour.h"
 #include "../gcollect/gc.h"
-
 #include "lexer.h"
 
-#include "lexertest.h"
+#ifndef report
+#define report printf
+#endif
+#ifndef print
+#define print printf
+#endif
 
+#include "lexertest.h"
 int main( int argc, char** argv )	{
 
 	volatile struct GC* gc = initGC( 100 );
 	colorMode();
 	
-	printf( "%s%sTest.%s\n", FG_BRIGHT_RED, BG_BRIGHT_BLUE, NORMAL );
+	print( "%sWelcome to %sDaveLib%s's testversion of a %sC--%s lexer.%s\n", FG_BRIGHT_BLUE, FG_YELLOW, FG_BRIGHT_BLUE, FG_BRIGHT_YELLOW, FG_BRIGHT_BLUE, NORMAL );
 
 	char* sc;
 	if( argc>1 )
@@ -36,19 +41,16 @@ int main( int argc, char** argv )	{
 	int success = lex( lexer );
 
 	if( !success )	{
-
-		printf( "Lexer is reporting failure. Carat position '%d' of file buffer size '%d'.\n", lexer->carat, lexer->strlen_sourceCode );
-
-	}
-
+	report( "Lexer is reporting failure to lex file %s.\n", sc );
+	
 	int x;
 	for( x=0; x<lexer->tokensCount; x++ )	{
 
 		if( lexer->tokens[x][0]==NULL )
 			break;
 		
-		printf( "%sToken Type: %s%s\n%sToken Literal: %s%s%s\n", FG_BRIGHT_YELLOW, FG_BRIGHT_GREEN, FG_BRIGHT_YELLOW, lexer->tokens[x][0], FG_BRIGHT_GREEN, lexer->tokens[x][1], NORMAL );
-
+		report( "%sToken Type: %s%s\n%sToken Literal: %s%s%s\n", FG_BRIGHT_YELLOW, FG_BRIGHT_GREEN, FG_BRIGHT_YELLOW, lexer->tokens[x][0], \
+				FG_BRIGHT_GREEN, lexer->tokens[x][1], NORMAL );
 	}
 
 	return 0;

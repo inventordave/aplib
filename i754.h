@@ -8,11 +8,55 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-
+#include <stdint.h>
+// uint32_t etc
+//  the types int_leastNN_t and uint_leastNN_t for NN 8, 16, 32, and 64 must always exist.
+//There is also a uint128_t if __SIZEOF_INT128__ is defined to 16 or greater (GCC and compatibles).
+// Its available on x86_64/amd64 machines, but the processor does not natively support it.
+// Only Cray's have that register size.
 
 // CUSTOM INC'S
 #include "aplib.h"
 #include "io.h"
+
+
+// DEFINES
+#define  CANNOT_OPTIMIZE_TO_NATIVE_uint_32_STORAGE_CLASS 1
+#define  CANNOT_OPTIMIZE_TO_NATIVE_uint_16_STORAGE_CLASS 2
+#define  CANNOT_OPTIMIZE_TO_NATIVE_uint_8_STORAGE_CLASS 3
+//SIGUSR1 and SIGUSR2
+
+//SIGUSR2 is a user-defined signal I can use for reporting error.
+
+uint_32_t ConvertToNativeU32( char* _ );
+uint_16_t ConvertToNativeU16( char* _ );
+
+int UserContext;
+
+uint_8_t ConvertToNativeU8( char* _ )	{
+
+	int strlen__ = strlen( _ );
+
+	if( strlen__==0 )
+		return (uint_8_t)0;
+
+	if( strlen__ > 3 )	{
+		signal( CANNOT_OPTIMIZE_TO_NATIVE_uint_8_STORAGE_CLASS, UserContext );
+		return (uint_8_t)0;
+	}
+
+	int i;
+	uint_8_t v = 0;
+	uint_8_t order = 1;
+	v += '0' - _[i];
+	for( i=strlen__-2; i>=0; i-- )	{
+
+		order *= 10;
+		v += ('0' - _[i]) * order;
+	}
+
+	return v;
+}
 
 
 // CORE DATA STRUCTURES

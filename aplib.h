@@ -87,7 +87,6 @@ APP {
 // AP Value reference. These (pointer) types have to be instantiated.
 
 typedef APP* AP;
-#define APL AP
 #define ap AP
 
 typedef struct
@@ -110,7 +109,6 @@ APExpC	{ // (AP OP AP) [OP] (AP OP AP)
 	opcode OP;
 }
 APExpC;
-
 
 typedef APExpC* complexexpression;
 typedef APExpC* complex;
