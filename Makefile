@@ -1,36 +1,22 @@
-# simplelexer Makefile
+# Makefile 'aplib'
 
-# vars
 
-compiler= gcc
-flags= -g -DDEBUG -Wall -Wextra
+aplib:	aplib.c aplib.h
+	gcc -g -DDEBUG -c aplib.c -o aplib.o
 
-# targets
+stringy: stringy.c stringy.h
+	gcc -g -DDEBUG -O -c stringy.c -o stringy.o
 
-lexertest: lexertest.c lexertest.h
-	$(compiler) $(flags) lexertest.c -c -o lexertest.o
+colour: colour.c colour.h
+	gcc -g -DDEBUG -O -c colour.c -o colour.o
 
-simplelexer: lexer.c lexer.h
-	$(compiler) $(flags) lexer.c -c -o simplelexer.o
+	
 
-aplib_pkg:
-	make -C ../ aplib
-	make -C ../ stringy
-	make -C ../ colour 
-	make -C ../gcollect/ gcd
-	make -C ../ io
-	make -C ../regex_w libd
+io: io.c io.h
+	gcc -g -DDEBUG -O -c io.c -o io.o
 
-test: aplib_pkg simplelexer lexertest
-	ar r slarc.a "../regex_w/wrx_free.o" "../regex_w/wrx_prnt.o" "../regex_w/wrx_comp.o" "../regex_w/wrx_exec.o" "../regex_w/wrx_err.o" "../aplib.o" "../stringy.o" "../colour.o" "../gcollect/gcd.o" "../io.o"  lexertest.o simplelexer.o
-
-	$(compiler) $(flags)  slarc.a -o lextest.exe
 
 clean:
 	rm -f *.o
-	rm -f *.a
 	rm -f *.exe
-
-	make -C ../regex_w/ clean
-	make -C ../ clean
 

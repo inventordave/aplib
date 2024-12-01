@@ -1875,8 +1875,8 @@ AP LCM(AP A, AP B) {
   return *(R1 + (str2int(inc->integer) - 1) * sizeof(AP));
 }
 
-#define aptr *AP
-AP LCMTESTSTR(AP max, aptr *R1, aptr *R2) {
+// #define aptr *AP
+AP LCMTESTSTR(AP max, AP* R1, AP* R2) {
 
   AP a = NewAPr(0, 0);
   AP b = NewAPr(0, 0);

@@ -20,7 +20,6 @@
 #include "lib.h"
 #include "stringy.h"
 #include "colour.h"
-<<<<<<< HEAD
 #include "stringy.h"
 #include "stringy.h"
 
@@ -111,8 +110,6 @@ while( t<str_width ){
 
 return _; }
 
-=======
->>>>>>> 1035c482134d1126e6c4a15dbc0a4abb6468997d
 
 // ANSI/VT Global Refs.
 extern char* ANSIVT_FG;

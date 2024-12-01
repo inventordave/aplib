@@ -22,8 +22,7 @@ aplib_pkg:
 	make -C ../regex_w libd
 
 test: aplib_pkg simplelexer lexertest
-	ar r slarc.a "../regex_w/wrx_free.o" "../regex_w/wrx_prnt.o" "../regex_w/wrx_comp.o" "../regex_w/wrx_exec.o" "../regex_w/wrx_err.o" "../aplib.o" "../stringy.o" "../colour.o" "../gcollect/gcd.o" "../io.o"  lexertest.o simplelexer.o
-
+	ar r slarc.a lexertest.o simplelexer.o "../regex_w/wrx_free.o" "../regex_w/wrx_prnt.o" "../regex_w/wrx_comp.o" "../regex_w/wrx_exec.o" "../regex_w/wrx_err.o" "../gcollect/gcd.o" "../aplib.o" "../stringy.o" "../colour.o"  "../io.o"  
 	$(compiler) $(flags)  slarc.a -o lextest.exe
 
 clean:
