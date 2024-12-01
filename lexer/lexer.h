@@ -30,8 +30,6 @@ char* parseRulesFilename;
 
 } LexInstance;
 
-
-
 // CSTNode for NonTerminals.
 // grammarEntry for Terminals.
 typedef struct GrammarUnit	{
@@ -40,7 +38,6 @@ typedef struct GrammarUnit	{
 	char** tokens;
 
 } GrammarUnit;
-
 
 typedef struct CSTNode	{
 
@@ -64,8 +61,6 @@ typedef struct ParserStack	{
 } ParserStack;
 
 
-
-
 struct CSTNode* createNode( char* nodeName )	{
 
 	struct CSTNode* _ = (struct CSTNode*) malloc( sizeof(struct CSTNode) );
@@ -85,20 +80,17 @@ struct CSTNode* createNode( char* nodeName )	{
 
 	return _;
 }
-
-
 void AddNode( struct CSTNode* node, struct CSTNode* ancestor )	{
 
 	node->ancestor = (void*) ancestor;
 	int x = ancestor->numDescendents;
 
-	descendents[ x+1 ] = node;
-	descendents[ x+2 ] = NULL;
+	ancestor->descendents[ x+1 ] = node;
+	ancestor->descendents[ x+2 ] = NULL;
 	ancestor->numDescendents++;
 
 	return;
 }
-
 void AddLeaf( struct GrammarUnit* g, struct CSTNode* node )	{
 
 	// Alternatively, the below line of code can be used inline to attach a leaf terminal to a CSTNode.
@@ -124,9 +116,6 @@ typedef struct ParseInstance	{
 	
 } ParseInstance;
 
-
-
-
 // FUNCTIONS
 
 // INITIALIZATION FUNCTIONS
@@ -137,6 +126,8 @@ int extend( void* _ );
 
 char*** initRuleSetArray( int numRules );
 char*** initTokenResultsArray( int assumpt );
+
+char** getNextProductionRuleSegment( struct LexInstance* lexer );
 
 // LEXER
 struct LexInstance* initLex( char* sc, char* lr );

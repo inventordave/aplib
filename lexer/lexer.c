@@ -34,7 +34,7 @@ char* patternMatch( char* str, struct LexInstance* lexer )	{
 		if(!r) {
 
 			fprintf(stderr,
-				"\n[%s:%d] ERROR......: %s\n%s\n%*c\n",
+				"\n[%s:%d] ERROR......: %s\n%s\n%d\n",
 				lexer->sourceCodeFileName,
 				lexer->carat,
 				wrx_error(e),
@@ -149,7 +149,6 @@ else
 	return stringList;
 }
 
-
 // LEXER::LEX() : [in] A pointer to a LexInstance Context.
 int lex( struct LexInstance* lexer )	{
 
@@ -259,7 +258,6 @@ struct LexInstance* initLex( char* sc, char* lr )	{
 	// LEXINSTANCE prepared. Return the Active Lex Instance.
 	return lexInstance;
 }
-
 
 int Parse( struct LexInstance* lexer	)	{
 
@@ -401,7 +399,6 @@ int Parse( struct LexInstance* lexer	)	{
 	return 1;
 }
 
-
 typedef struct GrammarUnit	{
 
 	int num_tokens; // from lexer
@@ -455,23 +452,25 @@ char** getNextProductionRuleSegment( struct LexInstance* lexer )	{
 		return NULL;
 	}
 
-	if( lexer==1 )	{
+	if( lexer==(void*)1 )	{
 
 		// return prRule;		
 		return &prRule;
 	}
 	
+	
+
+	if( !!strcmp( prRule,lexer->productionRules[x][0][0] ) )
+		prRule = lexer->productionRules[x][0][0];
+
 	checkAgain:
-
-	if( !!strcmp( prRule,lexer->productionRules[x][y][ ) )
-		prRule = *lexer->productionRules[x][0];
-
+	
 	// char**** productionRules [n] [segment] [each NT/T type]
 	
 	
 	prSegment = lexer->productionRules[x][y++];
 	
-	if( result == NULL )	{
+	if( prSegment == NULL )	{
 	// no more production rules to provide a segment from.
 
 		x = 0;
@@ -507,8 +506,6 @@ int extend( void* self )	{
 
 	struct CSTNode* node = (struct CSTNode*) self;
 
-	node->T_NT; // = realloc( ... );
-
 	int success = 0;
 	int numEntries;
 	int newNumOfEntries = 1;
@@ -518,14 +515,17 @@ int extend( void* self )	{
 	return success;
 }
 
-struct CSTNode* initNode( char* nodeName, int numEntries )	{
+struct CSTNode* initNode( char* nodeName )	{
 
-	struct CSTNode _ = (struct CSTNode*) calloc( sizeof(struct CSTNode),1 );
+	struct CSTNode* _ = (struct CSTNode*) calloc( sizeof(struct CSTNode),1 );
 	
 	_->nodeName = getstring( nodeName );
-	_->T_NT = (char**) calloc( sizeof(char*), numEntries );
-	_->numEntries = numEntries;
-	_->extend = extend;
+	_->ancestor = NULL;
+	_->descendents = NULL;
+	_->numDescendents = 0;
+
+	_->token_groups = NULL;
+	_->numTokenGroups = 0;
 
 	return _;
 }

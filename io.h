@@ -5,7 +5,6 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aplib.h"
 
 //#define in getchar
 //#define out putchar
@@ -39,10 +38,10 @@ struct FileContents read_f_split( char* fn, char* delim );
 byte getbyte( char* );
 
 // MEMORY HELPER FNC'S
-extern char* mem( large numBytes );
-extern char* memp( large numParts, large numBytes );
-extern void* cmem( large nb );
-extern char* zmem( large nb );
+extern char* mem( long long int numBytes );
+extern char* memp( long long int numParts, long long int numBytes );
+extern void* cmem( long long int nb );
+extern char* zmem( long long int nb );
 
 #endif
 

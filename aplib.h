@@ -136,8 +136,7 @@ extern AP AP1;
 extern AP DefaultPrecision;
 extern large MAX_LENGTH;
 
-typedef struct
-_APLIB	{
+typedef struct _APLIB	{
 	
 	AP (*RESET0)( AP );
 	AP (*RESET1)( AP );
@@ -146,7 +145,7 @@ _APLIB	{
 	AP AP1;
 
 	AP (*NOP)( AP );
-	AP (*ADD)( APL,AP );
+	AP (*ADD)( APL, AP );
 	AP (*ADDP)( APL,APL, AP );
 	AP (*SUB)( APL,AP );
 	AP (*SUBP)( APL,APL, AP );
