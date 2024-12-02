@@ -329,6 +329,7 @@ int Parse( struct LexInstance* lexer	)	{
 	char* term;
 	
 	char* ruleName;
+	char* prRule;
 
 	char* prsegment;
 	char* token_type;
@@ -440,7 +441,7 @@ int Parse( struct LexInstance* lexer	)	{
 		// ELSE, reset PoductionRules' static scanner, set latest PR-type, and continue anew from next token in stream.
 		prsegment = getNextProductionRuleSegment( NULL );
 
-		char*** collection = (char**) malloc( sizeof(char*) * (x2-x) * 2 );
+		char*** collection = (char***) malloc( sizeof(char*) * (x2-x) * 2 );
 		unsigned j;
 		for( j=x; j<x2; j++ )	{
 
@@ -449,7 +450,7 @@ int Parse( struct LexInstance* lexer	)	{
 
 		prRule = getNextProductionRuleSegment( (void*)1 );
 		
-		pushParserStack( prRule, collection, j+1 );
+		PushParserStack( prRule, collection, j+1, parser );
 
 		x = x2;
 		flag = 0;
@@ -465,10 +466,9 @@ int Parse( struct LexInstance* lexer	)	{
 		return 0;
 	}
 
-	printf( "%sHuzzah! Quickparse completed parsing of source file '%s'%s\n.", FG_GREEN, lexer->sourceFileName, NORMAL );
+	printf( "%sHuzzah! Quickparse completed parsing of source file '%s'%s\n.", FG_GREEN, lexer->sourceCodeFileName, NORMAL );
 	return 1;
 }
-
 
 char** split( char* line, char delim )	{
 
@@ -515,8 +515,6 @@ char** split( char* line, char delim )	{
 	return results;
 }
 
-
-
 void InitParserStack( struct ParserStack* _ )	{
 
 	_->numEntries=0;
@@ -525,16 +523,45 @@ void InitParserStack( struct ParserStack* _ )	{
 	_->_[1] = (struct GrammarUnit*) NULL;
 }
 
-void PushParserStack( char* prRule, char** collection, int amount 
-, struct ParserStack* parserStack )	{
+void PushParserStack( char* prRule, char*** collection, int amount 
+, struct ParserInstance* parser )	{
 
-	struct GrammarUnit* _ = (struct GrammarUnit*) malloc( sizeof(struct GrammarUnit) );
-	_->num_tokens = amount;
-	_->tokens = collection;
+	struct CSTNode* node = (struct CSTNode*) malloc( sizeof(struct CSTNode) );
 
-	parserStack->_[ ++parserStack->numEntries ] = _;
-	parserStack->_[ (parserStack->numEntries)+1 ] = (struct GrammarUnit*) NULL;
+	node->nodeName = getstring( prRule );
+	node->descendents = (struct CSTNode**) malloc( sizeof(struct CSTNode*) * amount );
+	node->descendentsCount = amount;
 
+	char* _;
+	struct CSTNode* subNode;
+	int x, y;
+	x=0, y=0;
+	for( x=0; x<amount; x++ )	{
+
+		char* tt = collection[x][0];
+		subNode = createNode( tt );
+
+		if( checkType( tt )=="T" )	{
+			
+			// Terminal.
+			subNode->isTerminal = 1;
+			subNode->termStr = getstring( collection[x][TOKEN_LITERAL] );
+
+			
+		}
+		else	{
+			// NonTerminal.
+			subNode->isTerminal = 0;
+			
+		}
+
+		subNode->ancestor = node;
+		node->descendents[x] = subNode;
+		
+		//node->descendents[x] = createNode( collection[x][TOKEN_TYPE] );		
+	}
+
+	
 	return;
 }
 

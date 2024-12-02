@@ -44,21 +44,17 @@ typedef struct CSTNode	{
 	char* nodeName; // OPTIONAL ID-STRING, NONTERMINAL DESIGNATION.
 
 	void* ancestor; 	// typeof( struct CSTNode* ), back-reference
+
+	char* termStr;
+	signed isTerminal; 
+	// if this is FAlSE, 0, then the below struct members must be populated, as the
+	// descendents will be nonterminals.
+
 	void** descendents;
 	signed numDescendents;
 
-	struct GrammarUnit** token_groups;
-	signed numTokenGroups; 
 	
 }	CSTNode;
-
-
-typedef struct ParserStack	{
-
-	struct GrammarUnit** _;
-	int numEntries;
-
-} ParserStack;
 
 
 
@@ -102,7 +98,7 @@ void AddLeaf( struct GrammarUnit* g, struct CSTNode* node )	{
 	return;
 }
 
-typedef struct ParseInstance	{
+typedef struct ParserInstance	{
 
 	struct LexInstance* lexer;
 
@@ -117,7 +113,11 @@ typedef struct ParseInstance	{
 	struct CSTNode* Root;
 
 	
-} ParseInstance;
+} ParserInstance;
+
+void PushParserStack( char* prRule, char** collection, int amount 
+, struct ParserInstance* );
+
 
 // FUNCTIONS
 
