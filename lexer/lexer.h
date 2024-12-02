@@ -27,6 +27,11 @@ typedef struct LexInstance	{
 	int numProductionRules;
 
 	int (*lex)( struct LexInstance* );
+	
+
+	struct ParserInstance* parser;
+
+
 
 } LexInstance;
 
@@ -56,29 +61,8 @@ typedef struct CSTNode	{
 	
 }	CSTNode;
 
-
-
 char** split( char* line, char delim );
 
-struct CSTNode* createNode( char* nodeName )	{
-
-	struct CSTNode* _ = (struct CSTNode*) malloc( sizeof(struct CSTNode) );
-
-	_->nodeName = nodeName;
-	
-	_->ancestor = NULL;
-
-	// FOR CSTNODE NONTERMINALS. EITHER/OR WITH TERMINALS SECTION BELOW.
-	_->descendents = malloc( sizeof( struct CSTNode* ) * (1<<13) );
-	_->descendents[0] = NULL;
-	_->numDescendents = 0;
-
-	// FOR TERMINALS AS ATTACHED LEAF-NODE.
-	_->token_groups = NULL;
-	_->numTokenGroups = 0;
-
-	return _;
-}
 void AddNode( struct CSTNode* node, struct CSTNode* ancestor )	{
 
 	node->ancestor = (void*) ancestor;
@@ -90,11 +74,17 @@ void AddNode( struct CSTNode* node, struct CSTNode* ancestor )	{
 
 	return;
 }
-void AddLeaf( struct GrammarUnit* g, struct CSTNode* node )	{
+void AddLeaf( struct CSTNode* node struct CSTNode* ancestor )	{
 
-	// Alternatively, the below line of code can be used inline to attach a leaf terminal to a CSTNode.
-	node->token_groups[ ++node->numTokenGroups ] = g;
+	node->isTerminal = +1;
 
+	if( node->termStr == NULL )
+		node->termStr = getstring( "[NULL String Node passed to AddLeaf() ]" );]" );
+
+	node->ancestor = (void*) ancestor;
+ 	node->descendents = NULL;
+	node->numDescendents = 0;
+	
 	return;
 }
 
@@ -105,17 +95,19 @@ typedef struct ParserInstance	{
 	// Example Potential Usage:
 	// struct ParseInstance parseInstance = newParser( );
 	// int a = parseInstance.parse( &parseInstance );
-	int (*parse)( struct ParseInstance* self );
+	int (*parse)( struct ParserInstance* self );
 
 	char* CFG; // filename of .cfg production rules file.
 	int numPRs; // number of production rules.
 
 	struct CSTNode* Root;
 
-	
+	void (*AddNode)( struct CSTNode* node, struct CSTNode* ancestor );
+
+	void (*AddLeaf)( struct CSTNode* node, struct CSTNode* leaf );
 } ParserInstance;
 
-void PushParserStack( char* prRule, char** collection, int amount 
+void PushParserStack( char* prRule, char*** collection, int amount 
 , struct ParserInstance* );
 
 
@@ -123,7 +115,7 @@ void PushParserStack( char* prRule, char** collection, int amount
 
 // INITIALIZATION FUNCTIONS
 struct CSTNode* initNode( char* nodeName );
-void InitParserStack( struct ParserStack* );
+struct ParseInstance* InitParserStack(void);
 
 int extend( void* _ );
 

@@ -126,7 +126,7 @@ struct FileContents read_f_split( char* fn, char* delim )	{
 char* getline_file( char* fn, int lineNum )	{
 
 	// struct FileContents read_f_split( char* fn, char* delim );
-	static struct FileContents fc = NULL;
+	static struct FileContents fc;
 	static char* fname = NULL;
 
 	if( strcmp( fn, fname ) != 0 )	{
@@ -346,7 +346,7 @@ int Parse( struct LexInstance* lexer	)	{
 	for( x=0; x<max_num_rules; x++ )	{
 
 		line = getline_file( lexer->parseRulesFileName,x );
-		ruleName = match_string( "^([a-zA-Z_0-9]+)\:", line )[1];
+		ruleName = match_string( "^([a-zA-Z_0-9]+)\\:", line );
 		lexer->productionRules[x][0][0] = getstring( ruleName );
 		free( ruleName );
 
@@ -375,7 +375,7 @@ int Parse( struct LexInstance* lexer	)	{
 
 	// FOR_EACH lexed token in the Lexer stream.
 	
-	for( x=0; x<lexer->tokenCount; x++ )	{
+	for( x=0; x<lexer->tokensCount; x++ )	{
 
 		
 		token_type = lexer->tokens[x][0];
@@ -404,7 +404,7 @@ int Parse( struct LexInstance* lexer	)	{
 			// beginning of a production rule section/segment that is NULL.
 
 			fprintf( stderr, "%s%sDEBUG MSG:%s %sAn Edge Case has arisen. A production rule has a NULL nonterminal/terminal decleration \
-				at the beginning of one of it's segments. Rule Name: %s'%s%s%s'%s.\n", BG_GRAY, FG_BRIGHT_YELLOW, NORMAL, FG_BRIGHT_BLUE,\
+				at the beginning of one of it's segments. Rule Name: %s'%s%s%s'%s.\n", BG_GREEN, FG_BRIGHT_YELLOW, NORMAL, FG_BRIGHT_BLUE,\
 				FG_WHITE, FG_BRIGHT_GREEN, *getNextProductionRuleSegment( (void*)1 ), FG_WHITE, NORMAL );
 			
 			break;
@@ -450,7 +450,7 @@ int Parse( struct LexInstance* lexer	)	{
 
 		prRule = getNextProductionRuleSegment( (void*)1 );
 		
-		PushParserStack( prRule, collection, j+1, parser );
+		PushParserStack( prRule, collection, j+1, lexer->parser );
 
 		x = x2;
 		flag = 0;
@@ -478,6 +478,7 @@ char** split( char* line, char delim )	{
 	int strlen_line = strlen( line );
 
 	int in_quotes = 0;
+	int in_singlequotes = 0;
 	int escaped = 0;
 	k=0; 
 	for( i=0; i<strlen_line; i++ )	{
@@ -497,13 +498,13 @@ char** split( char* line, char delim )	{
 		if( line[i] == '"' &&escaped==0 )
 			in_quotes==0 ? in_quotes=1 : in_quotes=0;
 		
-		if( line[i] == '\'' && escaped==0 && in_single_quotes==1 )
+		if( line[i] == '\'' && escaped==0 && in_singlequotes==1 )
 			in_singlequotes=0;
-		else if( line[i] == '\'' && escaped==0 && in_single_quotes==0 )
+		else if( line[i] == '\'' && escaped==0 && in_singlequotes==0 )
 			in_singlequotes=1;
 
-		if( line[i] == '\'' && in_single_quotes==1 )
-				in_single_quotes=0;
+		if( line[i] == '\'' && in_singlequotes==1 )
+				in_singlequotes=0;
 
 		if( escaped==1 )
 			escaped=0;
@@ -515,22 +516,25 @@ char** split( char* line, char delim )	{
 	return results;
 }
 
-void InitParserStack( struct ParserStack* _ )	{
+struct ParserInstance* InitParserInstance(void)	{
+	struct ParserInstance* parser = (struct ParserInstance*) calloc( 1, sizeof(struct ParserInstance) );
+	
+	parser->lexer = NULL;
+	parser->parse = NULL;
 
-	_->numEntries=0;
-	_->_ = (struct GrammarUnit**) malloc( sizeof(struct GrammarUnit) * 65536 );
-	_->_[0] = (struct GrammarUnit*) NULL; // Presumptively, I can use indice 0 for a custom storage.
-	_->_[1] = (struct GrammarUnit*) NULL;
+	parser->Root = NULL;
+
+	parser->AddNode = AddNode;
+	
 }
 
 void PushParserStack( char* prRule, char*** collection, int amount 
 , struct ParserInstance* parser )	{
 
-	struct CSTNode* node = (struct CSTNode*) malloc( sizeof(struct CSTNode) );
-
-	node->nodeName = getstring( prRule );
+	struct CSTNode* node = initNode( getstring(prRule) );
+	
 	node->descendents = (struct CSTNode**) malloc( sizeof(struct CSTNode*) * amount );
-	node->descendentsCount = amount;
+	node->numDescendents = amount;
 
 	char* _;
 	struct CSTNode* subNode;
@@ -542,26 +546,30 @@ void PushParserStack( char* prRule, char*** collection, int amount
 		subNode = createNode( tt );
 
 		if( checkType( tt )=="T" )	{
-			
-			// Terminal.
-			subNode->isTerminal = 1;
-			subNode->termStr = getstring( collection[x][TOKEN_LITERAL] );
 
+			#ifndef TOKEN_LITERAL
+			#define TOKEN_LITERAL 1
+			#endif
+			// Terminal.
+			// This has the side-effect that if any
+			// leaf nodes upon parse completion
+			// are not Terminals, the parse
+			// has failed.
+
+			subNode->isTerminal = 1;
+			subNode->termStr = getstring( collection[x][1] );
 			
 		}
 		else	{
 			// NonTerminal.
 			subNode->isTerminal = 0;
-			
 		}
 
-		subNode->ancestor = node;
-		node->descendents[x] = subNode;
-		
-		//node->descendents[x] = createNode( collection[x][TOKEN_TYPE] );		
+		//subNode->ancestor = node;
+		//node->descendents[x] = subNode;
+		AddNode( subNode, node );
 	}
 
-	
 	return;
 }
 
@@ -656,8 +664,8 @@ struct CSTNode* initNode( char* nodeName )	{
 	_->descendents = NULL;
 	_->numDescendents = 0;
 
-	_->token_groups = NULL;
-	_->numTokenGroups = 0;
+	_->termStr = NULL;
+	_->isTerminal = 0;
 
 	return _;
 }
