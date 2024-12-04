@@ -61,6 +61,47 @@ typedef struct CSTNode	{
 	
 }	CSTNode;
 
+char* checkType( char* token );
+
+
+unsigned strcmp__( char* str1, char* str2 )	{
+
+	#ifdef strcmp
+	#define strcmp_bkp strcmp
+	#undef strcmp
+	#endif
+	
+	#define strcmp strcmp__
+	
+	while( (*str1++ != 0) || (*str2++ != 0) )
+		if( *str2 == *str1 )
+			continue;
+		else
+			if( (*str1 < *str2) || (*str1 > *str2) )
+				return 0;
+
+	if(*str2 == *str1)
+		return +1;
+	
+	return * (str1[0]==0) ;
+}
+
+
+
+
+
+char* checkType( char* token )	{
+
+	char* type = getstring( "NT" );
+
+	int i;
+	for( i=0; i<Lexer->numRules; i++ )
+		if( strcmp( token, Lexer->tokens[i][1] )==0 )
+			return ++type;
+
+	return type;
+}
+
 char** split( char* line, char delim );
 
 void AddNode( struct CSTNode* node, struct CSTNode* ancestor )	{
