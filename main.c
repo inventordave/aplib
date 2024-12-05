@@ -96,8 +96,9 @@ int main( int argc, char** argv ){
     	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
 
 	int i;
+	char* temp;
 	for (i = 0; i < 2; i++) {
-        	scanf("%s", *(_+i) );
+        	temp = scanf("%s", *(_+i) );
     	}
 
 	setPartW( A, *_ );

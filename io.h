@@ -38,10 +38,10 @@ struct FileContents read_f_split( char* fn, char* delim );
 byte getbyte( char* );
 
 // MEMORY HELPER FNC'S
-extern char* mem( long long int numBytes );
-extern char* memp( long long int numParts, long long int numBytes );
-extern void* cmem( long long int nb );
-extern char* zmem( long long int nb );
+extern char* mem( unsigned unsigned long long int numBytes );
+extern char* memp( unsigned long long int numParts, long long int numBytes );
+extern void* cmem( unsigned long long int nb );
+extern char* zmem( unsigned long long int nb );
 
 #endif
 
