@@ -6,7 +6,7 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <string.h>
-#include "stringy.h"
+#include "../stringy/stringy.h"
 
 //char * formatString( char* fmt, ... );
 

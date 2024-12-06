@@ -1,6 +1,6 @@
 // T£STS.c
 #include <stdlib.h>
-#include "./gcollect/gc.h"
+#include "../gcollect/gc.h"
 #include "tests.h"
 #include "aplib.h"
 #include "ap.h"

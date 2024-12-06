@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "./gcollect/gc.h"
-#include "stringy.h"
-#include "colour.h"
+#include "../gcollect/gc.h"
+#include "../stringy/stringy.h"
+#include "../colour/colour.h"
 #include "aplib.h"
 
 #include "tests.h"
