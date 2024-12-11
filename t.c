@@ -31,12 +31,12 @@ char* MULv2( char* A, char* B )	{
 
 	char* str;
 	
-	char* C = (char*) malloc( 1, lenC + 1 );
+	char* C = (char*) malloc( lenC + 1 );
 	str = (char *)memset( C,'0', lenC );
 	C[ lenC ] = '\0';
 	int C_carat = lenC-1;
 	
-	char* T = (char*) malloc( 1, lenT + 1 );
+	char* T = (char*) malloc( lenT + 1 );
 	str = (char *)memset( T,'0', lenT );
 	T[ lenT ] = '\0';
 	int T_carat = lenT-1;
