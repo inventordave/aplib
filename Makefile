@@ -1,5 +1,10 @@
 # Makefile 'aplib'
 
+mul: t.c
+	gcc -g -DDEBUG -O0 -o t.exe	t.c
+
+clean-mul:
+	rm -f t.exe
 
 aplib:	aplib.c aplib.h
 	gcc -g -DDEBUG -c aplib.c -o aplib.o
