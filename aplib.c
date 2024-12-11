@@ -600,6 +600,78 @@ AP SUBP(AP A, AP B, AP P) {
 }
 AP MUL(AP A, AP B) { return MULP(A, B, NULL); }
 
+
+/** MUL AND DIV STEP-OPERATION ( A_n_digits * B_single_digit */
+
+int y = B_digit_offset; // from B[len(B)-1] to B[0]
+
+signed short r;
+signed short r2;
+signed long long n;
+for( int x=strlen(A)-1;  x>=0; x-- )	{
+
+	n = x;
+	
+	r = (A[x] - '0') * (B[y] - '0');
+
+	carry = 0;
+	r2 = -1;
+
+
+	if( r>9 )	{
+		
+		r2 = r;
+
+
+		while ( (r -= 10) > 0 )	{
+			
+			carry += 1;
+		}
+
+		r += 10;
+		
+		if( (n-1)<0 )	{
+
+			n_bkp = n;
+			msb_extend( C, 1 );
+			n++;
+			a = 1;
+			C[n-a] += carry;
+			if( C[n-a] > 9 )	{
+				msb_extend( C, 1 );
+
+				
+			while ( (C[n-a] -= 10) > 0 )	{
+
+				
+				C[n-(a+1)] += 1;
+			
+			carry += 1;
+		}
+			}
+		}
+
+		C[n-1] += carry;
+		if( C[n-1] > 9 )	{
+			
+			//r_bkp = r;
+			goto loopC;
+		}
+		else	{
+
+			r = rbkp;
+			n = nbkp;
+		}
+			
+			
+	}
+	
+}
+
+///////////////////////////////////////////
+
+
+
 AP MULP_new(
     AP A, AP B,
     AP P) { // seems to be multiplying each row to 1/2 it's intended value
