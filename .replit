@@ -1,10 +1,10 @@
-modules = ["c-gcc14", "nodejs-20"]
-run = "./test.exe"
-compile = "make test"
+modules = ["c-clang14", "cpp-clang14", "nodejs-20"]
+run = "./t.exe"
+compile = "make mul"
 
 [nix]
 channel = "stable-24_05"
 
 [deployment]
-run = ["sh", "-c", "./test.exe"]
-build = ["sh", "-c", "make test"]
+run = ["sh", "-c", "./t.exe"]
+build = ["sh", "-c", "make mul"]
