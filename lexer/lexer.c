@@ -1,9 +1,9 @@
 // DAVELIB_LEXER_C
 
-#include "../io.h"
-#include "../stringy.h"
-#include "../lib.h"
-#include "../colour.h"
+#include "../davelib/io.h"
+#include "../stringy/stringy.h"
+#include "../davelib/lib.h"
+#include "../colour/colour.h"
 
 // LEXER & PARSER Includes. 
 #include "lexer.h"
