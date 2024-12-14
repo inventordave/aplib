@@ -17,13 +17,18 @@ char* MULv2( char* A, char* B )	{
 
 	int lenA = strlen( A );
 	int lenB = strlen( B );
-	int lenC = lenA + 1 + (lenB - 1);
-	int lenT = lenA + lenB;
+	
+	int lenC = lenA + 1;
+	int maxTrailingDigits = lenB - 1;
+	lenC += maxTrailingDigits;
+	
+	int lenT = lenC + 1;
 	
 	int x;
 	int y;
 	int z;
-
+	int t;
+	
 	char a;
 	char b;
 	char c;
@@ -32,19 +37,18 @@ char* MULv2( char* A, char* B )	{
 	char* str;
 	
 	char* C = (char*) malloc( lenC + 1 );
-	str = (char *)memset( C,'0', lenC );
-	C[ lenC ] = '\0';
-	int C_carat = lenC-1;
+	memset( C,'0', lenC );
+	z = lenC-1;
 	
 	char* T = (char*) malloc( lenT + 1 );
-	str = (char *)memset( T,'0', lenT );
-	T[ lenT ] = '\0';
+	memset( T,'0', lenT );
+	
 	int T_carat = lenT-1;
 
 	for( y=lenB-1; y>=0; y-- )	{
 
-		for( z=trailing_zeroes; z>0; z-- )
-			C[ lenC-1-z ] = '0';
+		/*str = (char *)*/
+		memset( C,'0', lenC + 1 );
 
 		C_carat = lenC-1-trailing_zeroes;
 		
@@ -53,10 +57,11 @@ char* MULv2( char* A, char* B )	{
 		for( x=lenA-1; x>=0; x-- )	{
 	
 			a = A[x] - '0';
-			a += C[ C_carat ] - '0'; // *, or + ?
+			//a += C[ C_carat ] - '0'; // *, or + ?
 		
 			c = b * a;
-	
+			c += C[ C_carat ] - '0';
+			
 			if( c>9 )	{
 		
 				C[ C_carat ] = (c % 10) + '0';
@@ -68,35 +73,41 @@ char* MULv2( char* A, char* B )	{
 				
 				C[ C_carat ] = c + '0';
 			}
-
+			
 			C_carat--;
 		}
 
-		z = lenT-1;
-		for( x=lenC-1; x >= 0; x-- )	{
-
-			T[z] += ( C[x] - '0' );
-			//C[x] = '0';
-
-			if( T[z] > '9' )	{
-
-				char temp = T[z];
-				temp -= '0';
-				T[z] = '0' + (temp % 10);
-				
-				while( (temp-=10)>=0 )
-					T[z-1] += 1;
-			}
-
-			C[x] = '0';
-			z--;
-		}
-
 		trailing_zeroes++;
+
 	}
 
+	z = lenT-1-trailing_zeroes;
+	for( x=lenC-1; x >= 0; x--, z-- )	{
+
+		T[z] += ( C[x] - '0' );
 		
-  return T;
+		if( T[z] > '9' )	{
+			
+			c = T[z] - '0';
+			T[z] = '0' + (c % 10);
+	
+			while( (c-=10)>=0 )
+				T[ z-1 ] += 1;
+		}
+		
+	}
+
+	while( z >= 0 )
+		if( T[z] > '9' )	{
+			
+			c = T[z] - '0';
+			T[z] = '0' + (c % 10);
+			
+			while( (c-=10)>=0 )
+				T[ z-1 ] += 1;
+		}
+			
+	return T;
 } // 107 vs 77.
 
 // ALT SECTION.

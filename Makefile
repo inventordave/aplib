@@ -1,5 +1,6 @@
 # Makefile 'aplib'
 
+
 mul: t.c
 	gcc -g -DDEBUG -O0 -o t.exe	t.c
 
