@@ -20,8 +20,8 @@ extern L MAX_LOOPS;
 extern volatile struct GC* aplib_gc;
 
 // CUSTOM INC'S
-#include "lib.h"
-#include "colour.h"
+#include "../davelib/lib.h"
+#include "../colour/colour.h"
 
 
 

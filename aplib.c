@@ -1,12 +1,12 @@
 // APLIB_C
 
-#include "./gcollect/gc.h"
+#include "../gcollect/gc.h"
 
 // GC structure.
 volatile struct GC* aplib_gc;
 
-#include "lib.h"
-#include "stringy.h"
+#include "../davelib/lib.h"
+#include "../stringy/stringy.h"
 // #include "colour.h"
 
 #include "aplib.h"
@@ -15,7 +15,6 @@ volatile struct GC* aplib_gc;
 
 L MAX_LOOPS = 100;
 
-#include "stringy.h"
 
 AP AP0;
 AP AP1;
@@ -2086,7 +2085,7 @@ struct _APLIB *Init_APLIB() {
   //APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
 
   ANSI_init();
-  Init_ANSIVT_CTABLE();
+  Init_ANSIVT_CTABLE( ANSI );
   ResetAnsiVtCodes(1);
   colorMode();
 
