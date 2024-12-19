@@ -15,13 +15,15 @@ void flushBuffer() {
     while (((ch = getchar()) != EOF) && (ch != '\n'));
 }
 
-int main( int argc, char** argv ){
+int main( __attribute__((unused))int argc, __attribute__((unused))char** argv ){
 
 	
 	printf( "Begin...\n" );
 	fflush( stdout );
 
-	//ActivateColorConsole();
+	volatile struct GC* gc = initGC( 100 );
+	ResetAnsiVtCodes( 1 );
+	ActivateColorConsole();
 	colorMode();
 
 	// Test colourization output.
@@ -31,7 +33,7 @@ int main( int argc, char** argv ){
 	
 	//
 
-	aplib_gc = initGC( 10 );
+	APLIB_gc = initGC( 10 );
 
 	
 	//INIT()
@@ -50,15 +52,22 @@ int main( int argc, char** argv ){
 
 	printf( "Select from the following Unit Tests:\n\n" );
 
-	printf( "%s1. ADD +%s\n", FG_BRIGHT_GREEN, NORMAL );
-	printf( "%s2. SUB +%s\n", FG_BRIGHT_BLUE, NORMAL );
+	fflush( stdout );
+	
+	//printf( "%s1. ADD +%s\n", FG_BRIGHT_GREEN, NORMAL );
+	printf( "ADD.\n" );
+	
+	printf( "%s2. SUB -%s\n", FG_BRIGHT_BLUE, NORMAL );
 
 	printf( "%s3. MUL *%s\n", FG_BRIGHT_RED, NORMAL );
-	printf( "%s4. DIV *%s\n", FG_BRIGHT_YELLOW, NORMAL );
+	printf( "%s4. DIV *1/n%s\n", FG_BRIGHT_YELLOW, NORMAL );
 
 	char opsym;
 	char c = getchar();
 
+	fnc = ADD;
+	opsym = '+';
+	
 	switch( c-'0' )	{
 
 		case 1:
@@ -96,10 +105,11 @@ int main( int argc, char** argv ){
     	printf( "Input 2 Integer Operands to pass to %c operator.\n\n", opsym );
 
 	int i;
-	char* temp;
+	
 	for (i = 0; i < 2; i++) {
-        	temp = scanf("%s", *(_+i) );
-    	}
+		
+        	scanf("%s", *(_+i) );
+    }
 
 	setPartW( A, *_ );
 	setPartW( B, *(_+1) );

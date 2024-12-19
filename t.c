@@ -3,14 +3,13 @@
 #include <stdio.h>
 #include <assert.h>
 
-
+#include "../gcollect/gc.h"
 
 int MAX_LOOPS = 512;
 
-
 char* getstring( char* _ )	{
 
-	char* str = (char*)malloc( strlen(_) );
+	char* str = (char*) g( malloc( strlen(_) ) );
 	char* temp = str;
 
 	while( *_ != '\0' )	{
@@ -69,7 +68,7 @@ char* DIV( char*, char* );
 
 int main( int argc, char** argv )  {
 
-	//volatile struct GC* gc = initGC( 100 );
+	volatile struct GC* gc = initGC( 100 );
 	
 	char* A;
 	char* B;
@@ -122,6 +121,8 @@ int main( int argc, char** argv )  {
 
 	printf( "Result: '%s'\n", _ );
 	
+	cleanUp();
+	
 	return 0;
 }
 
@@ -151,7 +152,7 @@ char* SUB( char* A, char* B )	{
 
 	if( flag==2 )	{
 	
-		char* b = (char*) malloc( strlen(B) + 2 );
+		char* b = (char*) g( malloc( strlen(B) + 2 ) );
 		b[0] = '-';
 		strcat( b,B );
 		
@@ -186,7 +187,7 @@ char* DIV( char* A_, char* B_ )	{
 
 	char* R;
 	char* R2;
-	char* C = (char*) malloc( INIT_ASSUMPT );
+	char* C = (char*) g( malloc( INIT_ASSUMPT ) );
 	char* V;
 	
 	char t;
@@ -204,7 +205,7 @@ char* DIV( char* A_, char* B_ )	{
 		t = A[ lenB+1 ];
 		A[ lenB+1 ] = '\0';
 		
-		free( R );
+		freeRef( R );
 		R = getstring( A );		
 		A[ lenB+1 ] = t;
 	}
@@ -226,9 +227,10 @@ char* DIV( char* A_, char* B_ )	{
 				break;
 			}
 			
-			free( V );
+			freeRef( V );
 		}
-		free( V );
+		
+		freeRef( V );
 		
 		
 		B_rvalue[0] = '0' + i;		
@@ -236,8 +238,8 @@ char* DIV( char* A_, char* B_ )	{
 		
 		R2 = SUB( R, V );
 		
-		free( V );
-		free( R );
+		freeRef( V );
+		freeRef( R );
 		R = R2;
 		
 		if( cmp_dstr( R, "0" ) == 0 )
@@ -248,10 +250,10 @@ char* DIV( char* A_, char* B_ )	{
 		
 		if( carat >= INIT_ASSUMPT )	{
 			
-			char* _ = (char*) malloc( INIT_ASSUMPT * 2 + 1 );
+			char* _ = (char*) g( malloc( INIT_ASSUMPT * 2 + 1 ) );
 			INIT_ASSUMPT *= 2;
 			strcpy( _, C );
-			free( C );
+			freeRef( C );
 			
 			C = _;
 		}
@@ -262,12 +264,14 @@ char* DIV( char* A_, char* B_ )	{
 
 		dd_str[0] = dd;
 		
-		char* _temp_ = (char*) malloc( strlen(R) + 2 );		
+		char* _temp_ = (char*) g( malloc( strlen(R) + 2 ) );		
 		strcpy( _temp_, R );
 		strcat( _temp_, dd_str );
 		
-		free( R );
+		freeRef( R );
 		R = _temp_;
+		
+		LOOPS++;
 		
 		if( LOOPS>MAX_LOOPS )
 			break;
@@ -284,7 +288,7 @@ char* MUL( char* A, char* B )	{
 	int lenA = strlen( A );
 	int lenB = strlen( B );
 
-	char** resultRows = (char**) malloc( sizeof(char*) * lenB );
+	char** resultRows = (char**) g( malloc( sizeof(char*) * lenB ) );
 	
 	int lenC = lenA + 1;
 	int maxTrailingDigits = lenB - 1;
@@ -303,9 +307,9 @@ char* MUL( char* A, char* B )	{
 	char c;
 	int trailing_zeroes = 0;
 	
-	char* C = (char*) malloc( lenC + 1 );
+	char* C = (char*) g( malloc( lenC + 1 ) );
 	
-	char* T = (char*) malloc( lenT + 1 );
+	char* T = (char*) g( malloc( lenT + 1 ) );
 	memset( T,'0', lenT );
 	
 	t = lenT-1;
@@ -459,7 +463,7 @@ char* ADD( char* A_, char* B_ )	{
 	int lenC = lenA>lenB?lenA:lenB;
 	lenC += 1;
 	
-	char* C = (char*) malloc( lenC + 1 );
+	char* C = (char*) g( malloc( lenC + 1 ) );
 	memset( C, '0', lenC );
 	
 	char a;
@@ -541,7 +545,7 @@ char* ADD( char* A_, char* B_ )	{
 		c = C[ 0 ] - '0';
 		// 1. left-extend C
 		
-		temp = (char*) malloc( lenC + 2 );
+		temp = (char*) g( malloc( lenC + 2 ) );
 		lenC += 1;
 		
 		temp[0] = '0';
@@ -550,7 +554,7 @@ char* ADD( char* A_, char* B_ )	{
 			temp[z++] = *(C++);
 
 		temp[z] = '\0';
-		free( C );
+		freeRef( C );
 		C = temp;
 		// ...
 		// then...
@@ -564,7 +568,7 @@ char* ADD( char* A_, char* B_ )	{
 	}
 	
 	char* t;
-	char* _ = (char*) malloc( lenC + 2 );
+	char* _ = (char*) g( malloc( lenC + 2 ) );
 	_[0] = sign;
 	
 	t = C;
@@ -574,7 +578,7 @@ char* ADD( char* A_, char* B_ )	{
 	
 	_[z] = '\0';
 	
-	free( t );
+	freeRef( t );
 	
 	return _;
 	

@@ -3,7 +3,7 @@
 #define DAVE_AP_H
 
 // CUSTOM INC'S
-#include "aplib.h"
+#include "APLIB.h"
 #include <stdint.h>
 
 // HELPER TYPES

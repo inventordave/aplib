@@ -16,7 +16,7 @@
 // Only Cray's have that register size.
 
 // CUSTOM INC'S
-#include "aplib.h"
+#include "APLIB.h"
 #include "io.h"
 
 

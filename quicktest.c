@@ -50,7 +50,6 @@ int main( int argc, char** argv ){
 	return 0;
 }
 
-
 void PrintASCIITable(unsigned char start, unsigned char end)	{
 
 	

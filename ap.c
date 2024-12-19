@@ -11,7 +11,7 @@
 // LIB INC'S
 #include "ap.h"
 #include "i754.h"
-#include "aplib.h"
+#include "APLIB.h"
 #include "ap_io.h"
 #include "getOptions.h"
 #include "colour.h"

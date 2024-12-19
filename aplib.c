@@ -3,7 +3,7 @@
 #include "../gcollect/gc.h"
 
 // GC structure.
-volatile struct GC* aplib_gc;
+volatile struct GC* APLIB_gc;
 
 #include "../davelib/lib.h"
 #include "../stringy/stringy.h"
@@ -216,7 +216,7 @@ char *ConvertBase(
 //
 // This is computationally only useful for quick calculation of a log of a
 // rational (N/M, or "divisor-form"). It won't increase z=DIV(x,y) speed in
-// APlib, by indirection through z=(x/y)=b_exp(log_b(x/y)) APlib still provides
+// APLIB, by indirection through z=(x/y)=b_exp(log_b(x/y)) APLIB still provides
 // functions for calculating natural logs y=NLOG(x) and y=LOGb(x), an exponent y
 // in a defined base b for scalar x.
 //
@@ -225,7 +225,7 @@ char *ConvertBase(
 //		"AP logb_x_div_y = LOGb(x) - LOGb(y);"
 //
 // then the logarithmic identity for rational numbers has little implementation
-// benefit in APlib, except for convenience.
+// benefit in APLIB, except for convenience.
 //
 // A macro would therefore suffice:
 //
@@ -240,7 +240,7 @@ char *ConvertBase(
 // test the above macro, and if it works, see if I can remove the block-level
 // delimiters. 		I have placed a note in my TODO List.
 
-struct _APLIB APLIB;
+struct _APLIB* APLIB;
 
 char *MUL_SYM = "*";
 char *ADD_SYM = "+";
@@ -347,7 +347,7 @@ AP AND(AP LHS, AP RHS) {
 }
 AP NOT(AP v) {
 
-  APLS _v = v->integer;
+  APS _v = v->integer;
   L strlen_v = strlen(_v);
   register char *_ = (char *)malloc(strlen_v + 1);
   LARGE i;
@@ -361,7 +361,7 @@ AP NOT(AP v) {
 
   _[i] = '\0';
 
-  AP _2 = (APL)malloc(sizeof(APP));
+  AP _2 = (AP)malloc(sizeof(APP));
   _2->integer = _;
   return _2;
 }
@@ -459,7 +459,7 @@ AP XOR(AP LHS, AP RHS) {
 
   assert(k == -1);
 
-  AP _ = (APL)malloc(sizeof(APP));
+  AP _ = (AP)malloc(sizeof(APP));
   _->integer = bstr;
   return _;
 }
@@ -497,10 +497,7 @@ int DEC(AP A) {
 }
 
 AP ADD(AP A, AP B) { return ADDP(A, B, NULL); }
-AP ADDP(AP A, AP B, AP P) {
-
-  if( P==NULL )
-    ;
+AP ADDP(AP A, AP B, __attribute__((unused))AP P) {
 
   char sign_A = A->sign;
   char sign_C = '.';
@@ -582,10 +579,8 @@ AP ADDP(AP A, AP B, AP P) {
   return C;
 }
 AP SUB(AP A, AP B) { return SUBP(A, B, NULL); }
-AP SUBP(AP A, AP B, AP P) {
+AP SUBP(AP A, AP B, __attribute__((unused))AP P) {
 
-  if( P==NULL )
-    ;
 
   // SUB Algorithm:
   // The subtraction of a real number (the subtrahend [B]) from another (the
@@ -616,10 +611,8 @@ len(A) + 1 +(len(A)-1)
 
 AP MULP_new(
     AP A, AP B,
-    AP P) { // seems to be multiplying each row to 1/2 it's intended value
+    __attribute__((unused))AP P) { // seems to be multiplying each row to 1/2 it's intended value
 
-  if( P==NULL )
-    ;
 
   // 1. Multiply each digit of A with each digit of B. For each digit of B, a
   // result row is generated.
@@ -714,7 +707,6 @@ AP MULP_new(
   // When multiplying two numbers with the same sign,
   // the product is positive. When multiplying two numbers with
   // unlike signs, the product is negative.
-
   if (A->sign == B->sign)
     C->sign = '+';
   else
@@ -723,10 +715,7 @@ AP MULP_new(
   return C;
 }
 
-AP MULP(AP A, AP B, AP P) {
-
-  if( P==NULL )
-    ;
+AP MULP(AP A, AP B,__attribute__((unused)) AP P) {
 
   int MAX_NUM_MUL_ROWS =
       (strlen(A->integer) > strlen(B->integer) ? strlen(A->integer)
@@ -808,10 +797,8 @@ AP MULP(AP A, AP B, AP P) {
 }
 AP DIV(AP A, AP B) { return DIVP(A, B, DefaultPrecision); }
 
-AP DIVP( AP A, AP B, AP P )  {
+AP DIVP( AP A, AP B, __attribute__((unused))AP P )  {
 
-    if( P==NULL )
-      ;
 
     // 1. subsequence(A) >= B * v
     // 2. C_offset = v [0,9]
@@ -889,10 +876,10 @@ AP DIVP( AP A, AP B, AP P )  {
         // interim_result = interim_result - subtrahend;
       //   interim_result .= A[carat_offset];
 
-        AP _;
-        _ = SUB( subsequenceAP, subtrahendAP );
+        AP _1;
+        _1 = SUB( subsequenceAP, subtrahendAP );
         FreeAP( subsequenceAP );
-        subsequenceAP = _;
+        subsequenceAP = _1;
 
         
         if( carat_offset <= strlen_A )
@@ -918,14 +905,14 @@ AP DIVP( AP A, AP B, AP P )  {
 
           int c_ref = getRef( c );
 
-          void* c_ref_ptr = aplib_gc->_[c_ref];
+          void* c_ref_ptr = APLIB_gc->_[c_ref];
 
           _ = realloc( c,(strlen_C += 10) );
 
           if( _!= c_ref_ptr )  {
 
             // stdlib realloc() free'd old ptr for c.
-            aplib_gc->_[c_ref] = NULL;
+            APLIB_gc->_[c_ref] = NULL;
             g( _ );
           }
 
@@ -945,7 +932,7 @@ AP DIVP( AP A, AP B, AP P )  {
   
 }
 
-AP DIVP_old(AP A, AP B, AP P) {
+AP DIVP_old(AP A, AP B, __attribute__((unused))AP P) {
 
     int count = 0;
     int fractional = 0;
@@ -956,7 +943,7 @@ AP DIVP_old(AP A, AP B, AP P) {
     AP Remainder = NewAP(strlen(B->integer), 0);
   
     large i;
-    for (i = 0; i < strlen(B->integer); i++)
+    for (i = 0; i < (large)strlen(B->integer); i++)
       Remainder->integer[i] = A->integer[i];
   
     Remainder->integer[i] = '\0';
@@ -979,7 +966,7 @@ AP DIVP_old(AP A, AP B, AP P) {
   
     int LOOPS = 0;
   
-    int MAX_LOOPS = 50;
+    MAX_LOOPS = 50;
   
     // int count = 0;
   
@@ -1108,9 +1095,9 @@ AP DIVP_old(AP A, AP B, AP P) {
 
 // SKELETON FNC'S FOR FUTURE OPERATO
 AP CROSS(AP A, AP B) { return CROSSP(A, B, NULL); }
-AP CROSSP(AP A, AP B, AP P) { return CopyAP(AP1); }
+AP CROSSP(__attribute__((unused))AP A, __attribute__((unused))AP B, __attribute__((unused))AP P) { return CopyAP(AP1); }
 AP DOT(AP A, AP B) { return DOTP(A, B, NULL); }
-AP DOTP(AP A, AP B, AP P) { return CopyAP(AP1); }
+AP DOTP(__attribute__((unused))AP A, __attribute__((unused))AP B, __attribute__((unused))AP P) { return CopyAP(AP1); }
 
 char poke(char *in, char *out, LARGE offset) {
 
@@ -1149,9 +1136,9 @@ void setSign(AP A, char S) {
 
 AP RECIPROCAL2(AP A, AP B) { return RECIPROCAL2P(A, B, DefaultPrecision); }
 
-AP RECIPROCALP(AP A, AP DefaultPrecision) { return DIV(AP1, A); }
+AP RECIPROCALP(AP A, __attribute__((unused))AP P) { return DIV(AP1, A); }
 
-AP RECIPROCAL2P(AP A, AP B, AP DefaultPrecision) { return DIV(B, A); }
+AP RECIPROCAL2P(AP A, AP B, __attribute__((unused))AP P) { return DIV(B, A); }
 
 // BASE CONVERSION FNCS
 char *BIN_2_DEC( char *bin ) {
@@ -1234,7 +1221,7 @@ char *DEC_2_BIN(char *input, L packed) {
   }
 
   const L strlen_input = strlen(input);
-  AP *stack = (AP*) g( calloc(sizeof(AP), strlen_input) );
+  AP *stack = (AP*) g( calloc(strlen_input, sizeof(AP)) );
   char *binary_stack = (char*) g( calloc(length + 1, 1) );
 
   length = (L)strlen(input);
@@ -1620,7 +1607,7 @@ AP DIVBY2(AP A) {
   int overflow = 0;
   int value;
   L strlen_a = strlen(A->integer);
-  AP _ = (APL)malloc(sizeof(APP));
+  AP _ = (AP)malloc(sizeof(APP));
   _->integer = zmem(strlen_a);
   _->fractional = getstring("0");
   LARGE i;
@@ -1755,7 +1742,7 @@ L DSTRING2LARGE(AP A) {
 }
 
 /*
-AP APLCM( AP A, AP B ){
+AP APCM( AP A, AP B ){
 
         AP M1 = CopyAP( AP0 );
         AP M2 = CopyAP( AP0 );
@@ -1797,8 +1784,8 @@ AP LCM(AP A, AP B) {
   AP M1;
   AP M2;
   #define MAX_ITER 4096
-  AP *R1 = (AP *) g( calloc(sizeof(AP), MAX_ITER) );
-  AP *R2 = (AP *) g( calloc(sizeof(AP), MAX_ITER) );
+  AP *R1 = (AP *) g( calloc(MAX_ITER, sizeof(AP)) );
+  AP *R2 = (AP *) g( calloc(MAX_ITER, sizeof(AP)) );
 
   AP AP_MAX_ITER = NewAP(0, 0);
   freeRef (AP_MAX_ITER->integer);
@@ -1818,8 +1805,8 @@ AP LCM(AP A, AP B) {
     }
 
     //*(ANSI->c->ANSIVT_CTABLE + (i*4) + 0)
-    *(R1 + str2int(inc->integer) * sizeof(APL)) = MUL(M1, val);
-    *(R2 + str2int(inc->integer) * sizeof(APL)) = MUL(M2, val);
+    *(R1 + str2int(inc->integer) * sizeof(AP)) = MUL(M1, val);
+    *(R2 + str2int(inc->integer) * sizeof(AP)) = MUL(M2, val);
 
     // match = lcm_test(inc, R1, R2);
     match = LCMTESTSTR(inc, R1, R2);
@@ -1833,7 +1820,7 @@ AP LCM(AP A, AP B) {
   return *(R1 + (str2int(inc->integer) - 1) * sizeof(AP));
 }
 
-// #define aptr *AP
+// #define AP *AP
 AP LCMTESTSTR(AP max, AP* R1, AP* R2) {
 
   AP a = NewAPr(0, 0);
@@ -1846,7 +1833,7 @@ AP LCMTESTSTR(AP max, AP* R1, AP* R2) {
   return b;
 }
 
-AP lcm_example(int argc, char **argv) {
+AP lcm_example(__attribute__((unused))int argc, char **argv) {
 
   AP a;
   AP b;
@@ -1941,13 +1928,14 @@ void ClearAP(AP A) {
   return;
 }
 
-APTR DEC_2_HEX(APTR A, L packed) { aplibstdreturn(2); }
-APTR HEX_2_DEC(APTR A) { aplibstdreturn(10); }
-APTR DEC_2_OCTAL(APTR A, L precisiom) { aplibstdreturn(8); }
-APTR OCTAL_2_DEC(APTR A) { aplibstdreturn(10); }
 
-APTR BIN_2_OCTAL(APTR A) { aplibstdreturn(8); }
-APTR OCTAL_2_BIN(APTR A) { aplibstdreturn(2); }
+AP DEC_2_HEX(__attribute__((unused))AP A, __attribute__((unused))L packed) { APLIBstdreturn(2); }
+AP HEX_2_DEC(__attribute__((unused))AP A) { APLIBstdreturn(10); }
+AP DEC_2_OCTAL(__attribute__((unused))AP A, __attribute__((unused))L precisiom) { APLIBstdreturn(8); }
+AP OCTAL_2_DEC(__attribute__((unused))AP A) { APLIBstdreturn(10); }
+
+AP BIN_2_OCTAL(__attribute__((unused))AP A) { APLIBstdreturn(8); }
+AP OCTAL_2_BIN(__attribute__((unused)) AP A) { APLIBstdreturn(2); }
 
 void FreeAP(AP A) {
 
@@ -2040,7 +2028,8 @@ struct _APLIB *Init_APLIB() {
   DefaultPrecision = AP0; // Sets default precision to indicate the length of
                           // the largest string between the 2 operands.
 
-  struct _APLIB *APLIB = (struct _APLIB *) g( malloc(sizeof(struct _APLIB)) );
+  APLIB = (struct _APLIB *) g( malloc(sizeof(struct _APLIB)) );
+
 
   // Add the OPERATORS to the APLIB global.
   APLIB->NOP = NOP;
@@ -2084,7 +2073,7 @@ struct _APLIB *Init_APLIB() {
   APLIB->ANSI = ANSI;
   //APLIB->ANSI->c = (AVTC*)malloc( sizeof(AVTC) );
 
-  ANSI_init();
+  //ANSI_init();
   Init_ANSIVT_CTABLE( ANSI );
   ResetAnsiVtCodes(1);
   colorMode();
@@ -2146,7 +2135,7 @@ char peek(large c, char *_) {
   return _[c - 1];
 }
 
-// scint CmpAP_abs( APL, AP )
+// scint CmpAP_abs( AP, AP )
 scint CmpAP_abs(AP A, AP B) {
 
   if (A->integer == NULL)

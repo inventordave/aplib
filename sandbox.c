@@ -6,7 +6,7 @@
 #include "lib.h"
 #include "stringy.h"
 #include "i754.h"
-#include "aplib.h"
+#include "APLIB.h"
 #include "sandbox.h"
 
 #include <signal.h>
@@ -81,7 +81,7 @@ int main(int argc, char **argv)	{
 
 	//struct _APLIB* APLIB = Init_APLIB();
 
-	// not using the APLIB object yet, but I need to initialise the aplib-local globals, AP0 and AP1
+	// not using the APLIB object yet, but I need to initialise the APLIB-local globals, AP0 and AP1
 	struct _APLIB*  APLIB = Init_APLIB();
 
 	if( APLIB == NULL )

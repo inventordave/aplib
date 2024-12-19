@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-#include "aplib.h"
+#include "APLIB.h"
 
 //#define in getchar
 //#define out putchar

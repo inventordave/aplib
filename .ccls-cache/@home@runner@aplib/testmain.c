@@ -4,7 +4,7 @@
 #include "./gcollect/gc.h"
 #include "stringy.h"
 #include "colour.h"
-#include "aplib.h"
+#include "APLIB.h"
 
 #include "tests.h"
 #include "testmain.h"

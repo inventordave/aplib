@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "../gcollect/gc.h"
 #include "tests.h"
-#include "aplib.h"
+#include "APLIB.h"
 #include "ap.h"
 #include "ap_io.h"
 

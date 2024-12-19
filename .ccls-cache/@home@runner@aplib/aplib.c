@@ -3,7 +3,7 @@
 #include "lib.h"
 #include "stringy.h"
 // #include "colour.h"
-#include "aplib.h"
+#include "APLIB.h"
 
 #include "stringy.h"
 
@@ -208,7 +208,7 @@ char *ConvertBase(
 //
 // This is computationally only useful for quick calculation of a log of a
 // rational (N/M, or "divisor-form"). It won't increase z=DIV(x,y) speed in
-// APlib, by indirection through z=(x/y)=b_exp(log_b(x/y)) APlib still provides
+// APLIB, by indirection through z=(x/y)=b_exp(log_b(x/y)) APLIB still provides
 // functions for calculating natural logs y=NLOG(x) and y=LOGb(x), an exponent y
 // in a defined base b for scalar x.
 //
@@ -217,7 +217,7 @@ char *ConvertBase(
 //		"AP logb_x_div_y = LOGb(x) - LOGb(y);"
 //
 // then the logarithmic identity for rational numbers has little implementation
-// benefit in APlib, except for convenience.
+// benefit in APLIB, except for convenience.
 //
 // A macro would therefore suffice:
 //
@@ -338,7 +338,7 @@ AP AND(AP LHS, AP RHS) {
 }
 AP NOT(AP v) {
 
-  APLS _v = v->integer;
+  APS _v = v->integer;
   L strlen_v = strlen(_v);
   register char *_ = (char *)malloc(strlen_v + 1);
   LARGE i;
@@ -352,7 +352,7 @@ AP NOT(AP v) {
 
   _[i] = '\0';
 
-  AP _2 = (APL)malloc(sizeof(APP));
+  AP _2 = (AP)malloc(sizeof(APP));
   _2->integer = _;
   return _2;
 }
@@ -449,7 +449,7 @@ AP XOR(AP LHS, AP RHS) {
 
   assert(k == -1);
 
-  AP _ = (APL)malloc(sizeof(APP));
+  AP _ = (AP)malloc(sizeof(APP));
   _->integer = bstr;
   return _;
 }
@@ -1508,7 +1508,7 @@ AP DIVBY2(AP A) {
   int overflow = 0;
   int value;
   L strlen_a = strlen(A->integer);
-  AP _ = (APL)malloc(sizeof(APP));
+  AP _ = (AP)malloc(sizeof(APP));
   _->integer = zmem(strlen_a);
   _->fractional = getstring("0");
   LARGE i;
@@ -1643,7 +1643,7 @@ L DSTRING2LARGE(AP A) {
 }
 
 /*
-AP APLCM( AP A, AP B ){
+AP APCM( AP A, AP B ){
 
         AP M1 = CopyAP( AP0 );
         AP M2 = CopyAP( AP0 );
@@ -1651,8 +1651,8 @@ AP APLCM( AP A, AP B ){
         #define MAX_ITER 4096
         // It is AP pointers stored in the memory, because it is pointers
 allocated by the Operator functions that are passed. AP R1[MAX_ITER] =
-(APL)calloc( sizeof(APL), MAX_ITER ); AP R2[MAX_ITER] = (APL)calloc(
-sizeof(APL), MAX_ITER );
+(AP)calloc( sizeof(AP), MAX_ITER ); AP R2[MAX_ITER] = (AP)calloc(
+sizeof(AP), MAX_ITER );
 
         AP val = CopyAP( AP1 );
         AP inc = CopyAP( AP0 );
@@ -1685,8 +1685,8 @@ AP LCM(AP A, AP B) {
   AP M1;
   AP M2;
 #define MAX_ITER 4096
-  APL *R1 = (APL *)calloc(sizeof(APL), MAX_ITER);
-  APL *R2 = (APL *)calloc(sizeof(APL), MAX_ITER);
+  AP *R1 = (AP *)calloc(sizeof(AP), MAX_ITER);
+  AP *R2 = (AP *)calloc(sizeof(AP), MAX_ITER);
 
   AP AP_MAX_ITER = NewAP(0, 0);
   free(AP_MAX_ITER->integer);
@@ -1706,8 +1706,8 @@ AP LCM(AP A, AP B) {
     }
 
     //*(ANSI->c->ANSIVT_CTABLE + (i*4) + 0)
-    *(R1 + str2int(inc->integer) * sizeof(APL)) = MUL(M1, val);
-    *(R2 + str2int(inc->integer) * sizeof(APL)) = MUL(M2, val);
+    *(R1 + str2int(inc->integer) * sizeof(AP)) = MUL(M1, val);
+    *(R2 + str2int(inc->integer) * sizeof(AP)) = MUL(M2, val);
 
     // match = lcm_test(inc, R1, R2);
     match = LCMTESTSTR(inc, R1, R2);
@@ -1718,14 +1718,14 @@ AP LCM(AP A, AP B) {
 
   // print( "The LCM for %d And %d is %d.\n", M1, M2, R1[inc-1]);
 
-  return *(R1 + (str2int(inc->integer) - 1) * sizeof(APL));
+  return *(R1 + (str2int(inc->integer) - 1) * sizeof(AP));
 }
 
-#define aptr APL
-AP LCMTESTSTR(aptr max, aptr *R1, aptr *R2) {
+#define AP AP
+AP LCMTESTSTR(AP max, AP *R1, AP *R2) {
 
-  aptr a = NewAPr(0, 0);
-  aptr b = NewAPr(0, 0);
+  AP a = NewAPr(0, 0);
+  AP b = NewAPr(0, 0);
   for (FreeAP(a), a = CopyAP(AP0); CmpAP_abs(a, max) <= 1; INC(a))
     for (FreeAP(b), b = CopyAP(AP0); CmpAP_abs(b, max) <= 1; INC(b))
       if (CmpAP_abs(R1[str2int(a->integer)], R2[str2int(b->integer)]) == 0)
@@ -1839,13 +1839,13 @@ void ClearAP(AP A) {
   return;
 }
 
-APTR DEC_2_HEX(APTR A, L packed) { aplibstdreturn(2); }
-APTR HEX_2_DEC(APTR A) { aplibstdreturn(10); }
-APTR DEC_2_OCTAL(APTR A, L precisiom) { aplibstdreturn(8); }
-APTR OCTAL_2_DEC(APTR A) { aplibstdreturn(10); }
+AP DEC_2_HEX(AP A, L packed) { APLIBstdreturn(2); }
+AP HEX_2_DEC(AP A) { APLIBstdreturn(10); }
+AP DEC_2_OCTAL(AP A, L precisiom) { APLIBstdreturn(8); }
+AP OCTAL_2_DEC(AP A) { APLIBstdreturn(10); }
 
-APTR BIN_2_OCTAL(APTR A) { aplibstdreturn(8); }
-APTR OCTAL_2_BIN(APTR A) { aplibstdreturn(2); }
+AP BIN_2_OCTAL(AP A) { APLIBstdreturn(8); }
+AP OCTAL_2_BIN(AP A) { APLIBstdreturn(2); }
 
 void FreeAP(AP A) {
 
@@ -1980,7 +1980,7 @@ char peek(large c, char *_) {
   return _[c - 1];
 }
 
-// scint CmpAP_abs( APL, AP )
+// scint CmpAP_abs( AP, AP )
 scint CmpAP_abs(AP A, AP B) {
 
   if (A->integer == NULL)

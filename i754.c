@@ -1,7 +1,7 @@
 #include "i754.h"
 #include "stringy.h"
 
-// DEV FOR HARDWARE OPTIMIZATION of aplib
+// DEV FOR HARDWARE OPTIMIZATION of APLIB
 
 /**
 

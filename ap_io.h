@@ -12,7 +12,7 @@
 #include <string.h>
 
 // CUSTOM INC'S
-#include "aplib.h"
+#include "APLIB.h"
 #include "colour.h"
 
 // DATA STRUCTURES/TYPES

@@ -6,7 +6,7 @@
 
 #include "fractionalcalc.tab.h"
 
-#include "aplib.h"
+#include "APLIB.h"
 #include "colour.h"
 #include "stringy.h"
 
@@ -17,7 +17,7 @@ int yyerror(const char*);
 void printVars();
 
 // These are deprecated functions. They perform digitstring-truncation, which
-// is a feature precision, which 'aplib' will implement instead. 
+// is a feature precision, which 'APLIB' will implement instead. 
 char *convert(double x);
 char *trim(double x);
 char *(*function)(); 
@@ -27,7 +27,7 @@ scint truthy(double);
 
 // These methods of encoding FALSE, TRUE, NULL,
 // will be seperated from any Real- or Integer-valued scalar[0,N]
-// by aplib.
+// by APLIB.
 double _FALSE;
 double _TRUE;
 double _Null;

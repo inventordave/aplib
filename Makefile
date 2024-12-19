@@ -4,7 +4,7 @@
 # Vars.
 outFile=test.exe
 colorMode=1
-warnings=-Wall -Wextra
+warnings=-Wall -Wextra -Wshadow -Wimplicit-fallthrough=0 -Wno-unused-variable
 
 
 # Rules.
@@ -22,36 +22,48 @@ nocolour:
 
 # The APLIB object file.
 aplib: aplib.c aplib.h
-	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) aplib.c -lstd -c -o aplib.o
+	gcc $(warnings) -O0 -g -DDEBUG -DWIN32 -Dcm$(colorMode) aplib.c -c -o aplib.o
 
-stringy:	../stringy/stringy.c ../stringy/stringy.h
-	gcc $(warnings) -g -DDEBUG ../stringy/stringy.c -lstd -c -o stringy.o
+stringy:
+	make -C ../stringy/ stringyd
 
-colour:		../colour/colour.c ../colour/colour.h
-	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) ../colour/colour.c -lstd -c -o colour.o
+colour:
+	make -C ../colour/ colourd
 	
-aplib_pkg: GC aplib stringy colour mul
+gcollect:
+	make -C ../gcollect/ gcd
+
+
+aplib_pkg: gcollect aplib stringy colour
 
 	make -C ../davelib/ io
 	make -C ../davelib/ lib
-	ar r -p aplibarc.a aplib.o ../colour/colour.o ../stringy/stringy.o ../davelib/io.o ../davelib/lib.o ./t.o
+	make -C ../wernee/regex_w/ libd
+	ar -r arc.a aplib.o \
+		../wernee/regex_w/regexd.o \
+		../gcollect/gcd.o \
+		../colour/colourd.o \
+		../stringy/stringyd.o \
+		../davelib/io.o \
+		../davelib/lib.o
 
-
-mul: t.c
-	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) t.c -lstd -c -o t.o
+mul: t.c ../gcollect/gc.c
+	gcc $(warnings) -g -DDEBUG -Dcm$(colorMode) ../gcollect/gc.c t.c -lm -o t.exe
 
 GC:
 	make -C ../gcollect/ gcd
 
 test:	aplib_pkg
-	gcc $(warnings) -O -g -DDEBUG -Dcm$(colorMode) aplibarc.a -lstd -lm -o $(outFile)
+	gcc $(warnings) -O -g -DDEBUG -Dcm$(colorMode) main.c arc.a  -o $(outFile)
 
 # For removing the detritus of the last compilation cycle that tried to' mess wi' oos!!	
 clean:
 	rm -f *.o
 	rm -f *.exe
-	rm -f ./gcollect/*.o
+	rm -f ../gcollect/*.o
+	
 	rm -f *.a
 	rm -f $(outFile)
-	make -C ../regex_w/ clean
+	make -C ../wernee/regex_w/ clean
+	make -C ../davelib/ clean
 

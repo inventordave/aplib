@@ -21,7 +21,7 @@ typedef unsigned long long int large;
 // STATIC DEF'S
 #define MAX_LENGTH_AP_PART 1023 //Make this any number of bytes you want. The NewAP(int, int) function will +1 for the '\0' null-terminator. Default = 1023.
 
-#define APLS char*
+#define APS char*
 #define scint signed short int
 
 
@@ -75,7 +75,7 @@ APP {
 // AP Value reference. These (pointer) types have to be instantiated.
 
 typedef APP* AP;
-#define APL AP
+#define AP AP
 #define ap AP
 
 typedef struct
@@ -136,30 +136,30 @@ _APLIB	{
 	AP AP1;
 
 	AP (*NOP)( AP );
-	AP (*ADD)( APL,AP );
-	AP (*ADDP)( APL,APL, AP );
-	AP (*SUB)( APL,AP );
-	AP (*SUBP)( APL,APL, AP );
-	AP (*MUL)( APL,AP );
-	AP (*MULP)( APL,APL, AP );
-	AP (*DIV)( APL,AP );
-	AP (*DIVP)( APL,APL, AP );
+	AP (*ADD)( AP,AP );
+	AP (*ADDP)( AP,AP, AP );
+	AP (*SUB)( AP,AP );
+	AP (*SUBP)( AP,AP, AP );
+	AP (*MUL)( AP,AP );
+	AP (*MULP)( AP,AP, AP );
+	AP (*DIV)( AP,AP );
+	AP (*DIVP)( AP,AP, AP );
 	AP (*DIVBY2)( AP );
 	AP (*RECIPROCAL)( AP );
-	AP (*RECIPROCAL2)( APL,AP );
-	AP (*RECIPROCALP)( APL, AP );
-	AP (*RECIPROCAL2P)( APL,APL, AP );
-	AP (*EXP)( APL,AP );	
+	AP (*RECIPROCAL2)( AP,AP );
+	AP (*RECIPROCALP)( AP, AP );
+	AP (*RECIPROCAL2P)( AP,AP, AP );
+	AP (*EXP)( AP,AP );	
 
-	AP (*CROSS)( APL,AP );
-	AP (*CROSSP)( APL,APL, AP );	
-	AP (*DOT)( APL,AP );
-	AP (*DOTP)( APL,APL, AP );	
+	AP (*CROSS)( AP,AP );
+	AP (*CROSSP)( AP,AP, AP );	
+	AP (*DOT)( AP,AP );
+	AP (*DOTP)( AP,AP, AP );	
 
-	AP (*AND)( APL,AP );
-	AP (*OR)( APL,AP );
-	AP (*XOR)( APL,AP );
-	AP (*NAND)( APL,AP );
+	AP (*AND)( AP,AP );
+	AP (*OR)( AP,AP );
+	AP (*XOR)( AP,AP );
+	AP (*NAND)( AP,AP );
 	AP (*NOT)( AP );	
 
 	int (*INC)( AP );
@@ -167,7 +167,7 @@ _APLIB	{
 	
 	void (*flipSign)( AP );
 	char (*getSign)( AP );
-	void (*setSign)( APL, char );
+	void (*setSign)( AP, char );
 	
 	L (*DSTRING2LARGE)( AP );
 	
@@ -187,10 +187,10 @@ extern struct _APLIB* Init_APLIB();
 
 // GRANULAR (DIGIT-WISE) TOOLS //
 // DIGIT::GET(INDEX)
-extern char d( APL,L );
+extern char d( AP,L );
 // DIGIT::SET( DIGIT,INDEX )
 #define sd setDigit
-extern void setDigit( APL,L,char );
+extern void setDigit( AP,L,char );
 
 // CREATE/RESET/GC AP VALUES //
 extern AP NewAP( L,L );
@@ -201,9 +201,9 @@ extern void FreeAP( AP );
 extern AP ParseAP( char* );
 
 // MODIFYING AP VALUES
-extern L setPart( APL, char*, large part );
-extern L setPartW( APL, char* ); // "integer" part
-extern L setPartF( APL, char* ); // "fractional" part
+extern L setPart( AP, char*, large part );
+extern L setPartW( AP, char* ); // "integer" part
+extern L setPartF( AP, char* ); // "fractional" part
 #define SignPart 0
 #define PartW 1
 #define PartF 2
@@ -278,47 +278,47 @@ extern char poke( char*, char*, L offset );
 #define POKE poke
 
 // QUICK SIGN-IDENTIFICATION FOR NORMALED RESULT VALUES.
-extern char TT_ADD( APL,AP );
-extern char TT_MUL( APL,AP );
+extern char TT_ADD( AP,AP );
+extern char TT_MUL( AP,AP );
 
 // FOR DIAGNOSTICS, OR JUST FOR THE PRETTY-PRINTER.
 extern large DIVBY2_PRINT_ROWS;
 
 // USEFUL FEATURES
-#define APTR APL
+#define AP AP
 extern L DSTRING2LARGE( AP );
 extern char* pack( char* );
 extern char* unpack( char* );
 
 // NOT-YET-IMPLEMENTED LCM, GCD FUNCTIONS.
-extern AP GCD( APL,APL, AP lcm );
-extern AP LCM( APL,AP );
-extern AP LCMTESTSTR( APTR, APTR*,APTR* ); // Not a typo. The last 2 parameters are each (APL*).
+extern AP GCD( AP,AP, AP lcm );
+extern AP LCM( AP,AP );
+extern AP LCMTESTSTR( AP, AP*,AP* ); // Not a typo. The last 2 parameters are each (AP*).
 
 // BASE CONVERSION
 typedef char* string;
 extern char* DEC_2_BIN( char*,L packed );
 extern char* BIN_2_DEC( char* );
-extern APTR DEC_2_HEX( APTR,L packed );
-extern APTR HEX_2_DEC( APTR );
-extern APTR DEC_2_OCTAL( APTR,L );
-extern APTR OCTAL_2_DEC( APTR );
-extern APTR BIN_2_HEX( APTR );
-extern APTR HEX_2_BIN( APTR );
+extern AP DEC_2_HEX( AP,L packed );
+extern AP HEX_2_DEC( AP );
+extern AP DEC_2_OCTAL( AP,L );
+extern AP OCTAL_2_DEC( AP );
+extern AP BIN_2_HEX( AP );
+extern AP HEX_2_BIN( AP );
 
-extern APTR OCTAL_2_HEX( APTR );
-extern APTR HEX_2_OCTAL( APTR );
-extern APTR OCTAL_2_BIN( APTR );
-extern APTR BIN_2_OCTAL( APTR );
+extern AP OCTAL_2_HEX( AP );
+extern AP HEX_2_OCTAL( AP );
+extern AP OCTAL_2_BIN( AP );
+extern AP BIN_2_OCTAL( AP );
 
 extern LARGE lenp( AP );
 
 
-#define aplibstdreturn(b) { APTR _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; _->sign='+'; return _; }
+#define APLIBstdreturn(b) { AP _ = NewAPr( 1,0 ); setPartW( _,"1" ); _->base = b; _->sign='+'; return _; }
 
 // 2k-BOUNDARY
-extern L Max2K(APL);
-extern L Min2K(APL);
+extern L Max2K(AP);
+extern L Min2K(AP);
 
 extern L MSD( int );
 
@@ -327,14 +327,14 @@ extern void PackTrailingZeroes( char* cr, L alength, L n0 );
 extern string PackLeadingZeroes( char* str, L n0 );
 
 
-extern signed OverFlow( APL, int result, signed k );
+extern signed OverFlow( AP, int result, signed k );
 
 // ENCODE/DECODE
 extern L CharP2L(char* input);
 extern char* L2CharP( L v );
 
 // APLIB API SUPPORT FUNCTIONS
-#include "aplib_sym.h"
+#include "APLIB_sym.h"
 extern char** GetAPSymbols();
 
 #endif
